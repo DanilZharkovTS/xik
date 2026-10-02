@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import type { ReactElement, ReactNode } from 'react'
 import { X } from 'lucide-react'
 
@@ -11,7 +11,12 @@ type SheetProps = {
   children: ReactNode
 }
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])'
+
 // На телефоні виїжджає знизу (дотягується великим пальцем), на десктопі стає модальним вікном.
+// Поки відкрите: фокус усередині й не виходить за межі, Escape закриває, фон не прокручується,
+// після закриття фокус повертається на елемент, що відкрив вікно.
 export function Sheet({
   title,
   isOpen,
@@ -19,17 +24,60 @@ export function Sheet({
   children,
 }: SheetProps): ReactElement | null {
   const titleId = useId()
+  const panelRef = useRef<HTMLDivElement>(null)
+  // onClose змінюється при кожному рендері батька; ефект не має перезапускатися й красти фокус.
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
   useEffect(() => {
     if (!isOpen) return
 
+    const previouslyFocused = document.activeElement as HTMLElement | null
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    panelRef.current?.focus()
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') {
+        onCloseRef.current()
+        return
+      }
+
+      if (event.key !== 'Tab' || !panelRef.current) return
+
+      const focusable = [...panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
+        (element) => element.offsetParent !== null,
+      )
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const current = document.activeElement
+
+      if (!first || !last) {
+        event.preventDefault()
+        return
+      }
+
+      // Tab з кінця вертає на початок і навпаки; з самого вікна йде на перший елемент.
+      if (event.shiftKey && (current === first || current === panelRef.current)) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && current === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
 
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [isOpen, onClose])
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = previousOverflow
+      previouslyFocused?.focus()
+    }
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -38,15 +86,18 @@ export function Sheet({
       <button
         type="button"
         aria-label="Close"
+        tabIndex={-1}
         className="absolute inset-0 h-full w-full cursor-default bg-black/60"
         onClick={onClose}
       />
 
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="absolute inset-x-0 bottom-0 max-h-[90dvh] overflow-y-auto rounded-t-3xl border-t border-[var(--l)] bg-[var(--bg)] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 md:inset-auto md:left-1/2 md:top-1/2 md:w-[30rem] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-3xl md:border md:p-6"
+        tabIndex={-1}
+        className="absolute inset-x-0 bottom-0 max-h-[90dvh] overflow-y-auto rounded-t-3xl border-t border-[var(--l)] bg-[var(--bg)] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 outline-none md:inset-auto md:left-1/2 md:top-1/2 md:w-[30rem] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-3xl md:border md:p-6"
       >
         <div className="mb-4 flex items-center justify-between gap-4">
           <h2 id={titleId} className="text-xl font-medium">

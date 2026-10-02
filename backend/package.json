@@ -5,6 +5,7 @@
   "main": "src/app.ts",
   "scripts": {
     "dev": "tsx watch src/app.ts",
+    "start": "tsx src/app.ts",
     "admin:create": "tsx src/scripts/create-admin.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
