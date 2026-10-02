@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { PRODUCTS } from '../../src/features/products/data/products'
+import { PRODUCTS } from '../support/catalog'
 import { collectRuntimeErrors } from '../support/runtime'
 
 const PUBLIC_PAGES = [

@@ -45,5 +45,14 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
     notFound()
   }
 
-  return <CatalogItemDetail item={item} />
+  const related = getItemsByType('service')
+    .filter((other) => other.slug !== item.slug)
+    .slice(0, 3)
+    .map((other) => ({
+      href: `/services/${other.slug}`,
+      title: other.title,
+      subtitle: other.subtitle,
+    }))
+
+  return <CatalogItemDetail item={item} related={related} />
 }

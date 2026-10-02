@@ -1,11 +1,14 @@
-import { CreateProduct } from '@/src/features/products/components/CreateProduct'
+import type { Metadata } from 'next'
+
+import { AdminProductsScreen } from '@/src/features/admin-products/components/AdminProductsScreen'
+
+export const metadata: Metadata = {
+  title: 'Products',
+  robots: { index: false, follow: false },
+}
 
 const AdminProductsPage = () => {
-  return (
-    <div>
-      <CreateProduct />
-    </div>
-  )
+  return <AdminProductsScreen />
 }
 
 export default AdminProductsPage

@@ -86,7 +86,7 @@ a dedicated database, never at real data.
 | Report equals the event table for each period; admin sees a per-moderator breakdown | `tests/reports.test.ts` (DST and midnight boundaries) |
 | A deactivated moderator cannot sign in and the open session ends | `tests/access.test.ts` |
 | Products are added and removed one by one; revoked access fails on the next request; transfer keeps history and is audited | `tests/access.test.ts`, `tests/transfer.test.ts` |
-| All automated tests pass on Postgres | `npm test` (301 tests) |
+| All automated tests pass on Postgres | `npm test` (374 tests) |
 | Manual check on mobile (390px) and desktop | Checklist below |
 
 Manual check (390px and 1280px, both themes), signed in as admin and as a moderator:
@@ -102,6 +102,31 @@ Manual check (390px and 1280px, both themes), signed in as admin and as a modera
 
 Automated checks already run for this: axe (WCAG 2 A/AA and best practices) found no violations on all journal screens in
 both themes at both sizes, including open dialogs, and the production build (`next build`) passes.
+
+## Products, agents and Stripe
+
+There is one `Product` model for the database, the site and Stripe. A `kind` tag (`product` or `agent`) only decides
+which block of the site shows it; services stay static in the frontend.
+
+- **One-to-one link.** Every product has one Stripe product (`stripeProductId`) and one current Stripe price
+  (`stripePriceId`), both unique. Create is Stripe-first; if the database write then fails, the new Stripe objects are
+  deactivated. Changing the price creates a new Stripe price and deactivates the old one (existing subscribers keep it).
+- **Price is always set.** `showPrice` only decides whether the product page shows it; otherwise the buyer sees it at checkout.
+  Public responses never contain Stripe ids, and hide the price when `showPrice` is off.
+- **Delete is archive.** `DELETE /products/:id` sets `archivedAt` and deactivates the Stripe product; `POST /products/:id/restore`
+  brings it back. Archived products disappear from the site, checkout and the journal product list.
+- **Repair.** `POST /products/:id/stripe-sync` creates or re-links missing Stripe objects.
+- **Admin screen:** Dashboard -> Products (list, filters, create/edit sheet, Sync Stripe, Archive/Restore).
+
+Loading the existing catalog (15 products and agents from `backend/prisma/seed/catalog.json`) into a database:
+
+```bash
+docker compose -f docker-compose.local.yml exec backend npm run products:import            # with STRIPE_SECRET_KEY
+docker compose -f docker-compose.local.yml exec backend npm run products:import -- --no-stripe
+```
+
+The import is idempotent (matched by slug). Prices in the file are placeholders: set the real ones in Admin -> Products.
+The Next.js server reads the catalog through `API_INTERNAL_URL` (`http://backend:5001` inside Docker) with no caching.
 
 ## Known limitations and deliberately deferred
 

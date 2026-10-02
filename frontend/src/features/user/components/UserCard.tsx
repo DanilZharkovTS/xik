@@ -9,36 +9,16 @@ export const UserCard: React.FC<UserCardProps> = ({ user }) => {
   const isCurrentUser = currentUserId === user.id
 
   return (
-   <div
-  className={`relative flex flex-col gap-4 px-4 py-4 transition-colors md:flex-row md:items-center md:justify-between ${
-    isCurrentUser
-      ? 'bg-muted/40 before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-foreground'
-      : 'hover:bg-muted/20'
-  }`}
->
-  <div className="min-w-0">
-    <div className="flex items-center gap-2">
-      <p className="truncate font-medium">{user.name}</p>
+    <li className="space-y-3 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-4">
+      <div className="min-w-0">
+        <p className="truncate text-lg font-medium">
+          {user.name}
+          {isCurrentUser && <span className="text-sm font-normal text-[var(--m)]"> · you</span>}
+        </p>
+        <p className="truncate text-sm text-[var(--m)]">{user.email}</p>
+      </div>
 
-      {isCurrentUser && (
-        <span className="text-xs text-foreground-muted">
-          · you
-        </span>
-      )}
-    </div>
-
-    <p className="mt-1 truncate text-sm text-foreground-muted">
-      {user.email}
-    </p>
-  </div>
-
-  <div className="flex items-center gap-4">
-    <span className="text-xs text-foreground-muted">
-      Role
-    </span>
-
-    <UserRoleSelect user={user} />
-  </div>
-</div>
+      <UserRoleSelect user={user} />
+    </li>
   )
 }

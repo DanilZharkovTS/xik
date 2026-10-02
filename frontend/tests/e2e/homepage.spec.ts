@@ -1,11 +1,10 @@
 import { expect, test } from '@playwright/test'
 
 import {
-  MODERN_AI_CARDS,
   MODERN_PRINCIPLES,
-  MODERN_PRODUCTS,
   MODERN_SERVICES,
 } from '../../src/features/home/data/modern-home-data'
+import { MODERN_AI_CARDS, MODERN_PRODUCTS } from '../support/catalog'
 
 test.describe('modern homepage', () => {
   test('renders the modern homepage content and sections', async ({ page }) => {

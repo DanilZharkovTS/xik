@@ -45,7 +45,7 @@ export function ModeratorCard({
             'shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium',
             isActive
               ? 'border-[var(--t)]'
-              : 'border-border text-[var(--m)]',
+              : 'border-[var(--l)] text-[var(--m)]',
           )}
         >
           {isActive ? 'Active' : 'Deactivated'}

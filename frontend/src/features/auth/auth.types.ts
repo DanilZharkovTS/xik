@@ -48,6 +48,8 @@ export interface SetAuthFormData {
 
 export interface AuthInputProps  {
   name: string
+  label: string
+  autoComplete?: string
   value: string
   placeholder: string
   type?: string

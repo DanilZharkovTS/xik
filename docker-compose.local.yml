@@ -78,6 +78,8 @@ services:
       NODE_ENV: development
       PORT: 3000
       NEXT_PUBLIC_API_URL: "http://localhost:5001"
+      # Сервер Next.js ходить у бекенд за внутрішньою адресою Docker-мережі.
+      API_INTERNAL_URL: "http://backend:5001"
     volumes:
       - ./frontend:/app
       - /app/node_modules

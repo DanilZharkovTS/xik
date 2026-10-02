@@ -11,6 +11,6 @@ export const metadata: Metadata = createPageMetadata({
   pathname: '/',
 })
 
-export default function Home(): React.ReactElement {
+export default async function Home(): Promise<React.ReactElement> {
   return <Welcome />
 }

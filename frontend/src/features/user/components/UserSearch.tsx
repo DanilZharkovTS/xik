@@ -3,44 +3,34 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+import { Button } from '@/src/shared/ui/button'
 import { UsersSearchProps } from '../user.types'
 
 export const UserSearch: React.FC<UsersSearchProps> = ({ search }) => {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState(search)
 
-  const onSearch = () => {
+  const onSearch = (event: React.FormEvent) => {
+    event.preventDefault()
     const value = searchTerm.trim()
 
-    if (!value) {
-      router.push('/admin/users')
-      return
-    }
-
-    router.push(`/admin/users?search=${encodeURIComponent(value)}`)
+    router.push(value ? `/admin/users?search=${encodeURIComponent(value)}` : '/admin/users')
   }
 
   return (
-    <div className="flex gap-2">
+    <form onSubmit={onSearch} className="flex gap-2">
       <input
+        type="search"
+        aria-label="Search users"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            onSearch()
-          }
-        }}
-        placeholder="Search users..."
-        className="min-w-0 flex-1 border-pixel border-border bg-background px-4 py-3 text-sm outline-none transition-colors placeholder:text-foreground-muted focus:border-foreground"
+        placeholder="Search by name"
+        className="min-h-11 min-w-0 flex-1 rounded-xl border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
       />
 
-      <button
-        type="button"
-        onClick={onSearch}
-        className="border-pixel border-border px-5 py-3 text-sm transition-colors hover:bg-muted"
-      >
+      <Button type="submit" variant="secondary">
         Search
-      </button>
-    </div>
+      </Button>
+    </form>
   )
 }

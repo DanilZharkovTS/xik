@@ -5,6 +5,8 @@ import { userService } from '../user.service'
 import useAuthStore from '../../auth/store'
 import { toast } from 'sonner'
 
+import { getErrorMessage } from '@/src/shared/api/get-error-message'
+
 const ROLE_LABELS: Record<UserRole, string> = {
   admin: 'Admin',
   moderator: 'Moderator',
@@ -31,17 +33,13 @@ export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
     } catch (error) {
       setSelectedRole(user.role)
 
-      if (error instanceof Error) {
-        toast.error(error.message)
-      }
-
-      console.error(error)
+      toast.error(getErrorMessage(error))
     }
   }
 
   if (isCurrentUser) {
     return (
-      <span className="text-sm text-foreground-muted">
+      <span className="inline-block rounded-full border border-[var(--t)] px-3 py-1 text-sm">
         {ROLE_LABELS[selectedRole]}
       </span>
     )
@@ -49,9 +47,10 @@ export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
 
   return (
     <select
+      aria-label={`Role for ${user.name}`}
       value={selectedRole}
       onChange={onChangeRole}
-      className="cursor-pointer border-pixel border-border bg-background px-3 py-2 font-mono text-xs uppercase tracking-wider outline-none transition-colors hover:bg-muted focus:border-foreground"
+      className="min-h-11 w-full rounded-xl border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
     >
       <option value="admin">{ROLE_LABELS.admin}</option>
       <option value="moderator">{ROLE_LABELS.moderator}</option>

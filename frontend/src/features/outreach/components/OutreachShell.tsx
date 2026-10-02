@@ -25,6 +25,7 @@ const NAV_ITEMS = [
 export function OutreachShell({ children }: { children: ReactNode }): ReactElement {
   const pathname = usePathname()
   const token = useAuthStore((state) => state.accessToken)
+  const isAdmin = useAuthStore((state) => state.user?.role === 'admin')
   const status = useOutreachStore((state) => state.status)
   const products = useOutreachStore((state) => state.products)
   const setProducts = useOutreachStore((state) => state.setProducts)
@@ -86,8 +87,26 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
         <div className="rounded-2xl border border-[var(--l)] px-4 py-12 text-center">
           <p className="font-medium">No products assigned</p>
           <p className="mt-1 text-sm text-[var(--m)]">
-            Ask an administrator to give you access to a product.
+            {isAdmin
+              ? 'Create a product, then give a moderator access to it.'
+              : 'Ask an administrator to give you access to a product.'}
           </p>
+          {isAdmin && (
+            <div className="mt-4 flex flex-col justify-center gap-2 sm:flex-row">
+              <Link
+                href="/admin/products"
+                className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--t)] bg-[var(--t)] px-5 font-medium text-[var(--bg)]"
+              >
+                Products
+              </Link>
+              <Link
+                href="/admin/team"
+                className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--l)] px-5 font-medium"
+              >
+                Team
+              </Link>
+            </div>
+          )}
         </div>
       ) : (
         children

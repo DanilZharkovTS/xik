@@ -8,9 +8,8 @@ import { loginSchema, registerSchema } from '../auth.schema'
 import { authService } from '../auth.service'
 import useAuthStore from '../store'
 
-import { PageContainer } from '@/src/shared/ui/pixel/page-container'
-import { PixelButton } from '@/src/shared/ui/pixel/pixel-button'
-import { PixelHeading } from '@/src/shared/ui/pixel/pixel-heading'
+import { getErrorMessage } from '@/src/shared/api/get-error-message'
+import { Button } from '@/src/shared/ui/button'
 import { AuthInput } from './AuthInput'
 import Link from 'next/link'
 
@@ -78,11 +77,7 @@ export const AuthForm: React.FC = () => {
 
       router.push('/auth/login')
     } catch (err) {
-      if (err instanceof Error) {
-        toast.error(err.message)
-      }
-
-      console.error(err)
+      toast.error(getErrorMessage(err))
     } finally {
       setIsLoading(false)
     }
@@ -110,115 +105,85 @@ export const AuthForm: React.FC = () => {
 
       router.push('/dashboard')
     } catch (err) {
-      if (err instanceof Error) {
-        toast.error(err.message)
-      }
-
-      console.error(err)
+      toast.error(getErrorMessage(err))
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <main className="flex min-h-[calc(100svh-var(--header-height))] items-center border-b-pixel border-border">
-      <PageContainer className="flex w-full justify-center py-12 md:py-16">
-        <div className="w-full max-w-lg">
-          <div className="mb-8">
-            <p className="mb-3 font-mono text-xs uppercase tracking-widest text-foreground-muted">
-              {'// auth.system'}
-            </p>
+    <main className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col justify-center px-4 py-8 md:py-16">
+      <h1 className="text-3xl font-medium md:text-4xl">
+        {isRegister ? 'Create account' : 'Welcome back'}
+      </h1>
 
-            <PixelHeading as="h1" size="page">
-              {isRegister ? 'Create account.' : 'Welcome back.'}
-            </PixelHeading>
+      <p className="mt-1 text-[var(--m)]">
+        {isRegister ? 'Sign up to get started.' : 'Sign in to continue.'}
+      </p>
 
-            <p className="mt-4 font-mono text-sm leading-relaxed text-foreground-muted">
-              {isRegister
-                ? 'Initialize your account and enter the network.'
-                : 'Authenticate to continue to the system.'}
-            </p>
-          </div>
+      <form
+        onSubmit={isRegister ? registerSubmit : loginSubmit}
+        noValidate
+        className="mt-6 space-y-4 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-4 md:p-6"
+      >
+        <AuthInput
+          name="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          value={form.email}
+          onChange={handleChange}
+          placeholder="you@example.com"
+          error={errors.email}
+        />
 
-          <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
-            <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <span className="font-mono text-xs uppercase tracking-widest text-foreground-muted">
-                {isRegister ? 'register' : 'login'}
-              </span>
+        {isRegister && (
+          <AuthInput
+            name="name"
+            label="Name"
+            autoComplete="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Your name"
+            error={errors.name}
+          />
+        )}
 
-              <span className="font-mono text-xs text-foreground-muted">
-                {isRegister ? '01 / 02' : '01 / 01'}
-              </span>
-            </div>
+        <AuthInput
+          name="password"
+          label="Password"
+          type="password"
+          autoComplete={isRegister ? 'new-password' : 'current-password'}
+          value={form.password}
+          onChange={handleChange}
+          placeholder="••••••••"
+          error={errors.password}
+        />
 
-            <form
-              onSubmit={isRegister ? registerSubmit : loginSubmit}
-              className="space-y-5 p-5 md:p-6"
-            >
-              <AuthInput
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                error={errors.email}
-              />
+        {isRegister && (
+          <AuthInput
+            name="confirmPassword"
+            label="Confirm password"
+            type="password"
+            autoComplete="new-password"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            placeholder="••••••••"
+            error={errors.confirmPassword}
+          />
+        )}
 
-              {isRegister && (
-                <AuthInput
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Your name"
-                  error={errors.name}
-                />
-              )}
+        <Button type="submit" className="min-h-12 w-full" disabled={isLoading}>
+          {isLoading ? 'Please wait...' : isRegister ? 'Create account' : 'Sign in'}
+        </Button>
+      </form>
 
-              <AuthInput
-                name="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                error={errors.password}
-              />
-
-              {isRegister && (
-                <AuthInput
-                  name="confirmPassword"
-                  type="password"
-                  value={form.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  error={errors.confirmPassword}
-                />
-              )}
-
-              <div className="border-t border-border pt-5">
-                <PixelButton
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading
-                    ? 'Processing...'
-                    : isRegister
-                    ? 'Create Account'
-                    : 'Authenticate'}
-                </PixelButton>
-              </div>
-            </form>
-          </div>
-
-          <Link
-            href={isRegister ? '/auth/login' : '/auth/register'}
-            className="mt-4 font-mono text-xs text-foreground-muted hover:text-foreground"
-          >
-            <span className="mr-2">&gt;</span>
-            {isRegister ? 'Already registered?' : 'No account?'}
-          </Link>
-        </div>
-      </PageContainer>
+      <Link
+        href={isRegister ? '/auth/login' : '/auth/register'}
+        className="mt-4 inline-flex min-h-11 items-center justify-center text-[var(--m)] hover:text-[var(--t)]"
+      >
+        {isRegister ? 'Already have an account? Sign in' : 'No account? Create one'}
+      </Link>
     </main>
   )
 }

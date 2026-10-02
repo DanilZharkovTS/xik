@@ -9,6 +9,8 @@ type SheetProps = {
   isOpen: boolean
   onClose: () => void
   children: ReactNode
+  // 'lg' для довгих форм: на десктопі ширше вікно.
+  size?: 'md' | 'lg'
 }
 
 const FOCUSABLE =
@@ -22,6 +24,7 @@ export function Sheet({
   isOpen,
   onClose,
   children,
+  size = 'md',
 }: SheetProps): ReactElement | null {
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
@@ -97,7 +100,7 @@ export function Sheet({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="absolute inset-x-0 bottom-0 max-h-[90dvh] overflow-y-auto rounded-t-3xl border-t border-[var(--l)] bg-[var(--bg)] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 outline-none md:inset-auto md:left-1/2 md:top-1/2 md:w-[30rem] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-3xl md:border md:p-6"
+        className={`absolute inset-x-0 bottom-0 max-h-[90dvh] overflow-y-auto rounded-t-3xl border-t border-[var(--l)] bg-[var(--bg)] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 outline-none md:inset-auto md:left-1/2 md:top-1/2 ${size === 'lg' ? 'md:w-[44rem]' : 'md:w-[30rem]'} md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-3xl md:border md:p-6`}
       >
         <div className="mb-4 flex items-center justify-between gap-4">
           <h2 id={titleId} className="text-xl font-medium">
