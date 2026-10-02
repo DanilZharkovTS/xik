@@ -5,19 +5,19 @@ export const authService = {
   register: async (data: RegisterDto) => {
     console.log(data)
 
-    const res = await api.post('http://localhost:3000/api/auth/register', data)
+    const res = await api.post('/auth/register', data)
     return res
   },
   login: async (data: LoginDto) => {
-    const res = await api.post('http://localhost:3000/api/auth/login', data)
+    const res = await api.post('/auth/login', data)
     return res.data
   },
   refresh: async () => {
-    const res = await api.post('http://localhost:3000/api/auth/refresh', {})
+    const res = await api.post('/auth/refresh', {})
     return res.data
   },
   logout: async () => {
-    const res = await api.post('http://localhost:3000/api/auth/logout', {})
+    const res = await api.post('/auth/logout', {})
     return res.data
   },
 }

@@ -3,7 +3,7 @@ import { CreateProductDto, UpdateProductDto } from '../products.schema'
 
 export const productsService = {
   createProduct: async (data: CreateProductDto, token: string) => {
-    const res = await api.post('http://localhost:3000/api/products', data, {
+    const res = await api.post('/products', data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -12,7 +12,7 @@ export const productsService = {
     return res.data
   },
   findProducts: async (search: string, token: string | null) => {
-    const res = await api.get('http://localhost:3000/api/products', {
+    const res = await api.get('/products', {
       params: { name: search ? search : null },
       headers: {
         Authorization: `Bearer ${token}`,
@@ -22,7 +22,7 @@ export const productsService = {
     return res.data
   },
   findProduct: async (slug: string, token: string | null) => {
-    const res = await api.get(`http://localhost:3000/api/products/${slug}`, {
+    const res = await api.get(`/products/${slug}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -31,7 +31,7 @@ export const productsService = {
     return res.data
   }, 
   findSavedProducts: async (token: string) => {
-    const res = await api.get('http://localhost:3000/api/products/saved', {
+    const res = await api.get('/products/saved', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -39,7 +39,7 @@ export const productsService = {
     return res.data
   },
   updateProduct: async (id: string, data: UpdateProductDto, token: string) => {
-    const res = await api.patch(`http://localhost:3000/api/products/${id}`, data, {
+    const res = await api.patch(`/products/${id}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -48,7 +48,7 @@ export const productsService = {
     return res.data
   },
   toggleSaveProduct: async (id: string, token: string) => {
-    const res = await api.post(`http://localhost:3000/api/products/${id}/save`, {}, {
+    const res = await api.post(`/products/${id}/save`, {}, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -56,7 +56,7 @@ export const productsService = {
     return res
   },
   deleteProduct: async (id: string, token: string) => {
-    const res = await api.delete(`http://localhost:3000/api/products/${id}`, {
+    const res = await api.delete(`/products/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
