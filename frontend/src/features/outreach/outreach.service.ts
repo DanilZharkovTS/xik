@@ -11,6 +11,10 @@ import type {
   PublicationsPage,
   RegisterInput,
   RegisterOutcome,
+  Template,
+  TemplateInput,
+  TemplateStatus,
+  TemplateUpdateOutcome,
   TargetDetail,
   TargetsPage,
 } from './outreach.types'
@@ -156,5 +160,60 @@ export const outreachService = {
       params: lastId ? { lastId } : undefined,
     })
     return res.data
+  },
+  listTemplates: async (
+    token: string,
+    productId: string,
+    params: { status?: TemplateStatus; channel?: string } = {},
+  ): Promise<Template[]> => {
+    const res = await api.get('/outreach/templates', {
+      ...scoped(token, productId),
+      params,
+    })
+    return res.data.templates
+  },
+  createTemplate: async (
+    input: TemplateInput,
+    token: string,
+    productId: string,
+  ): Promise<Template> => {
+    const res = await api.post('/outreach/templates', input, scoped(token, productId))
+    return res.data.template
+  },
+  // 409 STALE_VERSION: шаблон змінили в іншій вкладці, віддаємо актуальний, щоб не затерти правки.
+  updateTemplate: async (
+    id: string,
+    input: Omit<Partial<TemplateInput>, 'subject'> & {
+      expectedVersion: number
+      subject?: string | null
+    },
+    token: string,
+    productId: string,
+  ): Promise<TemplateUpdateOutcome> => {
+    try {
+      const res = await api.patch(`/outreach/templates/${id}`, input, scoped(token, productId))
+      return { kind: 'updated', template: res.data.template }
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.data?.code === 'STALE_VERSION') {
+        return { kind: 'stale', template: err.response.data.template ?? null }
+      }
+      throw err
+    }
+  },
+  templateAction: async (
+    id: string,
+    action: 'archive' | 'restore' | 'duplicate',
+    token: string,
+    productId: string,
+  ): Promise<Template> => {
+    const res = await api.post(
+      `/outreach/templates/${id}/${action}`,
+      {},
+      scoped(token, productId),
+    )
+    return res.data.template
+  },
+  deleteTemplate: async (id: string, token: string, productId: string): Promise<void> => {
+    await api.delete(`/outreach/templates/${id}`, scoped(token, productId))
   },
 }

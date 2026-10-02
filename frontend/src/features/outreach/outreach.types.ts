@@ -122,14 +122,59 @@ export interface TargetPermissions {
 
 export interface ActivityInput {
   type: 'repeat' | 'reply'
+  templateId?: string
   channel?: Channel
   url?: string
   comment?: string
 }
 
+export type TemplateChannel = Channel | 'any'
+
+export const TEMPLATE_CHANNEL_LABELS: Record<TemplateChannel, string> = {
+  ...CHANNEL_LABELS,
+  any: 'Any channel',
+}
+
+export type TemplateStatus = 'active' | 'archived'
+
+export interface TemplatePermissions {
+  canEdit: boolean
+  canArchive: boolean
+  canRestore: boolean
+  canDuplicate: boolean
+  canDelete: boolean
+}
+
+export interface Template {
+  id: string
+  channel: TemplateChannel
+  title: string
+  subject: string | null
+  body: string
+  version: number
+  status: TemplateStatus
+  owner: { name: string }
+  isMine: boolean
+  createdAt: string
+  updatedAt: string
+  permissions: TemplatePermissions
+}
+
+export interface TemplateInput {
+  channel: TemplateChannel
+  title: string
+  subject?: string
+  body: string
+}
+
+export type TemplateUpdateOutcome =
+  | { kind: 'updated'; template: Template }
+  | { kind: 'stale'; template: Template | null }
+
 export interface TargetEvent {
   id: string
   type: 'first' | 'repeat' | 'reply' | 'publication' | 'status'
+  template: { id: string; title: string; version: number | null } | null
   channel: Channel | null
   url: string | null
   comment: string | null
@@ -168,6 +213,7 @@ export interface CheckInput {
 }
 
 export interface RegisterInput extends CheckInput {
+  templateId?: string
   displayName?: string
   url?: string
   comment?: string

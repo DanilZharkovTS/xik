@@ -10,6 +10,7 @@ import { TextField } from '@/src/shared/ui/text-field'
 import { formatDateTime, formatRelative } from '../format-date'
 import { outreachService } from '../outreach.service'
 import type {
+  Channel,
   CheckInput,
   CheckResult,
   CheckStatus,
@@ -18,6 +19,7 @@ import type {
 } from '../outreach.types'
 import { IdentifierLink } from './IdentifierLink'
 import { TargetActions } from './TargetActions'
+import { TemplateSelect } from './TemplateSelect'
 import { TargetDetailCard } from './TargetDetailCard'
 
 const STATUS_STYLES: Record<CheckStatus, { title: string; className: string }> = {
@@ -81,6 +83,7 @@ export function CheckResultCard({
           token={token}
           productId={productId}
           input={registerInput}
+          channel={result.normalized.channel}
           onTarget={onTarget}
           onTaken={onTaken}
           onError={onError}
@@ -151,11 +154,13 @@ function RegisterForm({
   token,
   productId,
   input,
+  channel,
   onTarget,
   onTaken,
   onError,
-}: FormCallbacks & { input: CheckInput }): ReactElement {
+}: FormCallbacks & { input: CheckInput; channel: Channel }): ReactElement {
   const [displayName, setDisplayName] = useState('')
+  const [templateId, setTemplateId] = useState('')
   const [url, setUrl] = useState('')
   const [comment, setComment] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -168,6 +173,7 @@ function RegisterForm({
       const outcome = await outreachService.register(
         {
           ...input,
+          templateId: templateId || undefined,
           displayName: displayName.trim() || undefined,
           url: url.trim() || undefined,
           comment: comment.trim() || undefined,
@@ -191,6 +197,13 @@ function RegisterForm({
         maxLength={100}
         autoComplete="off"
         onChange={(event) => setDisplayName(event.target.value)}
+      />
+      <TemplateSelect
+        token={token}
+        productId={productId}
+        channel={channel}
+        value={templateId}
+        onChange={setTemplateId}
       />
       <TextField
         label="Proof link (optional)"

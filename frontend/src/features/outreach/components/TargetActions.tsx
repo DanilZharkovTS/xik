@@ -11,6 +11,7 @@ import { TextField } from '@/src/shared/ui/text-field'
 import { outreachService } from '../outreach.service'
 import { CHANNELS, CHANNEL_LABELS } from '../outreach.types'
 import type { Channel, TargetDetail } from '../outreach.types'
+import { TemplateSelect } from './TemplateSelect'
 
 type TargetActionsProps = {
   target: TargetDetail
@@ -136,6 +137,7 @@ function ActivitySheet({
   onError,
 }: SheetProps & { type: 'repeat' | 'reply' | null }): ReactElement {
   const [channel, setChannel] = useState<Channel | ''>('')
+  const [templateId, setTemplateId] = useState('')
   const [url, setUrl] = useState('')
   const [comment, setComment] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -151,6 +153,7 @@ function ActivitySheet({
         {
           type,
           channel: channel || undefined,
+          templateId: templateId || undefined,
           url: url.trim() || undefined,
           comment: comment.trim() || undefined,
         },
@@ -160,6 +163,7 @@ function ActivitySheet({
       onUpdated(updated)
       toast.success(type === 'repeat' ? 'Repeat contact saved.' : 'Reply saved.')
       setChannel('')
+      setTemplateId('')
       setUrl('')
       setComment('')
       onClose()
@@ -191,6 +195,16 @@ function ActivitySheet({
             </option>
           ))}
         </SelectField>
+
+        {type === 'repeat' && (
+          <TemplateSelect
+            token={token}
+            productId={productId}
+            channel={channel}
+            value={templateId}
+            onChange={setTemplateId}
+          />
+        )}
 
         <TextField
           label="Proof link (optional)"

@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import type { ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ListChecks, Megaphone, Search } from 'lucide-react'
+import { FileText, ListChecks, Megaphone, Search } from 'lucide-react'
 
 import useAuthStore from '@/src/features/auth/store'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { href: '/outreach/check', label: 'Check', Icon: Search },
   { href: '/outreach/targets', label: 'My targets', Icon: ListChecks },
   { href: '/outreach/publications', label: 'Publications', Icon: Megaphone },
+  { href: '/outreach/templates', label: 'Templates', Icon: FileText },
 ]
 
 export function OutreachShell({ children }: { children: ReactNode }): ReactElement {
@@ -93,7 +94,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
 
       <nav
         aria-label="Journal"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-[var(--l)] bg-[var(--bg)] pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[var(--l)] bg-[var(--bg)] pb-[env(safe-area-inset-bottom)] md:hidden"
       >
         {NAV_ITEMS.map(({ href, label, Icon }) => (
           <Link

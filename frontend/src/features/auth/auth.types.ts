@@ -9,6 +9,7 @@ export interface AuthState {
   user: {
     id: string
     email: string
+    name?: string
     role: UserRole
     sessionId: string
   } | null
@@ -32,6 +33,7 @@ export interface SetAuthData {
   user: {
     id: string
     email: string
+    name?: string
     role: UserRole
     sessionId: string
   } | null

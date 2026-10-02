@@ -54,6 +54,12 @@ export function TargetDetailCard({ target }: { target: TargetDetail }): ReactEle
                 </time>
               </p>
               <p className="text-[var(--m)]">by {event.author}</p>
+              {event.template && (
+                <p className="text-[var(--m)]">
+                  Template: {event.template.title}
+                  {event.template.version ? ` (v${event.template.version})` : ''}
+                </p>
+              )}
               {event.comment && <p className="break-words">{event.comment}</p>}
               {event.url && (
                 <a
