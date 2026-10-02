@@ -12,6 +12,7 @@ export type AuditAction =
   | 'target_do_not_contact'
   | 'target_released'
   | 'template_deleted'
+  | 'targets_transferred'
 
 export interface AuditRecord {
   actorUserId: string

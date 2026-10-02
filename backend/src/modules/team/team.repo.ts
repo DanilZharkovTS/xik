@@ -1,3 +1,4 @@
+import { Prisma } from '../../generated/prisma/client.js'
 import { prisma, type DbClient } from '../../shared/database/prisma.js'
 
 export const teamRepo = {
@@ -79,5 +80,63 @@ export const teamRepo = {
       select: { id: true, name: true },
     })
     return product
+  },
+  findUserBasics: async (userId: string, db: DbClient = prisma) => {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, role: true, deactivatedAt: true },
+    })
+    return user
+  },
+  // Блокує цілі джерела на час передачі: паралельні події й передачі не перегоняють одне одного.
+  lockOwnedTargets: async (
+    params: { productId: string; ownerUserId: string; targetIds?: string[] },
+    db: DbClient
+  ) => {
+    const rows = await db.$queryRaw<{ id: string }[]>`
+      SELECT "id"
+      FROM "OutreachTarget"
+      WHERE "productId" = ${params.productId}
+        AND "ownerUserId" = ${params.ownerUserId}
+        ${
+          params.targetIds
+            ? Prisma.sql`AND "id" IN (${Prisma.join(params.targetIds)})`
+            : Prisma.empty
+        }
+      ORDER BY "id"
+      FOR UPDATE
+    `
+    return rows.map((row) => row.id)
+  },
+  reassignTargets: async (
+    targetIds: string[],
+    ownerUserId: string,
+    db: DbClient
+  ) => {
+    await db.outreachTarget.updateMany({
+      where: { id: { in: targetIds } },
+      data: { ownerUserId },
+    })
+  },
+  addTransferNotes: async (
+    params: {
+      productId: string
+      userId: string
+      targetIds: string[]
+      comment: string
+      occurredAt: Date
+    },
+    db: DbClient
+  ) => {
+    await db.outreachEvent.createMany({
+      data: params.targetIds.map((targetId) => ({
+        productId: params.productId,
+        userId: params.userId,
+        targetId,
+        type: 'status' as const,
+        comment: params.comment,
+        occurredAt: params.occurredAt,
+      })),
+    })
   },
 }

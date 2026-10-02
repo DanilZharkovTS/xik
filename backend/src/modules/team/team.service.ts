@@ -6,7 +6,13 @@ import { sessionRepo } from '../auth/repos/session.repo.js'
 import { auditRepo } from '../audit/audit.repo.js'
 import { membershipRepo } from '../access/membership.repo.js'
 import { teamRepo } from './team.repo.js'
-import type { CreateModeratorDto } from './team.schema.js'
+import { targetsRepo } from '../outreach/targets.repo.js'
+import { toListItemDto } from '../outreach/targets.mapper.js'
+import type {
+  CreateModeratorDto,
+  ListOwnedTargetsDto,
+  TransferTargetsDto,
+} from './team.schema.js'
 
 const requireModerator = async (userId: string) => {
   const moderator = await teamRepo.findModeratorById(userId)
@@ -172,5 +178,120 @@ export const teamService = {
     })
 
     return { response: { revoked: true } }
+  },
+  // Цілі, якими володіє користувач у продукті. Цілі колишнього учасника лишаються за ним.
+  listOwnedTargets: async (dto: ListOwnedTargetsDto) => {
+    if (!(await teamRepo.findProductById(dto.productId))) {
+      throw ApiError(404, 'PRODUCT_NOT_FOUND', 'Product not found')
+    }
+    if (!(await teamRepo.findUserBasics(dto.ownerId))) {
+      throw ApiError(404, 'USER_NOT_FOUND', 'User not found')
+    }
+
+    const rows = await targetsRepo.listTargets({
+      productId: dto.productId,
+      ownerUserId: dto.ownerId,
+      lastId: dto.lastId,
+      limit: dto.limit,
+    })
+
+    const hasMore = rows.length > dto.limit
+    const page = hasMore ? rows.slice(0, dto.limit) : rows
+
+    return {
+      response: {
+        targets: page.map(toListItemDto),
+        nextCursor: hasMore ? page.at(-1)!.id : null,
+      },
+    }
+  },
+  // Змінюється лише власник; події цілей лишаються, а в історії дописується запис про передачу.
+  transferTargets: async (admin: TokenPayload, dto: TransferTargetsDto) => {
+    if (dto.fromUserId === dto.toUserId) {
+      throw ApiError(400, 'SAME_USER', 'Choose a different recipient')
+    }
+
+    if (!(await teamRepo.findProductById(dto.productId))) {
+      throw ApiError(404, 'PRODUCT_NOT_FOUND', 'Product not found')
+    }
+
+    const [from, to] = await Promise.all([
+      teamRepo.findUserBasics(dto.fromUserId),
+      teamRepo.findUserBasics(dto.toUserId),
+    ])
+
+    if (!from || !to) {
+      throw ApiError(404, 'USER_NOT_FOUND', 'User not found')
+    }
+
+    if (to.deactivatedAt) {
+      throw ApiError(409, 'RECIPIENT_DEACTIVATED', 'The recipient account is deactivated')
+    }
+
+    // Одержувач має працювати в цьому продукті, інакше він не побачить переданих цілей.
+    const hasAccess =
+      to.role === 'admin' ||
+      (to.role === 'moderator' &&
+        (await membershipRepo.findActive(to.id, dto.productId)) !== null)
+
+    if (!hasAccess) {
+      throw ApiError(
+        409,
+        'RECIPIENT_NOT_IN_PRODUCT',
+        'The recipient does not have access to this product'
+      )
+    }
+
+    const transferred = await prisma.$transaction(async (tx) => {
+      const lockedIds = await teamRepo.lockOwnedTargets(
+        {
+          productId: dto.productId,
+          ownerUserId: dto.fromUserId,
+          targetIds: dto.targetIds,
+        },
+        tx
+      )
+
+      if (dto.targetIds && lockedIds.length !== new Set(dto.targetIds).size) {
+        throw ApiError(404, 'TARGETS_NOT_FOUND', 'Some targets do not belong to the source user')
+      }
+
+      if (lockedIds.length === 0) {
+        throw ApiError(409, 'NOTHING_TO_TRANSFER', 'The source user has no targets in this product')
+      }
+
+      const now = new Date()
+
+      await teamRepo.reassignTargets(lockedIds, to.id, tx)
+      await teamRepo.addTransferNotes(
+        {
+          productId: dto.productId,
+          userId: admin.id,
+          targetIds: lockedIds,
+          comment: `Transferred from ${from.name} to ${to.name} by an administrator`,
+          occurredAt: now,
+        },
+        tx
+      )
+      await auditRepo.record(
+        {
+          actorUserId: admin.id,
+          action: 'targets_transferred',
+          targetUserId: to.id,
+          productId: dto.productId,
+          meta: {
+            fromUserId: from.id,
+            toUserId: to.id,
+            count: lockedIds.length,
+            targetIds: lockedIds.slice(0, 100),
+          },
+        },
+        tx
+      )
+
+      return lockedIds.length
+    })
+
+    return { response: { transferred } }
   },
 }

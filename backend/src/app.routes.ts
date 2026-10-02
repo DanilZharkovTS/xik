@@ -7,6 +7,7 @@ import libraryRoutes from "./modules/library/library.routes.js";
 import teamRoutes from "./modules/team/team.routes.js";
 import accessRoutes from "./modules/access/access.routes.js";
 import outreachRoutes from "./modules/outreach/outreach.routes.js";
+import reportsRoutes from "./modules/reports/reports.routes.js";
 
 const router = Router()
 
@@ -25,5 +26,7 @@ router.use('/team', teamRoutes)
 router.use('/me', accessRoutes)
 
 router.use('/outreach', outreachRoutes)
+
+router.use('/reports', reportsRoutes)
 
 export default router

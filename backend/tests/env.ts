@@ -5,3 +5,4 @@ process.env.DATABASE_URL =
   'postgresql://postgres:1234@localhost:5432/xik_test'
 process.env.JWT_SECRET = 'test-jwt-secret'
 process.env.STRIPE_SECRET = process.env.STRIPE_SECRET ?? 'sk_test_dummy'
+process.env.REPORT_TIMEZONE = 'Europe/Kyiv'

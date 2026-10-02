@@ -15,6 +15,8 @@ import {
   doNotContactSchema,
   listPublicationsSchema,
 } from './events.schema.js'
+import { reportsController } from '../reports/reports.controller.js'
+import { reportQuerySchema } from '../reports/reports.schema.js'
 import { targetsController } from './targets.controller.js'
 import { templatesController } from './templates.controller.js'
 import {
@@ -111,6 +113,13 @@ router.get(
   '/publications',
   validateQuery(listPublicationsSchema),
   eventsController.listPublications
+)
+
+// Звіт по продукту: модератор бачить лише свої події, адмін усі з розбивкою за модераторами.
+router.get(
+  '/reports',
+  validateQuery(reportQuerySchema),
+  reportsController.forProduct
 )
 
 router.get(

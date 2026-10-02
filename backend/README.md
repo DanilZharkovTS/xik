@@ -53,3 +53,14 @@ Product-scoped text templates for copying (`/api/outreach/templates`).
 - Every content change bumps `version`; `PATCH` needs `expectedVersion` (`409 STALE_VERSION` returns the latest template).
 - Events (`POST /targets`, `POST /targets/:id/events`) accept an optional `templateId`; the server stores the template and its current version on the event. Only the version number is kept, not the old text.
 - Login and refresh responses now include the user's `name` (used for `{{manager_name}}`).
+
+## Reports and target transfer (stage 5)
+
+**Reports.** `GET /api/outreach/reports` (product-scoped) and `GET /api/reports` (admin only, all products or one via `productId`).
+
+- Query: `period` (`day|week|month|year|custom`), `date` (anchor day, default today), `from`/`to` for `custom`, `types` (`first,repeat,reply,publication`), `userId` (admins only; moderators always see only their own events).
+- Day boundaries use `REPORT_TIMEZONE` (default `Europe/Kyiv`) via `AT TIME ZONE`, so a day with a DST change is 23/25 hours. Weeks start on Monday. A custom range is limited to 366 days. Up to 62 days the series is per day, longer it is per month; empty buckets are zero-filled.
+- Response: `totals` (`contacts` = first + repeat; replies and publications are counted separately), `series`, `byChannel`, plus `byModerator` for admins and `byProduct` for the all-products view. Internal `status` events are never counted.
+- `occurredAt` columns are `timestamp` holding UTC; clients get ISO 8601 with `Z`.
+
+**Transfer.** `POST /api/team/transfer-targets { productId, fromUserId, toUserId, targetIds? }` (admin only). The recipient must be an active admin or have an active membership in the product. Only `ownerUserId` changes; events are kept and a `status` note is appended to each target's history. One `AuditEvent` records who, from whom, to whom and how many. Rows are locked with `SELECT ... FOR UPDATE`, so concurrent transfers or events cannot interleave. `GET /api/team/targets?productId&ownerId` lists a user's targets (targets of a former member stay with them until transferred).
