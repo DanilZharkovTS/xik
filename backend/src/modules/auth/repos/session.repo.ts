@@ -1,4 +1,4 @@
-import { prisma } from '../../../shared/database/prisma.js'
+import { prisma, type DbClient } from '../../../shared/database/prisma.js'
 
 export const sessionRepo = {
   ////////////
@@ -21,6 +21,36 @@ export const sessionRepo = {
       },
     })
     return session
+  },
+  findActiveWithUser: async (sessionId: string) => {
+    const session = await prisma.userSession.findUnique({
+      where: {
+        id: sessionId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            deactivatedAt: true,
+          },
+        },
+      },
+    })
+    return session
+  },
+  revokeAllForUser: async (userId: string, db: DbClient = prisma) => {
+    const now = new Date()
+
+    await db.userSession.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: now },
+    })
+    await db.refreshToken.updateMany({
+      where: { session: { userId }, revokedAt: null },
+      data: { revokedAt: now },
+    })
   },
   revokeSessionWithRefreshes: async (sessionId: string) => {
     const session = await prisma.userSession.update({

@@ -7,7 +7,7 @@ export const findUsersSchema = z.object({
 })
 
 export const changeUserRoleSchema = z.object({
-  role: z.enum(['admin', 'user'], 'New role must be admin or user'),
+  role: z.enum(['admin', 'moderator', 'user'], 'New role must be admin, moderator or user'),
 })
 
 //dto

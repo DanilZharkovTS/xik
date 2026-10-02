@@ -21,6 +21,7 @@ model Test {
 enum UserRole {
   user
   admin
+  moderator
 }
 
 enum ProductCategory {
@@ -77,11 +78,17 @@ model User {
   role UserRole @default(user)
 
   createdAt DateTime @default(now())
+  deactivatedAt DateTime?
 
   credentials UserCredentials?
   sessions UserSession[]
   savedProducts SavedProduct[]
   library UserLibrary[]
+  memberships ProductMembership[] @relation("MembershipUser")
+  grantedMemberships ProductMembership[] @relation("MembershipGrantedBy")
+  revokedMemberships ProductMembership[] @relation("MembershipRevokedBy")
+  auditActions AuditEvent[] @relation("AuditActor")
+  auditTargets AuditEvent[] @relation("AuditTarget")
 
   @@unique([createdAt,id])
 }
@@ -145,6 +152,7 @@ model Product {
 
   savedBy SavedProduct[]
   availableTo UserLibrary[] 
+  memberships ProductMembership[]
 
   @@unique([createdAt, id])
 }
@@ -181,4 +189,47 @@ model UserLibrary {
 
   @@unique([stripeSubscriptionId])
   @@unique([subscriptionId])
+}
+
+// Робочий доступ модератора до продукту (журнал звернень).
+// Активним вважається запис з revokedAt = null; унікальність активної пари
+// (userId, productId) забезпечує частковий індекс у міграції.
+model ProductMembership {
+  id String @id @default(uuid())
+
+  userId String
+  productId String
+
+  grantedById String
+  grantedAt DateTime @default(now())
+  revokedById String?
+  revokedAt DateTime?
+
+  user User @relation("MembershipUser", fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  grantedBy User @relation("MembershipGrantedBy", fields: [grantedById], references: [id])
+  revokedBy User? @relation("MembershipRevokedBy", fields: [revokedById], references: [id])
+
+  @@index([userId])
+  @@index([productId])
+}
+
+// Журнал дій адміністраторів. Секрети (паролі, токени) сюди не потрапляють.
+model AuditEvent {
+  id String @id @default(uuid())
+
+  actorUserId String
+  action String
+  targetUserId String?
+  productId String?
+  meta Json?
+
+  createdAt DateTime @default(now())
+
+  actor User @relation("AuditActor", fields: [actorUserId], references: [id])
+  target User? @relation("AuditTarget", fields: [targetUserId], references: [id])
+
+  @@index([actorUserId, createdAt])
+  @@index([targetUserId, createdAt])
+  @@index([action, createdAt])
 }

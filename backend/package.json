@@ -5,6 +5,9 @@
   "main": "src/app.ts",
   "scripts": {
     "dev": "tsx watch src/app.ts",
+    "admin:create": "tsx src/scripts/create-admin.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "postinstall": "prisma skills sync || exit 0"
   },
   "author": "",
@@ -31,7 +34,10 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.4.0",
+    "@types/supertest": "^7.2.1",
     "prisma": "^7.10.0",
-    "typescript": "^7.0.2"
+    "supertest": "^7.3.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
   }
 }

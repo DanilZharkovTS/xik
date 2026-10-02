@@ -15,6 +15,7 @@ declare global {
       }
       tokens?: Record<string, string>
       user: TokenPayload
+      product?: { id: string }
     }
   }
 }

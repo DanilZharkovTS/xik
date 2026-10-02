@@ -24,7 +24,7 @@ export const authService = {
   login: async (data: LoginDto) => {
     const user = await authRepo.findUserWithCredentialsByEmail(data.email)
 
-    if (!user) {
+    if (!user || user.deactivatedAt) {
       throw ApiError(401, 'UNAUTHORIZED', 'Email or/and password is incorrect')
     }
 
@@ -76,7 +76,8 @@ export const authService = {
       !refresh ||
       new Date() > refresh.expiresAt ||
       refresh.revokedAt ||
-      session?.revokedAt
+      session?.revokedAt ||
+      user?.deactivatedAt
     ) {
       throw ApiError(401, 'UNAUTHORIZED', 'Session is expired or invalid')
     }
