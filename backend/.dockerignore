@@ -1,0 +1,10 @@
+# Залежності й артефакти хоста не мають потрапляти в образ: бінарники macOS/Windows
+# не працюють у Linux-контейнері (prisma: Permission denied).
+node_modules
+dist
+src/generated
+npm-debug.log
+.env
+.env.*
+.git
+.DS_Store

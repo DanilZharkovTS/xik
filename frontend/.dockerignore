@@ -1,0 +1,11 @@
+# Залежності й артефакти хоста не мають потрапляти в образ.
+node_modules
+.next
+out
+npm-debug.log
+.env
+.env.*
+.git
+.DS_Store
+test-results
+playwright-report
