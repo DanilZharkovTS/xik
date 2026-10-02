@@ -82,7 +82,9 @@ const fake = vi.hoisted(() => {
 vi.mock('../src/modules/billing/stripe.js', () => ({ stripe: fake.stripe }))
 
 import { Prisma } from '../src/generated/prisma/client.js'
+import { importCatalog } from '../src/modules/products/catalog-import.js'
 import { productsRepo } from '../src/modules/products/products.repo.js'
+import catalog from '../prisma/seed/catalog.json'
 import { prisma } from '../src/shared/database/prisma.js'
 import {
   api,
@@ -767,5 +769,83 @@ describe('публічний каталог і оплата', () => {
   it('невідомий slug 404, без токена публічні ендпоінти працюють', async () => {
     expect((await api().get('/api/products/nope')).status).toBe(404)
     expect((await api().get('/api/products/catalog')).status).toBe(200)
+  })
+})
+
+describe('імпорт статичного каталогу', () => {
+  it('усі записи JSON проходять схему; продуктів і агентів очікувана кількість', async () => {
+    const { createProductSchema } = await import('../src/modules/products/products.schema.js')
+
+    for (const item of catalog) {
+      expect(createProductSchema.safeParse(item).success, item.slug).toBe(true)
+    }
+    expect(catalog.filter((i) => i.kind === 'product')).toHaveLength(6)
+    expect(catalog.filter((i) => i.kind === 'agent')).toHaveLength(9)
+    expect(new Set(catalog.map((i) => i.slug)).size).toBe(catalog.length)
+  })
+
+  it('зі Stripe: кожен продукт привʼязаний 1 до 1, ціни збережені, повторний запуск нічого не створює', async () => {
+    const result = await importCatalog(catalog, { useStripe: true })
+
+    expect(result.failed).toEqual([])
+    expect(result.created).toHaveLength(15)
+    const rows = await prisma.product.findMany()
+    expect(rows.every((p) => p.stripeProductId && p.stripePriceId)).toBe(true)
+    expect(new Set(rows.map((p) => p.stripeProductId)).size).toBe(15)
+    expect(activeStripeProducts()).toHaveLength(15)
+    const keyho = rows.find((p) => p.slug === 'keyho')!
+    expect(keyho).toMatchObject({ kind: 'product', showPrice: true })
+    expect(keyho.price.toString()).toBe('29')
+    const voice = rows.find((p) => p.slug === 'voice-ai')!
+    expect(voice).toMatchObject({ kind: 'agent', status: 'build', showPrice: false })
+
+    const calls = fake.state.calls.length
+    const again = await importCatalog(catalog, { useStripe: true })
+    expect(again.created).toEqual([])
+    expect(again.skipped).toHaveLength(15)
+    expect(fake.state.calls.length).toBe(calls)
+  })
+
+  it('без Stripe: продукти створюються непривʼязаними і придатні до привʼязки через sync', async () => {
+    const { tokens } = await setup()
+
+    const result = await importCatalog(catalog, { useStripe: false })
+
+    expect(result.created).toHaveLength(15)
+    expect(fake.state.calls).toHaveLength(0)
+    const row = await prisma.product.findUniqueOrThrow({ where: { slug: 'rag' } })
+    expect(row.stripeProductId).toBeNull()
+    const synced = await action(tokens.admin, row.id, 'stripe-sync')
+    expect(synced.body.product.isStripeLinked).toBe(true)
+  })
+
+  it('збій одного запису не зупиняє решту й не лишає напівстворених продуктів', async () => {
+    fake.state.fail.add('prices.create')
+
+    const result = await importCatalog(catalog.slice(0, 3), { useStripe: true })
+
+    expect(result.created).toEqual([])
+    expect(result.failed).toHaveLength(3)
+    expect(await prisma.product.count()).toBe(0)
+  })
+
+  it('некоректний запис потрапляє у failed, коректні створюються', async () => {
+    const result = await importCatalog([{ slug: 'Bad Slug' }, catalog[0]], { useStripe: false })
+
+    expect(result.failed.map((f) => f.slug)).toEqual(['Bad Slug'])
+    expect(result.created).toEqual([catalog[0].slug])
+  })
+
+  it('імпортовані продукти одразу видно в каталозі сайту по блоках', async () => {
+    await importCatalog(catalog, { useStripe: true })
+
+    const products = (await api().get('/api/products/catalog').query({ kind: 'product' })).body.products
+    const agents = (await api().get('/api/products/catalog').query({ kind: 'agent' })).body.products
+
+    expect(products).toHaveLength(6)
+    expect(agents).toHaveLength(9)
+    expect(products[0].slug).toBe('keyho')
+    expect(products.find((p: { slug: string }) => p.slug === 'keyho').price).toBe('29')
+    expect(agents.every((a: { price: string | null }) => a.price === null)).toBe(true)
   })
 })

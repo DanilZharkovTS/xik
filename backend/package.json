@@ -7,6 +7,7 @@
     "dev": "tsx watch src/app.ts",
     "start": "tsx src/app.ts",
     "admin:create": "tsx src/scripts/create-admin.ts",
+    "products:import": "tsx src/scripts/import-catalog.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma skills sync || exit 0"

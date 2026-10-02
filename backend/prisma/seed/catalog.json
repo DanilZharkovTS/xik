@@ -1,0 +1,994 @@
+[
+  {
+    "slug": "keyho",
+    "name": "Keyho",
+    "kind": "product",
+    "status": "production",
+    "shortDescription": "Property operations platform connecting owners, managers and workers.",
+    "description": "KEYHO is an integrated operations platform for multi-unit property portfolios. It bridges owners, property managers, on-site contractors and operational staff into a unified, synchronized dashboard for task assignment, status verification, and work auditing.",
+    "categories": [
+      "productivity",
+      "business",
+      "automation"
+    ],
+    "features": [
+      "Task Dispatch & Assignment",
+      "Apartment & Asset Tracking",
+      "Worker Communication Gateway",
+      "Auditable Financial & Service Logs"
+    ],
+    "categoryLabel": "PropTech · Operations",
+    "tagline": "Streamline property workflows with zero operational latency.",
+    "highlights": [
+      "Multi-tenant Workspace",
+      "Realtime Task Queue",
+      "<40ms Sync Latency"
+    ],
+    "capabilities": [
+      {
+        "title": "Task Dispatch & Assignment",
+        "description": "Auto-allocate maintenance and operational tasks based on worker availability, proximity and specialty."
+      },
+      {
+        "title": "Apartment & Asset Tracking",
+        "description": "Comprehensive unit-level history, inventory tracking and condition reporting with photographic logs."
+      },
+      {
+        "title": "Worker Communication Gateway",
+        "description": "Direct mobile-friendly messaging and notification dispatch without third-party app installations."
+      },
+      {
+        "title": "Auditable Financial & Service Logs",
+        "description": "Immutable operational records ready for accounting exports and owner transparent billing."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Next.js 16",
+        "Go Microservices",
+        "PostgreSQL",
+        "RabbitMQ",
+        "Tailwind CSS v4"
+      ],
+      "runtime": "Docker Compose / Kubernetes",
+      "deployment": "Self-hosted or Managed Cloud",
+      "latency": "<40ms sync"
+    },
+    "protocols": [
+      "REST API",
+      "WebSocket Feeds",
+      "Push Notifications",
+      "Webhooks"
+    ],
+    "demoUrl": null,
+    "sortOrder": 10,
+    "price": 29,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": true
+  },
+  {
+    "slug": "telemetry-hub",
+    "name": "Telemetry Hub",
+    "kind": "product",
+    "status": "production",
+    "shortDescription": "Unified metrics, logs, traces and alerting for Docker Compose environments.",
+    "description": "TELEMETRY HUB is an all-in-one observability platform designed specifically for self-hosted and independent Docker Compose architectures. It consolidates metrics collection, structured log streaming, trace aggregation, and smart alert rules into a single lean stack.",
+    "categories": [
+      "analytics",
+      "automation",
+      "development"
+    ],
+    "features": [
+      "Lightweight Log Streaming",
+      "Multi-service Metric Graphs",
+      "Smart Anomaly Alerting",
+      "Trace Propagation"
+    ],
+    "categoryLabel": "Observability · Infrastructure",
+    "tagline": "Turn distributed container noise into actionable operational clarity.",
+    "highlights": [
+      "Zero-config Setup",
+      "Unified PromQL & LogQL",
+      "Sub-second Ingestion"
+    ],
+    "capabilities": [
+      {
+        "title": "Lightweight Log Streaming",
+        "description": "Instant ingestion of container stdout/stderr with full-text search, regex filtering, and tag indexing."
+      },
+      {
+        "title": "Multi-service Metric Graphs",
+        "description": "Auto-scrapes Prometheus endpoints and host resources (CPU, RAM, IOPS, Network) without heavy agents."
+      },
+      {
+        "title": "Smart Anomaly Alerting",
+        "description": "Threshold and rate-of-change alerts dispatched to Telegram, Discord, Slack or custom webhooks."
+      },
+      {
+        "title": "Trace Propagation",
+        "description": "Correlate user requests across microservices with distributed OpenTelemetry context propagation."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Go Ingestion Engine",
+        "ClickHouse",
+        "Prometheus Agent",
+        "Next.js Frontend"
+      ],
+      "runtime": "Single Docker Compose Container Suite",
+      "deployment": "Edge Node or Dedicated Server",
+      "latency": "<15ms query"
+    },
+    "protocols": [
+      "OpenTelemetry",
+      "Prometheus Scrape",
+      "Syslog",
+      "Webhook Gateway"
+    ],
+    "demoUrl": null,
+    "sortOrder": 20,
+    "price": 49,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": true
+  },
+  {
+    "slug": "job-follow",
+    "name": "Job Follow",
+    "kind": "product",
+    "status": "production",
+    "shortDescription": "Automated lead monitoring, news feeds and IT job discovery engine.",
+    "description": "JOB FOLLOW monitors Telegram channels, job boards, community forums and news distribution outlets in real time. It uses custom natural language classifiers to extract high-value leads, technical vacancies, and market signals, delivering them instantly to tailored feeds.",
+    "categories": [
+      "analytics",
+      "socialMedia",
+      "automation"
+    ],
+    "features": [
+      "Telegram Channel Ingestion",
+      "Contextual Lead Scoring",
+      "Structured Resume Matching",
+      "Multi-target Dispatch"
+    ],
+    "categoryLabel": "Market Intelligence · Automation",
+    "tagline": "Continuous intelligence from high-velocity communication channels.",
+    "highlights": [
+      "24/7 Channel Scraping",
+      "NLP Classification",
+      "Instant Telegram Alerts"
+    ],
+    "capabilities": [
+      {
+        "title": "Telegram Channel Ingestion",
+        "description": "Connects multiple listener accounts to extract messages across public and restricted technical groups."
+      },
+      {
+        "title": "Contextual Lead Scoring",
+        "description": "Applies neural classifiers to filter out spam and prioritize relevant job opportunities or business leads."
+      },
+      {
+        "title": "Structured Resume Matching",
+        "description": "Cross-checks vacancy requirements against developer profiles to calculate precise qualification scores."
+      },
+      {
+        "title": "Multi-target Dispatch",
+        "description": "Route scored opportunities into personal Telegram bots, Notion boards, or webhook endpoints."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Python Telethon",
+        "FastAPI",
+        "PostgreSQL",
+        "Vector Embeddings",
+        "Redis"
+      ],
+      "runtime": "Containerized Worker Fleet",
+      "deployment": "Cloud VPS with Proxy Pools",
+      "latency": "<1s detection to alert"
+    },
+    "protocols": [
+      "MTProto (Telegram)",
+      "REST API",
+      "Redis Pub/Sub",
+      "Webhook Dispatches"
+    ],
+    "demoUrl": null,
+    "sortOrder": 30,
+    "price": 19,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": true
+  },
+  {
+    "slug": "chpokai",
+    "name": "Chpokai",
+    "kind": "product",
+    "status": "active",
+    "shortDescription": "Authorized AI-agent security, pentesting and acceptance testing platform.",
+    "description": "CHPOKAI executes controlled, reproducible behavioral security assessments against web systems, APIs and AI agents. It identifies prompt injections, business logic bypasses, auth leakage, and API flaws, generating auditable proof-of-exploit reports.",
+    "categories": [
+      "development",
+      "cybersecurity"
+    ],
+    "features": [
+      "Autonomous Attack Simulation",
+      "Sandbox Execution Proofs",
+      "Guardrail Regression Testing",
+      "Machine-Readable Audit Reports"
+    ],
+    "categoryLabel": "AI Product · Security & Testing",
+    "tagline": "Autonomous adversarial verification with machine-readable evidence.",
+    "highlights": [
+      "Adversarial Simulation",
+      "Prompt Injection Probing",
+      "Compliance Audit Logs"
+    ],
+    "capabilities": [
+      {
+        "title": "Autonomous Attack Simulation",
+        "description": "Generates non-destructive exploitation vectors testing for OWASP Top 10 for LLMs and web APIs."
+      },
+      {
+        "title": "Sandbox Execution Proofs",
+        "description": "Isolates findings with step-by-step reproduction traces and verifiable network payloads."
+      },
+      {
+        "title": "Guardrail Regression Testing",
+        "description": "Continuously asserts that system prompts and safety filters maintain their integrity across model updates."
+      },
+      {
+        "title": "Machine-Readable Audit Reports",
+        "description": "Exports formal vulnerability logs in JSON, Markdown, and SARIF formats for CI/CD integration."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Python Security Framework",
+        "Sandboxed Headless Chromium",
+        "Multi-LLM Swarm",
+        "Next.js UI"
+      ],
+      "runtime": "Isolated Ephemeral Containers",
+      "deployment": "Secure VPC",
+      "latency": "Real-time telemetry"
+    },
+    "protocols": [
+      "HTTP/2",
+      "WebSocket",
+      "CLI Engine",
+      "CI/CD Action"
+    ],
+    "demoUrl": null,
+    "sortOrder": 40,
+    "price": 29,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "activity-simulator",
+    "name": "Activity Simulator",
+    "kind": "agent",
+    "status": "active",
+    "shortDescription": "Native desktop application orchestrating realistic mouse, keyboard and scenario behaviors.",
+    "description": "Activity Simulator is a native cross-platform desktop application (macOS, Windows, Linux) that orchestrates desktop workflows with natural bezier mouse curves, randomized typing cadence, and adaptive window management. Built for stress testing, realistic activity generation, and autonomous scenario execution.",
+    "categories": [
+      "automation",
+      "productivity"
+    ],
+    "features": [
+      "Natural Bezier Pointer Curves",
+      "Stochastic Typing Cadence",
+      "Multi-window Application Flow",
+      "Profile & Scenario Presets"
+    ],
+    "categoryLabel": "Desktop AI · Automation",
+    "tagline": "Natural desktop automation with realistic human-like dynamics and native OS hooks.",
+    "highlights": [
+      "Native Desktop App (macOS/Win/Linux)",
+      "Human-grade Motion",
+      "Non-deterministic Curves",
+      "Profile Presets"
+    ],
+    "capabilities": [
+      {
+        "title": "Natural Bezier Pointer Curves",
+        "description": "Simulates realistic cursor movement acceleration, deceleration, and micro-corrections."
+      },
+      {
+        "title": "Stochastic Typing Cadence",
+        "description": "Dynamic character entry speeds with simulated fatigue, pauses, and typo-correction behavior."
+      },
+      {
+        "title": "Multi-window Application Flow",
+        "description": "Intelligently manages browser tabs, code editors, and terminal focus across long-running sessions."
+      },
+      {
+        "title": "Profile & Scenario Presets",
+        "description": "Save custom developer, researcher, or operator profiles with distinct daily schedule patterns."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Go Native OS Bindings",
+        "Cross-platform Cocoa/Win32",
+        "Lightweight Agent Runtime"
+      ],
+      "runtime": "Native Binary (macOS / Windows / Linux)",
+      "deployment": "Local Desktop Execution",
+      "latency": "<1ms input dispatch"
+    },
+    "protocols": [
+      "Local IPC",
+      "WebSocket Control Plane",
+      "CLI"
+    ],
+    "demoUrl": null,
+    "sortOrder": 50,
+    "price": 19,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "build-runner",
+    "name": "Build Runner",
+    "kind": "agent",
+    "status": "active",
+    "shortDescription": "Real-time cross-platform desktop interview and engineering copilot.",
+    "description": "BUILD RUNNER is a native cross-platform desktop application (macOS & Windows) that listens to audio discussions and analyzes screen context simultaneously. It operates as a stealth floating HUD overlay, providing architectural suggestions, live syntax hints, and algorithmic breakdowns in real time.",
+    "categories": [
+      "development",
+      "productivity"
+    ],
+    "features": [
+      "Real-time Audio Stream Parsing",
+      "Live Screen Context OCR",
+      "Role-Aware Response Synthesis",
+      "Stealth Floating HUD"
+    ],
+    "categoryLabel": "Desktop AI · Copilot",
+    "tagline": "Realtime multimodal desktop copilot combining voice, screen context, and stealth HUD overlay.",
+    "highlights": [
+      "Native Desktop App (macOS & Win)",
+      "Stealth Floating HUD Overlay",
+      "Sub-300ms Audio Transcription",
+      "BYOK Model Routing"
+    ],
+    "capabilities": [
+      {
+        "title": "Real-time Audio Stream Parsing",
+        "description": "High-accuracy continuous voice transcription with speaker diarization and noise suppression."
+      },
+      {
+        "title": "Live Screen Context OCR",
+        "description": "Reads technical problem statements, IDE code windows, and system architecture diagrams on the fly."
+      },
+      {
+        "title": "Role-Aware Response Synthesis",
+        "description": "Tailors advice to senior engineering levels, avoiding boilerplate in favor of architectural precision."
+      },
+      {
+        "title": "Stealth Floating HUD",
+        "description": "Transparent, click-through desktop overlay designed for absolute minimum visual distraction."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Rust Core",
+        "WebRTC Audio Pipeline",
+        "Claude 3.7 / Gemini 2.0 Routing",
+        "Tauri GUI"
+      ],
+      "runtime": "Native Desktop Process",
+      "deployment": "Client Desktop with Cloud AI Bridge",
+      "latency": "<400ms voice-to-hint"
+    },
+    "protocols": [
+      "WebRTC",
+      "WebSocket",
+      "Model BYOK API"
+    ],
+    "demoUrl": null,
+    "sortOrder": 60,
+    "price": 19,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "key-service",
+    "name": "Key Service",
+    "kind": "product",
+    "status": "production",
+    "shortDescription": "Licensing, device-bound verification and entitlement infrastructure.",
+    "description": "Key Service is a high-performance Go/PostgreSQL licensing backend. It handles cryptographic product activation, hardware fingerprint hashing, recurring entitlement validation, and audited lifecycle administration across all studio applications.",
+    "categories": [
+      "business",
+      "cybersecurity"
+    ],
+    "features": [
+      "Device-Bound Fingerprinting",
+      "Cryptographic License Keys",
+      "Feature Entitlement Gates",
+      "Audit & Revocation Control"
+    ],
+    "categoryLabel": "Licensing & Identity",
+    "tagline": "Hardware-bound licensing and entitlement control for software products.",
+    "highlights": [
+      "Cryptographic Ed25519",
+      "Offline Verification",
+      "<3ms Verification"
+    ],
+    "capabilities": [
+      {
+        "title": "Device-Bound Fingerprinting",
+        "description": "Hashes CPU, motherboard, and disk IDs to create tamper-resistant device identity hashes."
+      },
+      {
+        "title": "Cryptographic License Keys",
+        "description": "Issues Ed25519-signed license tokens verifiable both online and in air-gapped environments."
+      },
+      {
+        "title": "Feature Entitlement Gates",
+        "description": "Granular boolean, integer and expiration-based feature toggles per issued license."
+      },
+      {
+        "title": "Audit & Revocation Control",
+        "description": "Instantly revoke, rebind, or suspend licenses with an immutable administrative audit trail."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Go 1.24",
+        "PostgreSQL",
+        "Ed25519 Cryptography",
+        "Redis Cache"
+      ],
+      "runtime": "Lightweight Docker Container",
+      "deployment": "High-availability Kubernetes / VPS",
+      "latency": "<3ms verification"
+    },
+    "protocols": [
+      "REST JSON API",
+      "gRPC Service",
+      "Offline JWT / Ed25519"
+    ],
+    "demoUrl": null,
+    "sortOrder": 70,
+    "price": 29,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "ai-execution-advisor",
+    "name": "AI Execution Advisor",
+    "kind": "product",
+    "status": "active",
+    "shortDescription": "Analyzes AI workloads, execution cost and quality for organizational LLM ops.",
+    "description": "Observes organization-scoped AI workloads across providers (OpenAI, Anthropic, Google, local open weights). Analyzes token efficiency, cache hit rates, prompt length bloat, and provides guarded A/B experiment recommendations to cut costs without reducing quality.",
+    "categories": [
+      "development",
+      "analytics"
+    ],
+    "features": [
+      "Cross-Provider Cost Inspection",
+      "Prompt Compression & Caching",
+      "A/B Quality Evaluation",
+      "Adaptive Fallback Policy"
+    ],
+    "categoryLabel": "AI Product · LLM Operations",
+    "tagline": "Evidence-based cost, latency, and quality optimization for enterprise AI.",
+    "highlights": [
+      "Token Cost Analytics",
+      "Cache Hit Optimization",
+      "Automated Fallback Routing"
+    ],
+    "capabilities": [
+      {
+        "title": "Cross-Provider Cost Inspection",
+        "description": "Granular per-tenant, per-model, and per-feature spend tracking down to the individual token."
+      },
+      {
+        "title": "Prompt Compression & Caching",
+        "description": "Detects repetitive context blocks and enforces prefix caching rules to slash LLM billings by up to 60%."
+      },
+      {
+        "title": "A/B Quality Evaluation",
+        "description": "Guarded side-by-side model experiments benchmarking smaller/cheaper models against flagship tiers."
+      },
+      {
+        "title": "Adaptive Fallback Policy",
+        "description": "Auto-reroutes failed or rate-limited requests to standby providers with zero user disruption."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Go Reverse Proxy",
+        "ClickHouse Analytics",
+        "Next.js Dashboard"
+      ],
+      "runtime": "Cloud Proxy Edge",
+      "deployment": "Drop-in API BaseURL replacement",
+      "latency": "<2ms proxy overhead"
+    },
+    "protocols": [
+      "OpenAI-compatible REST",
+      "Anthropic Protocol",
+      "gRPC Telemetry"
+    ],
+    "demoUrl": null,
+    "sortOrder": 80,
+    "price": 29,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "agent-platform",
+    "name": "Agent Platform",
+    "kind": "agent",
+    "status": "active",
+    "shortDescription": "Multi-tenant control plane for agents, conversations, tools and delegations.",
+    "description": "A scalable multi-tenant control plane for orchestrating autonomous agents, persistent memories, tool registries, execution quotas, and cross-agent delegation across web, Telegram, voice and media pipelines.",
+    "categories": [
+      "automation",
+      "development"
+    ],
+    "features": [
+      "Hierarchical Agent Delegation",
+      "Sandboxed Tool Execution",
+      "Contextual Memory Management",
+      "Tenant Quotas & Policy Controls"
+    ],
+    "categoryLabel": "AI Platform · Multi-Agent",
+    "tagline": "The unified operating system for autonomous enterprise agents.",
+    "highlights": [
+      "Multi-Agent Delegation",
+      "Sandboxed Tool Registry",
+      "Persistent Memory Store"
+    ],
+    "capabilities": [
+      {
+        "title": "Hierarchical Agent Delegation",
+        "description": "Supervisor agents break complex goals into task graphs and delegate to specialized subagents."
+      },
+      {
+        "title": "Sandboxed Tool Execution",
+        "description": "Execute Python, Bash, Web Search, and database queries in short-lived secure micro-VM environments."
+      },
+      {
+        "title": "Contextual Memory Management",
+        "description": "Short-term sliding window context coupled with long-term vector embeddings and user facts graph."
+      },
+      {
+        "title": "Tenant Quotas & Policy Controls",
+        "description": "Fine-grained rate limits, budget ceilings, and strict tool authorization policies per workspace."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Node.js / TypeScript",
+        "PostgreSQL",
+        "pgvector",
+        "Docker Engine",
+        "Next.js"
+      ],
+      "runtime": "Distributed Cluster",
+      "deployment": "Self-hosted or Cloud",
+      "latency": "<100ms dispatch"
+    },
+    "protocols": [
+      "REST",
+      "WebSocket",
+      "MCP (Model Context Protocol)",
+      "Telegram Webhooks"
+    ],
+    "demoUrl": null,
+    "sortOrder": 90,
+    "price": 19,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "voice-ai",
+    "name": "Voice AI",
+    "kind": "agent",
+    "status": "build",
+    "shortDescription": "Realtime bidirectional conversational agents for voice and telephony.",
+    "description": "Realtime conversational voice engine combining WebRTC streaming, acoustic voice activity detection (VAD), streaming neural speech-to-text, LLM generation, and ultra-low-latency voice synthesis.",
+    "categories": [
+      "audio",
+      "communication"
+    ],
+    "features": [
+      "Bilingual Speech Pipeline",
+      "Zero-lag Barge-in",
+      "Telephony & WebRTC Connectors",
+      "Custom Voice Personas"
+    ],
+    "categoryLabel": "Voice AI · Realtime",
+    "tagline": "Sub-second conversational voice intelligence with natural interruption handling.",
+    "highlights": [
+      "Sub-500ms End-to-End",
+      "Native Interruption (Barge-in)",
+      "SIP / Telephony Bridge"
+    ],
+    "capabilities": [
+      {
+        "title": "Bilingual Speech Pipeline",
+        "description": "Flawless transcription and synthesis across Ukrainian and English with native accent modulation."
+      },
+      {
+        "title": "Zero-lag Barge-in",
+        "description": "User interruptions are recognized instantly, gracefully silencing current audio playback within 80ms."
+      },
+      {
+        "title": "Telephony & WebRTC Connectors",
+        "description": "Connect directly to Asterisk, Twilio, browser WebRTC, or SIP trunks."
+      },
+      {
+        "title": "Custom Voice Personas",
+        "description": "Train and configure distinct vocal characteristics, pacing, emotion, and technical tone."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Rust WebRTC Engine",
+        "Whisper Live",
+        "Cartesia / ElevenLabs",
+        "Gemini Live API"
+      ],
+      "runtime": "GPU Acceleration Node",
+      "deployment": "Low-latency Regional Edge",
+      "latency": "<450ms turnaround"
+    },
+    "protocols": [
+      "WebRTC",
+      "SIP / RTP",
+      "WebSocket Streaming"
+    ],
+    "demoUrl": null,
+    "sortOrder": 100,
+    "price": 19,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "video-ai",
+    "name": "Video AI",
+    "kind": "agent",
+    "status": "build",
+    "shortDescription": "Generative video editing, synthetic presentations and avatar experiences.",
+    "description": "Generative video pipeline for producing product demos, synthetic avatar presentations, and automated short-form video content from structured markdown scripts and documentation.",
+    "categories": [
+      "videoGeneration"
+    ],
+    "features": [
+      "Script-to-Video Compilation",
+      "Dynamic Asset Injection",
+      "Multi-resolution Rendering",
+      "Full Audio Soundtrack Mastering"
+    ],
+    "categoryLabel": "Generative AI · Video",
+    "tagline": "Automate visual media generation from structured text and prompts.",
+    "highlights": [
+      "Automated B-roll Stitching",
+      "Synthetic Avatars",
+      "Kinetic Typography"
+    ],
+    "capabilities": [
+      {
+        "title": "Script-to-Video Compilation",
+        "description": "Transforms markdown technical guides into narrated, visually paced walkthrough videos."
+      },
+      {
+        "title": "Dynamic Asset Injection",
+        "description": "Automatically inserts code snippets, product UI frames, and animated diagram highlights."
+      },
+      {
+        "title": "Multi-resolution Rendering",
+        "description": "Simultaneous export for 16:9 desktop presentation and 9:16 vertical social reels."
+      },
+      {
+        "title": "Full Audio Soundtrack Mastering",
+        "description": "Automated background audio ducking, sound effects, and voice clarity balancing."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Remotion",
+        "FFmpeg",
+        "Node.js Renderer",
+        "Gemini Omni Flash"
+      ],
+      "runtime": "Cloud Rendering Fleet",
+      "deployment": "AWS ECS / GPU Nodes",
+      "latency": "2x realtime render"
+    },
+    "protocols": [
+      "REST Render API",
+      "Webhook Delivery",
+      "S3 Storage"
+    ],
+    "demoUrl": null,
+    "sortOrder": 110,
+    "price": 19,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "rag",
+    "name": "RAG",
+    "kind": "agent",
+    "status": "active",
+    "shortDescription": "Strict grounded-answer retrieval engine for tenant-isolated knowledge bases.",
+    "description": "RAG knowledge system combining hybrid sparse-dense vector retrieval, re-ranking, and strict provenance citation. Designed to ingest PDF manuals, documentation, source code, and knowledge bases for strictly grounded answers.",
+    "categories": [
+      "research",
+      "dataScience"
+    ],
+    "features": [
+      "Multi-format Document Ingestion",
+      "Context-Aware Chunking",
+      "Strict Provenance & Citations",
+      "Tenant-isolated Knowledge Partitioning"
+    ],
+    "categoryLabel": "Knowledge AI · Retrieval",
+    "tagline": "Hallucination-free document intelligence with verifiable source attribution.",
+    "highlights": [
+      "Hybrid BM25 + Dense Vectors",
+      "Cohere Rerank Integration",
+      "100% Source Citations"
+    ],
+    "capabilities": [
+      {
+        "title": "Multi-format Document Ingestion",
+        "description": "Extracts clean semantic text from PDFs, Markdown, Notion, GitHub repos, and raw database dumps."
+      },
+      {
+        "title": "Context-Aware Chunking",
+        "description": "Hierarchical chunking preserving headers, tables, and parent-child document relationships."
+      },
+      {
+        "title": "Strict Provenance & Citations",
+        "description": "Every statement in the generated answer contains clickable footnotes pointing to exact source pages."
+      },
+      {
+        "title": "Tenant-isolated Knowledge Partitioning",
+        "description": "Strict security boundaries guaranteeing that organizational knowledge never leaks across workspaces."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Python LlamaIndex",
+        "Qdrant / pgvector",
+        "BGE / OpenAI Embeddings",
+        "Next.js UI"
+      ],
+      "runtime": "Kubernetes Cluster",
+      "deployment": "Private VPC",
+      "latency": "<200ms retrieval"
+    },
+    "protocols": [
+      "REST Query API",
+      "Vector gRPC",
+      "Webhook Sync"
+    ],
+    "demoUrl": null,
+    "sortOrder": 120,
+    "price": 19,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "telegram-ai",
+    "name": "Telegram AI",
+    "kind": "agent",
+    "status": "active",
+    "shortDescription": "Autonomous Telegram monitoring, lead classification and alert workflows.",
+    "description": "Autonomous agent fleet monitoring targeted Telegram groups, channels, and forums. Extracts purchase intent, high-value technical queries, customer feedback, and breaking market signals with zero manual polling.",
+    "categories": [
+      "communication",
+      "analytics"
+    ],
+    "features": [
+      "Live Chat Stream Interception",
+      "Fast Intent & Sentiment Scoring",
+      "Instant Dispatch & Webhooks",
+      "Automated Conversation Starter"
+    ],
+    "categoryLabel": "Monitoring AI · Telegram",
+    "tagline": "High-speed signal extraction from thousands of Telegram communities.",
+    "highlights": [
+      "Realtime MTProto Daemon",
+      "Intent Classification",
+      "Instant Private Alerts"
+    ],
+    "capabilities": [
+      {
+        "title": "Live Chat Stream Interception",
+        "description": "Listens across hundreds of community discussions simultaneously via distributed listener daemons."
+      },
+      {
+        "title": "Fast Intent & Sentiment Scoring",
+        "description": "Filters noise, emojis, and spam, highlighting only high-value queries with commercial intent."
+      },
+      {
+        "title": "Instant Dispatch & Webhooks",
+        "description": "Forwards actionable leads directly to manager Telegram accounts or CRM systems within 2 seconds."
+      },
+      {
+        "title": "Automated Conversation Starter",
+        "description": "Can draft contextual introductory responses based on company knowledge for quick human approval."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Python AsyncIO",
+        "Telethon",
+        "FastAPI",
+        "Redis",
+        "PostgreSQL"
+      ],
+      "runtime": "Distributed VPS Daemon Fleet",
+      "deployment": "Self-hosted Docker Swarm",
+      "latency": "<1.5s latency"
+    },
+    "protocols": [
+      "Telegram MTProto API",
+      "Telegram Bot API",
+      "Webhook Dispatch"
+    ],
+    "demoUrl": null,
+    "sortOrder": 130,
+    "price": 19,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "web-widget-ai",
+    "name": "Web Widget Support AI",
+    "kind": "agent",
+    "status": "active",
+    "shortDescription": "Embeddable intelligent website chat widget with streaming answers, documentation grounding, and lead capture.",
+    "description": "WEB WIDGET AI is a lightweight (<25KB), customizable embeddable web chat widget powered by streaming LLMs and vector RAG. It seamlessly integrates into any modern website or web app, answers visitor questions strictly grounded in your product documentation, collects verified leads, and hands off complex conversations to human operators.",
+    "categories": [
+      "communication",
+      "sales"
+    ],
+    "features": [
+      "One-Line Script Embedding",
+      "Strict Knowledge Grounding",
+      "Automated Lead Qualification",
+      "Custom Brand & Theme Styling"
+    ],
+    "categoryLabel": "Web AI · Conversational Widget",
+    "tagline": "Instant customer support and automated lead qualification embedded in any website.",
+    "highlights": [
+      "<25KB Embed Bundle",
+      "Realtime Token Streaming",
+      "Strict Docs Grounding",
+      "Automated Lead Qualification"
+    ],
+    "capabilities": [
+      {
+        "title": "One-Line Script Embedding",
+        "description": "Drop onto any website via a single script tag across WordPress, Webflow, Shopify, React, Next.js or static HTML."
+      },
+      {
+        "title": "Strict Knowledge Grounding",
+        "description": "Answers visitor inquiries strictly using verified documentation, pricing sheets, and FAQs with zero hallucination."
+      },
+      {
+        "title": "Automated Lead Qualification",
+        "description": "Identifies high-intent visitors, collects verified emails and phone numbers, and routes leads directly to CRM or Telegram."
+      },
+      {
+        "title": "Custom Brand & Theme Styling",
+        "description": "Fully customizable widget accents, launcher bubbles, welcome greetings, avatars, and tone of voice."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "TypeScript",
+        "Preact Widget Core",
+        "FastAPI Backend",
+        "Qdrant Vector DB",
+        "Redis Cache"
+      ],
+      "runtime": "Edge CDN & Distributed Server Fleet",
+      "deployment": "Managed Cloud / On-Premise Docker",
+      "latency": "<80ms TTFT (Time to First Token)"
+    },
+    "protocols": [
+      "WebSocket Streaming",
+      "REST API",
+      "Embed Script",
+      "CRM Webhooks"
+    ],
+    "demoUrl": null,
+    "sortOrder": 140,
+    "price": 19,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  },
+  {
+    "slug": "telegram-bot-ai",
+    "name": "TELEGRAM Support BOT AI",
+    "kind": "agent",
+    "status": "active",
+    "shortDescription": "Interactive conversational assistant for Telegram groups, channels and private chats with tool execution.",
+    "description": "TELEGRAM CHATBOT AI is a production-grade conversational bot engineered for Telegram. It handles customer inquiries in direct messages, moderates and assists in community groups, understands voice notes and document uploads, and runs custom backend actions (order lookup, support ticketing, booking) through secure function calling.",
+    "categories": [
+      "communication",
+      "automation"
+    ],
+    "features": [
+      "Group Moderation & Community Support",
+      "Voice Note & Document Understanding",
+      "Contextual Multi-Turn Memory",
+      "Custom Tool & API Integrations"
+    ],
+    "categoryLabel": "Telegram AI · Conversational Bot",
+    "tagline": "Enterprise-grade conversational intelligence and workflow automation right inside Telegram.",
+    "highlights": [
+      "Group & Direct Message Modes",
+      "Voice & Image Understanding",
+      "Persistent User Context",
+      "Function Calling & Tools"
+    ],
+    "capabilities": [
+      {
+        "title": "Group Moderation & Community Support",
+        "description": "Answers member questions in group discussions, detects spam, and responds either inline or via private messaging."
+      },
+      {
+        "title": "Voice Note & Document Understanding",
+        "description": "Transcribes incoming voice messages with Whisper and analyzes uploaded PDF/photo documents with multimodal vision."
+      },
+      {
+        "title": "Contextual Multi-Turn Memory",
+        "description": "Maintains long-term session memory for every user, remembering past interactions, preferences, and account IDs."
+      },
+      {
+        "title": "Custom Tool & API Integrations",
+        "description": "Executes backend queries, order lookups, appointment scheduling, and CRM updates directly through chat buttons and commands."
+      }
+    ],
+    "architecture": {
+      "stack": [
+        "Python 3.12 AsyncIO",
+        "aiogram 3.x",
+        "PostgreSQL",
+        "Redis State Store",
+        "Whisper & Vision APIs"
+      ],
+      "runtime": "Resilient High-Availability VPS Cluster",
+      "deployment": "Docker Swarm / Kubernetes",
+      "latency": "<350ms response delivery"
+    },
+    "protocols": [
+      "Telegram Bot API",
+      "MTProto Client",
+      "Webhook Bridge",
+      "REST JSON API"
+    ],
+    "demoUrl": null,
+    "sortOrder": 150,
+    "price": 19,
+    "currency": "USD",
+    "billingPeriod": "month",
+    "showPrice": false
+  }
+]
