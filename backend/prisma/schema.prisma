@@ -34,6 +34,14 @@ enum OutreachEventType {
   repeat
   reply
   publication
+  status
+}
+
+enum OutreachPublicationKind {
+  post
+  ad
+  article
+  link_in_offer
 }
 
 enum ProductCategory {
@@ -305,6 +313,9 @@ model OutreachEvent {
   type OutreachEventType
   channel String?
   url String?
+  // Лише для публікацій: нормалізований URL, за яким вони не дублюються в межах продукту.
+  urlNormalized String?
+  publicationKind OutreachPublicationKind?
   comment String?
   occurredAt DateTime @default(now())
   createdAt DateTime @default(now())

@@ -8,6 +8,13 @@ import {
   validateQuery,
 } from '../../shared/middlewares/helpers.js'
 import { ApiError } from '../../shared/utils/ApiError.js'
+import { eventsController } from './events.controller.js'
+import {
+  addEventSchema,
+  addPublicationSchema,
+  doNotContactSchema,
+  listPublicationsSchema,
+} from './events.schema.js'
 import { targetsController } from './targets.controller.js'
 import {
   addIdentifierSchema,
@@ -64,6 +71,40 @@ router.post(
   validateParams('targetId'),
   validateBody(addIdentifierSchema),
   targetsController.addIdentifier
+)
+
+router.post(
+  '/targets/:targetId/events',
+  validateParams('targetId'),
+  validateBody(addEventSchema),
+  eventsController.add
+)
+
+router.post(
+  '/targets/:targetId/do-not-contact',
+  validateParams('targetId'),
+  validateBody(doNotContactSchema),
+  eventsController.markDoNotContact
+)
+
+// Знімає «не писати» лише адмін.
+router.post(
+  '/targets/:targetId/release',
+  authMiddleware.requiresRole('admin'),
+  validateParams('targetId'),
+  eventsController.release
+)
+
+router.post(
+  '/publications',
+  validateBody(addPublicationSchema),
+  eventsController.createPublication
+)
+
+router.get(
+  '/publications',
+  validateQuery(listPublicationsSchema),
+  eventsController.listPublications
 )
 
 export default router

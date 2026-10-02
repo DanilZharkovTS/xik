@@ -153,3 +153,32 @@ describe('посилання для відкриття', () => {
     expect(identifierHref(identifier)).toBe(href)
   })
 })
+
+describe('нормалізація URL публікацій', () => {
+  it.each([
+    ['https://www.instagram.com/p/AbC123/?igsh=xyz&utm_source=ig', 'instagram.com/p/AbC123'],
+    ['https://instagram.com/p/AbC123', 'instagram.com/p/AbC123'],
+    ['https://m.facebook.com/story.php?story_fbid=9&id=1&fbclid=zz', 'facebook.com/story.php?id=1&story_fbid=9'],
+    ['https://youtu.be/dQw4w9WgXcQ?si=abc', 'youtu.be/dQw4w9WgXcQ'],
+    ['https://www.threads.net/@acme/post/XyZ/', 'threads.net/@acme/post/XyZ'],
+    ['  https://Example.COM/Article#section  ', 'example.com/Article'],
+  ])('%s -> %s', async (input, expected) => {
+    const { normalizePublicationUrl } = await import('../src/modules/outreach/normalizers.js')
+    expect(normalizePublicationUrl(input)).toBe(expected)
+  })
+
+  it.each(['javascript:alert(1)', 'ftp://example.com/x', 'not a url', 'http://localhost/x', ''])(
+    'відхиляє %j',
+    async (input) => {
+      const { normalizePublicationUrl } = await import('../src/modules/outreach/normalizers.js')
+      expect(normalizePublicationUrl(input)).toBeNull()
+    }
+  )
+
+  it('регістр шляху зберігається: коди дописів чутливі до регістру', async () => {
+    const { normalizePublicationUrl } = await import('../src/modules/outreach/normalizers.js')
+    expect(normalizePublicationUrl('https://instagram.com/p/AbC')).not.toBe(
+      normalizePublicationUrl('https://instagram.com/p/abc')
+    )
+  })
+})

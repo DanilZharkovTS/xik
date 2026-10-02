@@ -36,3 +36,10 @@ All routes live under `/api/outreach`, need a token and the `X-Product-Id` heade
 - Check, register and add-identifier share a per-user limit of 30 requests per minute (`OUTREACH_RATE_LIMIT`).
 
 Normalization lives in `src/modules/outreach/normalizers.ts` (one function per channel, table-driven tests in `tests/normalizers.test.ts`). Websites match by registrable domain (`blog.company.com` is `company.com`); platforms like `github.com` or `medium.com` match by path, and `*.substack.com` by subdomain.
+
+## Outreach ledger: events, do not contact, publications (stage 3)
+
+- `POST /targets/:id/events` `{ type: 'repeat' | 'reply', channel?, url?, comment?, occurredAt? }`: a repeat moves `lastContactedAt` forward (never back); a reply does not. Dates cannot be in the future.
+- `POST /targets/:id/do-not-contact` (owner or admin) and `POST /targets/:id/release` (admin only). Status changes lock the target row (`SELECT ... FOR UPDATE`), write a `status` event into the history and an `AuditEvent`. A repeat to a `do_not_contact` target is rejected with `409 DO_NOT_CONTACT`; a reply can still be logged.
+- Target responses carry a server-computed `permissions` object (`canRepeat`, `canReply`, `canAddIdentifier`, `canMarkDoNotContact`, `canRelease`) and `isMine`, so the UI never guesses rights from the role.
+- `POST /publications` `{ channel, kind: post | ad | article | link_in_offer, url, comment?, occurredAt? }` records a publication without a target. Duplicates are rejected by a partial unique index on the normalized URL (tracking params, `www.`, hash and trailing slash are ignored; path case is kept). `GET /publications`: moderators see their own, admins all.

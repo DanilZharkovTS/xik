@@ -9,6 +9,8 @@ export type AuditAction =
   | 'user_activated'
   | 'product_granted'
   | 'product_revoked'
+  | 'target_do_not_contact'
+  | 'target_released'
 
 export interface AuditRecord {
   actorUserId: string

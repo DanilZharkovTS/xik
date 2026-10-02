@@ -231,3 +231,52 @@ export const identifierHref = ({ channel, value }: NormalizedIdentifier): string
       return `https://${value}`
   }
 }
+
+export const PUBLICATION_CHANNELS = [
+  'facebook',
+  'instagram',
+  'threads',
+  'tiktok',
+  'x',
+  'youtube',
+  'linkedin',
+  'telegram',
+  'website',
+  'other',
+] as const
+
+export type PublicationChannel = (typeof PUBLICATION_CHANNELS)[number]
+
+export const PUBLICATION_KINDS = ['post', 'ad', 'article', 'link_in_offer'] as const
+
+export type PublicationKind = (typeof PUBLICATION_KINDS)[number]
+
+// Параметри відстеження не змінюють допис: без них одне посилання не зʼявляється двічі.
+const TRACKING_PARAM =
+  /^(utm_.*|fbclid|gclid|igshid|igsh|si|ref|ref_src|ref_url|feature|mc_cid|mc_eid|_ga|share_id)$/i
+
+// Ключ дедуплікації публікацій. Регістр шляху зберігаємо: коди дописів (Instagram, YouTube)
+// чутливі до регістру. Повертає null, якщо це не http(s)-посилання.
+export const normalizePublicationUrl = (raw: string): string | null => {
+  let url: URL
+
+  try {
+    url = new URL(raw.trim())
+  } catch {
+    return null
+  }
+
+  if (!['http:', 'https:'].includes(url.protocol)) return null
+
+  const host = url.hostname.toLowerCase().replace(/^(www|m|mobile)\./, '')
+  if (!host.includes('.')) return null
+
+  const params = [...url.searchParams.entries()]
+    .filter(([key]) => !TRACKING_PARAM.test(key))
+    .sort(([a], [b]) => a.localeCompare(b))
+  const query = params.length
+    ? `?${params.map(([key, value]) => `${key}=${value}`).join('&')}`
+    : ''
+
+  return `${host}${url.pathname.replace(/\/+$/, '')}${query}`
+}

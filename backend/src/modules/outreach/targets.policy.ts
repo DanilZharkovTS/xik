@@ -17,3 +17,14 @@ export const canViewDetails = (
 // Змінювати можна лише активну ціль; «не писати» блокує дописування.
 export const canModify = (actor: TokenPayload, target: OwnedTarget): boolean =>
   canViewDetails(actor, target) && target.status === 'active'
+
+// «Не писати» ставить власник (і адмін) на активну ціль; знімає лише адмін.
+export const canMarkDoNotContact = (
+  actor: TokenPayload,
+  target: OwnedTarget
+): boolean => canViewDetails(actor, target) && target.status === 'active'
+
+export const canRelease = (
+  actor: TokenPayload,
+  target: OwnedTarget
+): boolean => actor.role === 'admin' && target.status === 'do_not_contact'

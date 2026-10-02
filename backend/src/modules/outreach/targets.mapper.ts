@@ -1,4 +1,12 @@
+import type { TokenPayload } from '../auth/auth.types.js'
 import { identifierHref, type Channel } from './normalizers.js'
+import {
+  canMarkDoNotContact,
+  canModify,
+  canRelease,
+  canViewDetails,
+  isOwner,
+} from './targets.policy.js'
 
 interface IdentifierRow {
   channel: string
@@ -36,6 +44,7 @@ export const toEventDto = (row: EventRow) => ({
 
 interface TargetBase {
   id: string
+  ownerUserId: string
   displayName: string
   status: string
   statusReason: string | null
@@ -56,11 +65,30 @@ export const toListItemDto = (row: TargetBase) => ({
 })
 
 // Повні дані цілі: лише для власника й адміна (див. targets.policy).
-export const toDetailDto = (row: TargetBase & { events: EventRow[] }) => ({
-  ...toListItemDto(row),
-  statusReason: row.statusReason,
-  events: row.events.map(toEventDto),
-})
+// Права обчислює сервер, щоб інтерфейс не вгадував їх за роллю.
+export const toDetailDto = (
+  row: TargetBase & { events: EventRow[] },
+  actor: TokenPayload
+) => {
+  const target = {
+    ownerUserId: row.ownerUserId,
+    status: row.status as 'active' | 'do_not_contact',
+  }
+
+  return {
+    ...toListItemDto(row),
+    statusReason: row.statusReason,
+    isMine: isOwner(actor, target),
+    permissions: {
+      canRepeat: canModify(actor, target),
+      canReply: canViewDetails(actor, target),
+      canAddIdentifier: canModify(actor, target),
+      canMarkDoNotContact: canMarkDoNotContact(actor, target),
+      canRelease: canRelease(actor, target),
+    },
+    events: row.events.map(toEventDto),
+  }
+}
 
 // Чужа ціль: лише власник (імʼя) і дата, без історії й ідентифікаторів.
 export const toForeignDto = (row: {

@@ -81,7 +81,7 @@ export const targetsRepo = {
       productId: string
       targetId: string
       userId: string
-      type: 'first' | 'repeat' | 'reply' | 'publication'
+      type: 'first' | 'repeat' | 'reply' | 'status'
       channel?: Channel
       url?: string
       comment?: string
@@ -90,6 +90,47 @@ export const targetsRepo = {
     db: DbClient = prisma
   ) => {
     await db.outreachEvent.create({ data })
+  },
+  // Блокує рядок цілі до кінця транзакції: зміна статусу й додавання події не перегоняють одне одного.
+  lockTarget: async (
+    productId: string,
+    targetId: string,
+    db: DbClient
+  ) => {
+    const rows = await db.$queryRaw<
+      { id: string; ownerUserId: string; status: 'active' | 'do_not_contact' }[]
+    >`
+      SELECT "id", "ownerUserId", "status"
+      FROM "OutreachTarget"
+      WHERE "id" = ${targetId} AND "productId" = ${productId}
+      FOR UPDATE
+    `
+    return rows[0] ?? null
+  },
+  setStatus: async (
+    targetId: string,
+    status: 'active' | 'do_not_contact',
+    statusReason: string | null,
+    db: DbClient = prisma
+  ) => {
+    await db.outreachTarget.update({
+      where: { id: targetId },
+      data: { status, statusReason },
+    })
+  },
+  // Останній контакт лише рухається вперед, навіть якщо подію внесли заднім числом.
+  touchLastContacted: async (
+    targetId: string,
+    at: Date,
+    db: DbClient = prisma
+  ) => {
+    await db.outreachTarget.updateMany({
+      where: {
+        id: targetId,
+        OR: [{ lastContactedAt: null }, { lastContactedAt: { lt: at } }],
+      },
+      data: { lastContactedAt: at },
+    })
   },
   listTargets: async (
     params: {

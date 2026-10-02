@@ -62,7 +62,7 @@ const lookup = async (
 
   const detail = await targetsRepo.findDetailById(productId, found.id)
 
-  return { ...base, target: detail ? toDetailDto(detail) : undefined }
+  return { ...base, target: detail ? toDetailDto(detail, actor) : undefined }
 }
 
 export const targetsService = {
@@ -121,7 +121,7 @@ export const targetsService = {
 
       const detail = await targetsRepo.findDetailById(productId, targetId)
 
-      return { status: 201, response: { target: toDetailDto(detail!) } }
+      return { status: 201, response: { target: toDetailDto(detail!, actor) } }
     } catch (err) {
       if (!(err instanceof IdentifierTaken)) throw err
 
@@ -177,7 +177,7 @@ export const targetsService = {
 
     const detail = await targetsRepo.findDetailById(productId, targetId)
 
-    return { status: 201, response: { target: toDetailDto(detail!) } }
+    return { status: 201, response: { target: toDetailDto(detail!, actor) } }
   },
   list: async (actor: TokenPayload, productId: string, dto: ListTargetsDto) => {
     const rows = await targetsRepo.listTargets({
@@ -209,6 +209,6 @@ export const targetsService = {
       throw ApiError(403, 'FORBIDDEN', 'This target belongs to another moderator')
     }
 
-    return { response: { target: toDetailDto(target) } }
+    return { response: { target: toDetailDto(target, actor) } }
   },
 }
