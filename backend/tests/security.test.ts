@@ -51,6 +51,12 @@ const ADMIN_ONLY_ROUTES: Array<[Method, string]> = [
   ['get', '/api/team/targets'],
   ['post', '/api/team/transfer-targets'],
   ['get', '/api/reports'],
+  ['get', '/api/products/admin'],
+  ['post', '/api/products'],
+  ['patch', '/api/products/x'],
+  ['delete', '/api/products/x'],
+  ['post', '/api/products/x/restore'],
+  ['post', '/api/products/x/stripe-sync'],
 ]
 
 // Адмін-ендпоінти в межах продукту: модератору заборонені, хоч він і в продукті.

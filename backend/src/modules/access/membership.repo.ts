@@ -13,7 +13,7 @@ export const membershipRepo = {
   },
   listActiveProducts: async (userId: string) => {
     const memberships = await prisma.productMembership.findMany({
-      where: { userId, revokedAt: null },
+      where: { userId, revokedAt: null, product: { archivedAt: null } },
       select: { product: { select: { id: true, slug: true, name: true } } },
       orderBy: { grantedAt: 'asc' },
     })

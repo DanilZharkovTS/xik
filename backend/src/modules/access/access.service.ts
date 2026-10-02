@@ -6,7 +6,9 @@ export const accessService = {
   // Продукти для перемикача: адмін бачить усі, модератор лише свої активні.
   listMyProducts: async ({ id, role }: TokenPayload) => {
     if (role === 'admin') {
+      // Архівні продукти зникають з перемикача, але історія в журналі та звітах лишається.
       const products = await prisma.product.findMany({
+        where: { archivedAt: null },
         select: { id: true, slug: true, name: true },
         orderBy: { name: 'asc' },
       })

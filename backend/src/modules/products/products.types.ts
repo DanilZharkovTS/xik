@@ -1,4 +1,4 @@
-import { Prisma } from "../../generated/prisma/client.js"
+import { Prisma } from '../../generated/prisma/client.js'
 
 export type ProductCategory =
   | 'development'
@@ -37,11 +37,27 @@ export type ProductCurrency =
 
 export type ProductBillingPeriod = 'week' | 'month' | 'year'
 
+export type ProductKind = 'product' | 'agent'
+
+export type ProductStatus = 'production' | 'active' | 'beta' | 'build'
+
+export interface ProductCapability {
+  title: string
+  description: string
+}
+
+export interface ProductArchitecture {
+  stack: string[]
+  runtime: string
+  deployment: string
+  latency: string
+}
+
 export interface Product {
   id: string
 
-  stripeProductId: string
-  stripePriceId: string
+  stripeProductId: string | null
+  stripePriceId: string | null
 
   slug: string
   name: string
@@ -50,10 +66,23 @@ export interface Product {
   categories: ProductCategory[]
   features: string[]
 
+  kind: ProductKind
+  status: ProductStatus
+  categoryLabel: string | null
+  tagline: string | null
+  highlights: string[]
+  capabilities: Prisma.JsonValue
+  architecture: Prisma.JsonValue | null
+  protocols: string[]
+  demoUrl: string | null
+  sortOrder: number
+
   price: Prisma.Decimal
   currency: ProductCurrency
   billingPeriod: ProductBillingPeriod
+  showPrice: boolean
 
+  archivedAt: Date | null
   updatedAt: Date
   createdAt: Date
 }

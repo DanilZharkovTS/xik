@@ -51,7 +51,23 @@ export const productsController = {
       next(err)
     }
   },
+  listCatalog: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await productsService.listCatalog(req.validData.query)
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
   //admin
+  listForAdmin: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await productsService.listForAdmin(req.validData.query)
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
   createProduct: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await productsService.createProduct(req.validData.body)
@@ -71,9 +87,29 @@ export const productsController = {
       next(err)
     }
   },
-  deleteProduct: async (req: Request, res: Response, next: NextFunction) => {
+  archiveProduct: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await productsService.deleteProduct(
+      const result = await productsService.archiveProduct(
+        req.validData.params.productId
+      )
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
+  restoreProduct: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await productsService.restoreProduct(
+        req.validData.params.productId
+      )
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
+  syncWithStripe: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await productsService.syncWithStripe(
         req.validData.params.productId
       )
       res.status(200).json(result.response)

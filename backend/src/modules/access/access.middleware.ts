@@ -14,8 +14,9 @@ export const accessMiddleware = {
         throw ApiError(400, 'PRODUCT_REQUIRED', 'Product is not selected')
       }
 
-      const product = await prisma.product.findUnique({
-        where: { id: productId },
+      // Архівний продукт для журналу не існує (адмін може його відновити).
+      const product = await prisma.product.findFirst({
+        where: { id: productId, archivedAt: null },
         select: { id: true },
       })
 
