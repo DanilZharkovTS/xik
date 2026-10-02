@@ -32,9 +32,104 @@ export interface TargetIdentifier {
   href: string
 }
 
+export type PublicationChannel =
+  | 'facebook'
+  | 'instagram'
+  | 'threads'
+  | 'tiktok'
+  | 'x'
+  | 'youtube'
+  | 'linkedin'
+  | 'telegram'
+  | 'website'
+  | 'other'
+
+export const PUBLICATION_CHANNELS: readonly PublicationChannel[] = [
+  'facebook',
+  'instagram',
+  'threads',
+  'tiktok',
+  'x',
+  'youtube',
+  'linkedin',
+  'telegram',
+  'website',
+  'other',
+]
+
+export const PUBLICATION_CHANNEL_LABELS: Record<PublicationChannel, string> = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  threads: 'Threads',
+  tiktok: 'TikTok',
+  x: 'X',
+  youtube: 'YouTube',
+  linkedin: 'LinkedIn',
+  telegram: 'Telegram',
+  website: 'Website',
+  other: 'Other',
+}
+
+export type PublicationKind = 'post' | 'ad' | 'article' | 'link_in_offer'
+
+export const PUBLICATION_KINDS: readonly PublicationKind[] = [
+  'post',
+  'ad',
+  'article',
+  'link_in_offer',
+]
+
+export const PUBLICATION_KIND_LABELS: Record<PublicationKind, string> = {
+  post: 'Post',
+  ad: 'Ad placement',
+  article: 'Article',
+  link_in_offer: 'Link in an offer',
+}
+
+export interface Publication {
+  id: string
+  channel: PublicationChannel
+  kind: PublicationKind
+  url: string
+  comment: string | null
+  occurredAt: string
+  author: string
+}
+
+export interface PublicationInput {
+  channel: PublicationChannel
+  kind: PublicationKind
+  url: string
+  comment?: string
+}
+
+export type PublicationOutcome =
+  | { kind: 'created'; publication: Publication }
+  | { kind: 'duplicate'; existing: Publication | null }
+
+export interface PublicationsPage {
+  publications: Publication[]
+  nextCursor: string | null
+}
+
+export interface TargetPermissions {
+  canRepeat: boolean
+  canReply: boolean
+  canAddIdentifier: boolean
+  canMarkDoNotContact: boolean
+  canRelease: boolean
+}
+
+export interface ActivityInput {
+  type: 'repeat' | 'reply'
+  channel?: Channel
+  url?: string
+  comment?: string
+}
+
 export interface TargetEvent {
   id: string
-  type: 'first' | 'repeat' | 'reply' | 'publication'
+  type: 'first' | 'repeat' | 'reply' | 'publication' | 'status'
   channel: Channel | null
   url: string | null
   comment: string | null
@@ -54,6 +149,8 @@ export interface TargetListItem {
 
 export interface TargetDetail extends TargetListItem {
   statusReason: string | null
+  isMine: boolean
+  permissions: TargetPermissions
   events: TargetEvent[]
 }
 

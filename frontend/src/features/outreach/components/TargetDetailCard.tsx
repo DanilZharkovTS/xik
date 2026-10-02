@@ -10,6 +10,7 @@ const EVENT_LABELS: Record<TargetEvent['type'], string> = {
   repeat: 'Repeat contact',
   reply: 'Reply',
   publication: 'Publication',
+  status: 'Status change',
 }
 
 export function TargetDetailCard({ target }: { target: TargetDetail }): ReactElement {

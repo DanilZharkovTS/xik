@@ -62,7 +62,7 @@ export function CheckScreen(): ReactElement {
 
     setResult({
       normalized,
-      status: 'mine',
+      status: target.status === 'do_not_contact' ? 'do_not_contact' : target.isMine ? 'mine' : 'foreign',
       owner: target.owner,
       firstContactedAt: target.firstContactedAt,
       target,

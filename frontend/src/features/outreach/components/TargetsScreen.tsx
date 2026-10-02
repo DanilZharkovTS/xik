@@ -8,9 +8,11 @@ import { cn } from '@/src/shared/lib/cn'
 import { Button } from '@/src/shared/ui/button'
 import { formatDateTime, formatRelative } from '../format-date'
 import { outreachService } from '../outreach.service'
-import type { TargetListItem } from '../outreach.types'
+import type { TargetDetail, TargetListItem } from '../outreach.types'
 import { useOutreachContext } from '../use-outreach-context'
 import { IdentifierLink } from './IdentifierLink'
+import { TargetActions } from './TargetActions'
+import { TargetDetailCard } from './TargetDetailCard'
 
 export function TargetsScreen(): ReactElement {
   const { token, productId, handleError } = useOutreachContext()
@@ -19,6 +21,9 @@ export function TargetsScreen(): ReactElement {
   const [nextCursor, setNextCursor] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [details, setDetails] = useState<Record<string, TargetDetail>>({})
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [loadingDetailId, setLoadingDetailId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!token || !productId) return
@@ -58,6 +63,44 @@ export function TargetsScreen(): ReactElement {
       setIsLoadingMore(false)
     }
   }, [token, productId, nextCursor, handleError])
+
+  const toggleDetails = async (id: string) => {
+    if (openId === id) {
+      setOpenId(null)
+      return
+    }
+
+    setOpenId(id)
+    if (details[id] || !token || !productId) return
+
+    try {
+      setLoadingDetailId(id)
+      const detail = await outreachService.getTarget(id, token, productId)
+      setDetails((current) => ({ ...current, [id]: detail }))
+    } catch (err) {
+      setOpenId(null)
+      await handleError(err)
+    } finally {
+      setLoadingDetailId(null)
+    }
+  }
+
+  // Після дії оновлюємо і картку, і рядок списку (статус, останній контакт).
+  const applyUpdate = (updated: TargetDetail) => {
+    setDetails((current) => ({ ...current, [updated.id]: updated }))
+    setTargets((current) =>
+      current.map((item) =>
+        item.id === updated.id
+          ? {
+              ...item,
+              status: updated.status,
+              lastContactedAt: updated.lastContactedAt,
+              identifiers: updated.identifiers,
+            }
+          : item,
+      ),
+    )
+  }
 
   return (
     <div className="space-y-5">
@@ -121,6 +164,35 @@ export function TargetsScreen(): ReactElement {
                     </li>
                   ))}
                 </ul>
+
+                <Button
+                  variant="secondary"
+                  className="w-full"
+                  aria-expanded={openId === target.id}
+                  onClick={() => toggleDetails(target.id)}
+                >
+                  {openId === target.id ? 'Hide details' : 'Details'}
+                </Button>
+
+                {openId === target.id &&
+                  (details[target.id] ? (
+                    <div className="space-y-4 border-t border-[var(--l)] pt-4">
+                      <TargetDetailCard target={details[target.id]} />
+                      {token && productId && (
+                        <TargetActions
+                          target={details[target.id]}
+                          token={token}
+                          productId={productId}
+                          onUpdated={applyUpdate}
+                          onError={handleError}
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    loadingDetailId === target.id && (
+                      <p className="py-4 text-center text-[var(--m)]">Loading...</p>
+                    )
+                  ))}
               </li>
             ))}
           </ul>

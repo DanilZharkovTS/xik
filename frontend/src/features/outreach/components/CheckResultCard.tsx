@@ -17,6 +17,7 @@ import type {
   TargetDetail,
 } from '../outreach.types'
 import { IdentifierLink } from './IdentifierLink'
+import { TargetActions } from './TargetActions'
 import { TargetDetailCard } from './TargetDetailCard'
 
 const STATUS_STYLES: Record<CheckStatus, { title: string; className: string }> = {
@@ -114,7 +115,15 @@ export function CheckResultCard({
         <>
           <TargetDetailCard target={result.target} />
 
-          {result.status === 'mine' && (
+          <TargetActions
+            target={result.target}
+            token={token}
+            productId={productId}
+            onUpdated={onTarget}
+            onError={onError}
+          />
+
+          {result.target.permissions.canAddIdentifier && (
             <AddIdentifierForm
               targetId={result.target.id}
               token={token}
