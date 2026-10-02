@@ -7,7 +7,7 @@ export const api = () => request(app)
 
 export const resetDb = async () => {
   await prisma.$executeRawUnsafe(
-    `TRUNCATE "AuditEvent", "ProductMembership", "RefreshToken", "UserSession", "UserCredentials", "SavedProduct", "UserLibrary", "Product", "User" RESTART IDENTITY CASCADE`
+    `TRUNCATE "OutreachEvent", "OutreachIdentifier", "OutreachTarget", "AuditEvent", "ProductMembership", "RefreshToken", "UserSession", "UserCredentials", "SavedProduct", "UserLibrary", "Product", "User" RESTART IDENTITY CASCADE`
   )
 }
 
@@ -65,3 +65,14 @@ export const loginOk = async (email: string, password = 'password-123') => {
   }
   return result
 }
+
+export const grant = async (userId: string, productId: string, grantedById: string) => {
+  return prisma.productMembership.create({
+    data: { userId, productId, grantedById },
+  })
+}
+
+export const inProduct = (token: string, productId: string) => ({
+  Authorization: `Bearer ${token}`,
+  'X-Product-Id': productId,
+})

@@ -1,0 +1,69 @@
+import { Router } from 'express'
+import { rateLimit } from 'express-rate-limit'
+import { authMiddleware } from '../auth/auth.middleware.js'
+import { accessMiddleware } from '../access/access.middleware.js'
+import {
+  validateBody,
+  validateParams,
+  validateQuery,
+} from '../../shared/middlewares/helpers.js'
+import { ApiError } from '../../shared/utils/ApiError.js'
+import { targetsController } from './targets.controller.js'
+import {
+  addIdentifierSchema,
+  checkSchema,
+  listTargetsSchema,
+  registerTargetSchema,
+} from './targets.schema.js'
+
+const router = Router()
+
+// Ліміт на користувача (не на IP): перевірка й реєстрація діляться одним лічильником.
+const writeLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: Number(process.env.OUTREACH_RATE_LIMIT ?? 30),
+  keyGenerator: (req) => req.user.id,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  handler: (req, res, next) =>
+    next(ApiError(429, 'RATE_LIMITED', 'Too many requests, try again in a minute')),
+})
+
+// Усе тут працює в межах продукту, який сервер звіряє з членством користувача.
+router.use(authMiddleware.verifyAccess, accessMiddleware.requireProduct)
+
+router.post(
+  '/check',
+  writeLimiter,
+  validateBody(checkSchema),
+  targetsController.check
+)
+
+router.post(
+  '/targets',
+  writeLimiter,
+  validateBody(registerTargetSchema),
+  targetsController.register
+)
+
+router.get(
+  '/targets',
+  validateQuery(listTargetsSchema),
+  targetsController.list
+)
+
+router.get(
+  '/targets/:targetId',
+  validateParams('targetId'),
+  targetsController.get
+)
+
+router.post(
+  '/targets/:targetId/identifiers',
+  writeLimiter,
+  validateParams('targetId'),
+  validateBody(addIdentifierSchema),
+  targetsController.addIdentifier
+)
+
+export default router

@@ -24,6 +24,18 @@ enum UserRole {
   moderator
 }
 
+enum OutreachTargetStatus {
+  active
+  do_not_contact
+}
+
+enum OutreachEventType {
+  first
+  repeat
+  reply
+  publication
+}
+
 enum ProductCategory {
   development
   writing
@@ -85,6 +97,8 @@ model User {
   savedProducts SavedProduct[]
   library UserLibrary[]
   memberships ProductMembership[] @relation("MembershipUser")
+  ownedTargets OutreachTarget[]
+  outreachEvents OutreachEvent[]
   grantedMemberships ProductMembership[] @relation("MembershipGrantedBy")
   revokedMemberships ProductMembership[] @relation("MembershipRevokedBy")
   auditActions AuditEvent[] @relation("AuditActor")
@@ -153,6 +167,9 @@ model Product {
   savedBy SavedProduct[]
   availableTo UserLibrary[] 
   memberships ProductMembership[]
+  outreachTargets OutreachTarget[]
+  outreachIdentifiers OutreachIdentifier[]
+  outreachEvents OutreachEvent[]
 
   @@unique([createdAt, id])
 }
@@ -232,4 +249,71 @@ model AuditEvent {
   @@index([actorUserId, createdAt])
   @@index([targetUserId, createdAt])
   @@index([action, createdAt])
+}
+
+// Журнал звернень. Ціль (людина, компанія, сайт) належить одному продукту й одному
+// власнику; власника змінює лише адмін через передачу цілей.
+model OutreachTarget {
+  id String @id @default(uuid())
+
+  productId String
+  displayName String
+  ownerUserId String
+
+  status OutreachTargetStatus @default(active)
+  statusReason String?
+
+  firstContactedAt DateTime?
+  lastContactedAt DateTime?
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  owner User @relation(fields: [ownerUserId], references: [id])
+  identifiers OutreachIdentifier[]
+  events OutreachEvent[]
+
+  @@index([ownerUserId, lastContactedAt])
+  @@index([productId, lastContactedAt])
+}
+
+// Одна ціль може мати кілька ідентифікаторів (Telegram, e-mail, сайт). Унікальність у межах
+// продукту не дає двом модераторам зайняти те саме.
+model OutreachIdentifier {
+  id String @id @default(uuid())
+
+  targetId String
+  productId String
+  channel String
+  valueNormalized String
+  createdAt DateTime @default(now())
+
+  target OutreachTarget @relation(fields: [targetId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([productId, channel, valueNormalized])
+  @@index([targetId])
+}
+
+// Лише дописування. Вміст повідомлень не зберігається, лише факт, канал і посилання-доказ.
+model OutreachEvent {
+  id String @id @default(uuid())
+
+  productId String
+  targetId String?
+  userId String
+
+  type OutreachEventType
+  channel String?
+  url String?
+  comment String?
+  occurredAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  target OutreachTarget? @relation(fields: [targetId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([targetId, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([productId, type, occurredAt])
 }
