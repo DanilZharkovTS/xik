@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto'
 import { prisma } from '../../shared/database/prisma.js'
 import { productsRepo } from './products.repo.js'
 import { createProductSchema, type CreateProductDto } from './products.schema.js'
-import { productsService } from './products.service.js'
 
 export interface ImportResult {
   created: string[]
@@ -37,6 +36,8 @@ export async function importCatalog(
       }
 
       if (options.useStripe) {
+        // Підвантажуємо лише тут: модуль Stripe падає без ключа, а імпорт без Stripe має працювати.
+        const { productsService } = await import('./products.service.js')
         await productsService.createProduct(data)
       } else {
         await productsRepo.createProduct(randomUUID(), data, null)
