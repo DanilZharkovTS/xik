@@ -1,6 +1,6 @@
 export type AuthStateStatus = 'checking' | 'authenticated' | 'unauthenticated'
 
-export type UserRole = 'user' | 'admin'
+export type UserRole = 'user' | 'admin' | 'moderator'
 
 export interface AuthState {
   status: AuthStateStatus

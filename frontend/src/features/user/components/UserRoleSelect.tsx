@@ -5,6 +5,12 @@ import { userService } from '../user.service'
 import useAuthStore from '../../auth/store'
 import { toast } from 'sonner'
 
+const ROLE_LABELS: Record<UserRole, string> = {
+  admin: 'Admin',
+  moderator: 'Moderator',
+  user: 'User',
+}
+
 export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
   const token = useAuthStore((state) => state.accessToken)
   const currentUserId = useAuthStore((state) => state.user?.id)
@@ -36,7 +42,7 @@ export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
   if (isCurrentUser) {
     return (
       <span className="text-sm text-foreground-muted">
-        {selectedRole === 'admin' ? 'Admin' : 'User'}
+        {ROLE_LABELS[selectedRole]}
       </span>
     )
   }
@@ -47,8 +53,9 @@ export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
       onChange={onChangeRole}
       className="cursor-pointer border-pixel border-border bg-background px-3 py-2 font-mono text-xs uppercase tracking-wider outline-none transition-colors hover:bg-muted focus:border-foreground"
     >
-      <option value="admin">Admin</option>
-      <option value="user">User</option>
+      <option value="admin">{ROLE_LABELS.admin}</option>
+      <option value="moderator">{ROLE_LABELS.moderator}</option>
+      <option value="user">{ROLE_LABELS.user}</option>
     </select>
   )
 }
