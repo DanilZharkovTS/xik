@@ -3,6 +3,7 @@
 A full-stack application organized as a monorepo:
 - **Frontend**: Next.js 16 (React 19, Turbopack, Tailwind CSS)
 - **Backend**: Node.js / Express 5 (TypeScript, Prisma 7)
+- **Notification Service**: Node.js / Express 5 (TypeScript, Resend)
 - **Database**: PostgreSQL 16
 - **Containerization**: Docker & Docker Compose (dedicated `local` and `prod` configurations)
 
@@ -20,6 +21,9 @@ xik-app/
 │   ├── Dockerfile            # Multi-stage Dockerfile (dev / prod targets)
 │   ├── app/                  # Next.js App Router pages and routes
 │   └── src/                  # UI components, services, hooks, stores
+├── notification_service/     # Express 5 email notifications service
+│   ├── Dockerfile            # Multi-stage Dockerfile (dev / prod targets)
+│   └── src/                  # Controllers, routes, email templates
 ├── docker/
 │   └── postgres/data/        # Local PostgreSQL data files (git-ignored)
 ├── docker-compose.local.yml   # Docker Compose for local development
@@ -50,6 +54,7 @@ docker compose -f docker-compose.local.yml up -d --build
 | :--- | :--- | :--- |
 | **Frontend** | [http://localhost:3000](http://localhost:3000) | Next.js web application |
 | **Backend API** | [http://localhost:5001](http://localhost:5001) | Express REST API endpoints |
+| **Notifications** | [http://localhost:3002](http://localhost:3002) | Resend email notification service (internal: `http://notifications:3002`) |
 | **PostgreSQL** | `localhost:5432` | Database (`user: postgres`, `password: 1234`, `db: xik_db`) |
 
 > [!NOTE]

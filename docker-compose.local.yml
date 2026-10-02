@@ -19,6 +19,25 @@ services:
       timeout: 5s
       retries: 5
 
+  notifications:
+    container_name: xik-notifications
+    build:
+      context: ./notification_service
+      dockerfile: Dockerfile
+      target: dev
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./notification_service/.env
+    environment:
+      PORT: 3002
+    volumes:
+      - ./notification_service:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
   backend:
     container_name: xik-backend
     build:
@@ -34,12 +53,15 @@ services:
       PORT: 5001
       DATABASE_URL: "postgresql://postgres:1234@postgres:5432/xik_db"
       FRONTEND_URL: "http://localhost:3000"
+      NOTIFICATIONS_SERVICE_URL: "http://notifications:3002"
     volumes:
       - ./backend:/app
       - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
+      notifications:
+        condition: service_started
     networks:
       - app-network
 
