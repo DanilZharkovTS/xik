@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark light;
+  --bg: #fff;
+  --s: #f5f5f7;
+  --t: #1d1d1f;
+  --m: #6e6e73;
+  --l: #ddd;
+  --g: #ffffffcc;
+  --b: #0071e3;
+
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, Arial, sans-serif;
+  --header-height: 52px;
+
+  --color-background: var(--bg);
+  --color-surface: var(--s);
+  --color-surface-muted: color-mix(in srgb, var(--s) 72%, var(--bg));
+  --color-foreground: var(--t);
+  --color-foreground-muted: var(--m);
+  --color-border: var(--l);
+  --color-border-bright: var(--t);
+  --color-focus: var(--b);
+  --border-width-pixel: 1px;
+  --radius-pixel: 16px;
+  --shadow-pixel: 0 20px 40px rgba(0, 0, 0, 0.08);
+  --shadow-pixel-small: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme='dark'] {
+  --bg: #000;
+  --s: #161617;
+  --t: #f5f5f7;
+  --m: #a1a1a6;
+  --l: #333;
+  --g: #000000cc;
+  --b: #2997ff;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    min-height: 100%;
+    background: var(--color-background);
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--header-height) + 1rem);
+  }
+
+  body {
+    min-height: 100dvh;
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-apple);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 4px;
+  }
+
+  ::selection {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+}
+
+.pixel-button-modern {
+  border-radius: 9999px;
+  text-transform: none;
+  letter-spacing: normal;
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.pixel-button-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.pixel-card-modern {
+  border-radius: 28px;
+  border-width: 1px;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.pixel-card-modern:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.12);
+}
+
+.pixel-heading-modern {
+  text-transform: none;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+}
+
+.pixel-panel-modern {
+  border-radius: 28px;
+  border-width: 1px;
+}
+
+html[data-theme='dark'] .pixel-card-modern:hover {
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+}
+
+/* 3D Orb for Modern Template Cards */
+.card-orb {
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  border-radius: 54px;
+  right: -55px;
+  bottom: -55px;
+  background: linear-gradient(145deg, #ffffff, #dddddd);
+  transform: rotate(-12deg);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  opacity: 0.85;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-theme='dark'] .card-orb {
+  background: linear-gradient(145deg, #2e2e32, #0d0d10);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.55);
+}
+
+.modern-product-card:hover .card-orb {
+  transform: rotate(-6deg) scale(1.08);
+}
+
+@utility pixelated {
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+@utility theme-sensitive-art {
+  filter: var(--theme-art-filter);
+  transition: filter var(--duration-step) var(--ease-step);
+}
+
+@utility duration-step-fast {
+  transition-duration: var(--duration-step-fast);
+}
+
+@utility duration-step {
+  transition-duration: var(--duration-step);
+}
+
+@utility duration-step-slow {
+  transition-duration: var(--duration-step-slow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-delay: -0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,503 @@
+{
+  "sourceReference": "docs/references/homepage/homepage-layout-reference-variant-2-approved.png",
+  "generatedWith": "OpenAI built-in image generation",
+  "backgroundRemoval": "Chroma key converted to alpha",
+  "actionSources": [
+    "docs/references/homepage/generated-masters/developer-actions/primary-random-actions.png",
+    "docs/references/homepage/generated-masters/developer-actions/secondary-random-actions.png",
+    "docs/references/homepage/generated-masters/developer-actions/secondary-laugh.png"
+  ],
+  "palette": [
+    5,
+    17,
+    41,
+    94,
+    189,
+    245
+  ],
+  "sheets": [
+    {
+      "file": "public/sprites/developer/developer-idle.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 28867,
+      "sha256": "0a5e60376dbe91058073ec4acaf399c0d62e152e1cf386adc6b61416166468eb",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 3
+    },
+    {
+      "file": "public/sprites/developer/developer-typing.png",
+      "frameCount": 6,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 1152,
+      "sheetHeight": 192,
+      "bytes": 43919,
+      "sha256": "84efc01765eb97f7e4f2d1c52411dbbab54bb523e88ecf405793836c7f6beadb",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 3
+    },
+    {
+      "file": "public/sprites/developer/developer-mask-blink.png",
+      "frameCount": 3,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 576,
+      "sheetHeight": 192,
+      "bytes": 23062,
+      "sha256": "af6e2ca0f5d59032d8f96a726509918bed77557b3b33e86455b85f45f8f29c21",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 3
+    },
+    {
+      "file": "public/sprites/developer/developer-head-turn.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 29938,
+      "sha256": "ec6b1436d59885f86280136c7a32b37c18b0c809e2f7ed4f8216aa31f9378aa2",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 3
+    },
+    {
+      "file": "public/sprites/developer/developer-activate.png",
+      "frameCount": 6,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 1152,
+      "sheetHeight": 192,
+      "bytes": 44937,
+      "sha256": "2d4df0550460f5c9096089a1ec14ad58a7c75f2caa6942001ff6e32f64dd469f",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 3
+    },
+    {
+      "file": "public/sprites/ai-dino/ai-dino-idle.png",
+      "frameCount": 4,
+      "frameWidth": 256,
+      "frameHeight": 176,
+      "sheetWidth": 1024,
+      "sheetHeight": 176,
+      "bytes": 36009,
+      "sha256": "d711e5df4302fd7cca42a9d820b0179c371dbff2eb624d9245861de39f57de0c",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 37
+    },
+    {
+      "file": "public/sprites/ai-dino/ai-dino-blink.png",
+      "frameCount": 3,
+      "frameWidth": 256,
+      "frameHeight": 176,
+      "sheetWidth": 768,
+      "sheetHeight": 176,
+      "bytes": 28493,
+      "sha256": "b90aeff25ccbb72feeca0bee31218d032d55a68868065c2966ef670a8a66aa78",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 17
+    },
+    {
+      "file": "public/sprites/ai-dino/ai-dino-tail.png",
+      "frameCount": 6,
+      "frameWidth": 256,
+      "frameHeight": 176,
+      "sheetWidth": 1536,
+      "sheetHeight": 176,
+      "bytes": 53397,
+      "sha256": "1103c8481ecdcdbfd1d78c2cc0f93254360d90e3ef8bb31b7165a30b9465434f",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 18
+    },
+    {
+      "file": "public/sprites/ai-dino/ai-dino-scan.png",
+      "frameCount": 6,
+      "frameWidth": 256,
+      "frameHeight": 176,
+      "sheetWidth": 1536,
+      "sheetHeight": 176,
+      "bytes": 52095,
+      "sha256": "51f553b3eecf3e8aaf4c7a76d549a46032aa1a3b4b0012b83d59e3de16a1b3bc",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 12
+    },
+    {
+      "file": "public/sprites/ai-dino/ai-dino-linked.png",
+      "frameCount": 4,
+      "frameWidth": 256,
+      "frameHeight": 176,
+      "sheetWidth": 1024,
+      "sheetHeight": 176,
+      "bytes": 35298,
+      "sha256": "af1b1649bd44a3cd00091e18f58d2151a49af8a81ffdb13b814b5be2d8740202",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 38
+    },
+    {
+      "file": "public/sprites/ai-dino/ai-dino-boosted.png",
+      "frameCount": 6,
+      "frameWidth": 256,
+      "frameHeight": 176,
+      "sheetWidth": 1536,
+      "sheetHeight": 176,
+      "bytes": 57735,
+      "sha256": "2989cec6be0e1cb782b7c318c54bee38e8ad4859e031f770d081638e78b0c248",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 33
+    },
+    {
+      "file": "public/sprites/ai-dino/ai-dino-ready.png",
+      "frameCount": 4,
+      "frameWidth": 256,
+      "frameHeight": 176,
+      "sheetWidth": 1024,
+      "sheetHeight": 176,
+      "bytes": 38250,
+      "sha256": "0c1109efffbcac13724dd68ab89f95361d8e395df489c8e4a5a7602b45d1eaeb",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 30
+    },
+    {
+      "file": "public/sprites/developer/developer-scratch.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 28571,
+      "sha256": "f63ea8d3ba42a344292fd8bb2d6c1865f5563991214ab2e669aad116e8bcbc20",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 10
+    },
+    {
+      "file": "public/sprites/developer/developer-hands-up.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 29456,
+      "sha256": "6836f4b9793f5d1359964bcc6133664613394305193e744638727ef0fd863834",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 7
+    },
+    {
+      "file": "public/sprites/developer/developer-clap.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 27164,
+      "sha256": "84f23c676e76072926100b9dde2d12d6396c0f4d3173fe2548f85a51c5323ff9",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 9
+    },
+    {
+      "file": "public/sprites/developer/developer-laugh.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 28325,
+      "sha256": "8283d7491bfb12f71dd1e781ed63f1dee7cf332573897c3c9027dd9a253cca4e",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 3
+    },
+    {
+      "file": "public/sprites/developer-secondary/secondary-typing.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 30937,
+      "sha256": "a005c8d85b89c5d0f3ab79652ed7cafc66e62660beda3ccab8ad28fa480afc8f",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 4
+    },
+    {
+      "file": "public/sprites/developer-secondary/secondary-scratch.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 31114,
+      "sha256": "2b03fea72c4f94c639c5c8a63ee9aa797792705174b38967b9388de50e05a638",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 5
+    },
+    {
+      "file": "public/sprites/developer-secondary/secondary-hands-up.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 32215,
+      "sha256": "a92b7b37c74b5a793ac2eb2b8cf0fed27c050ad61b5f1563b6b59ab9b4f3ea07",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 7
+    },
+    {
+      "file": "public/sprites/developer-secondary/secondary-clap.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 26776,
+      "sha256": "3eb1c68167221a75d38542634efca3cb4e0c77af29af1560cfdb08d66ea89fc5",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 15
+    },
+    {
+      "file": "public/sprites/developer-secondary/secondary-laugh.png",
+      "frameCount": 4,
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "sheetWidth": 768,
+      "sheetHeight": 192,
+      "bytes": 33458,
+      "sha256": "667a9d9fb043faeeb110e411088d0cbabb2634a8c9fcf0385cfdbe8a311c392e",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "grayscaleValues": [
+        5,
+        17,
+        41,
+        94,
+        189,
+        245
+      ],
+      "minimumHorizontalAlphaMargin": 3
+    }
+  ]
+}

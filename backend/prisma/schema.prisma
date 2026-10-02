@@ -1,0 +1,184 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Test {
+  id Int @id @default(autoincrement())
+  content String @db.VarChar(10)
+}
+//enums
+
+enum UserRole {
+  user
+  admin
+}
+
+enum ProductCategory {
+  development
+  writing
+  design
+  productivity
+  education
+  business
+  marketing
+  finance
+  research
+  analytics
+  communication
+  automation
+  imageGeneration
+  videoGeneration
+  audio
+  translation
+  socialMedia
+  sales
+  legal
+  cybersecurity
+  dataScience
+  lifestyle
+}
+
+enum ProductCurrency {
+  USD
+  EUR
+  GBP
+  CAD
+  AUD
+  JPY
+  CHF
+  CNY
+  UAH
+}
+
+enum ProductBillingPeriod {
+  week
+  month
+  year
+}
+
+//models
+
+model User {
+  id String @id @default(uuid())
+
+  email String @unique
+  name String @db.VarChar(50)
+
+  role UserRole @default(user)
+
+  createdAt DateTime @default(now())
+
+  credentials UserCredentials?
+  sessions UserSession[]
+  savedProducts SavedProduct[]
+  library UserLibrary[]
+
+  @@unique([createdAt,id])
+}
+
+model UserCredentials {
+  id String @id @default(uuid())
+
+  userId String @unique
+  passwordHash String
+  passwordUpdatedAt DateTime @default(now())
+
+  user User @relation(fields: [userId],references: [id])
+}
+
+model UserSession {
+  id String @id @default(uuid())
+
+  userId String
+
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id String @id @default(uuid())
+
+  sessionId String
+
+  tokenHash String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  session UserSession @relation(fields: [sessionId], references: [id])
+}
+
+model Product {
+  id String @id @default(uuid())
+
+  stripeProductId String?
+  stripePriceId String?
+
+  slug String @unique
+  name String
+  shortDescription String @db.VarChar(160)
+  description String
+  categories ProductCategory[]
+  features String[]
+
+  price Decimal
+  currency ProductCurrency
+  billingPeriod ProductBillingPeriod
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  savedBy SavedProduct[]
+  availableTo UserLibrary[] 
+
+  @@unique([createdAt, id])
+}
+
+model SavedProduct {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@unique([createdAt, id])
+  @@index([userId])
+  @@index([productId])
+}
+
+model UserLibrary {
+  id String @id @default(uuid())
+
+  userId String 
+  productId String
+  subscriptionId String?
+  stripeSubscriptionId String?
+
+  accessExpiresAt DateTime?
+  canceledAt DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([stripeSubscriptionId])
+  @@unique([subscriptionId])
+}
