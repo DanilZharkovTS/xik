@@ -29,6 +29,8 @@ interface EventRow {
   url: string | null
   comment: string | null
   occurredAt: Date
+  templateVersion: number | null
+  template: { id: string; title: string } | null
   user: { name: string }
 }
 
@@ -40,6 +42,13 @@ export const toEventDto = (row: EventRow) => ({
   comment: row.comment,
   occurredAt: row.occurredAt,
   author: row.user.name,
+  template: row.template
+    ? {
+        id: row.template.id,
+        title: row.template.title,
+        version: row.templateVersion,
+      }
+    : null,
 })
 
 interface TargetBase {

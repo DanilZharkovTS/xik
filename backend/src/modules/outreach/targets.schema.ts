@@ -11,6 +11,7 @@ export const registerTargetSchema = checkSchema.extend({
   displayName: z.string().trim().max(100).optional(),
   url: z.url({ protocol: /^https?$/ }).max(2048).optional(),
   comment: z.string().trim().max(1000).optional(),
+  templateId: z.string().min(1).optional(),
 })
 
 export const addIdentifierSchema = checkSchema

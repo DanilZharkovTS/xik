@@ -43,3 +43,13 @@ Normalization lives in `src/modules/outreach/normalizers.ts` (one function per c
 - `POST /targets/:id/do-not-contact` (owner or admin) and `POST /targets/:id/release` (admin only). Status changes lock the target row (`SELECT ... FOR UPDATE`), write a `status` event into the history and an `AuditEvent`. A repeat to a `do_not_contact` target is rejected with `409 DO_NOT_CONTACT`; a reply can still be logged.
 - Target responses carry a server-computed `permissions` object (`canRepeat`, `canReply`, `canAddIdentifier`, `canMarkDoNotContact`, `canRelease`) and `isMine`, so the UI never guesses rights from the role.
 - `POST /publications` `{ channel, kind: post | ad | article | link_in_offer, url, comment?, occurredAt? }` records a publication without a target. Duplicates are rejected by a partial unique index on the normalized URL (tracking params, `www.`, hash and trailing slash are ignored; path case is kept). `GET /publications`: moderators see their own, admins all.
+
+## Outreach ledger: templates (stage 4)
+
+Product-scoped text templates for copying (`/api/outreach/templates`).
+
+- A template has a channel (a ledger channel or `any`), a title, an optional subject (email and `any` only), a body and a `version`. Allowed variables: `{{name}}`, `{{product_name}}`, `{{product_link}}`, `{{manager_name}}`; anything else is rejected so typos never reach a recipient.
+- Rights (variant A): everyone in the product sees and copies active templates; only the owner or an admin edits, archives (soft delete) or restores; others duplicate a template and edit the copy. Only an admin can delete permanently, and only if no journal event used it (`409 TEMPLATE_IN_USE`, archive instead). Archived templates are visible to the owner and admins only.
+- Every content change bumps `version`; `PATCH` needs `expectedVersion` (`409 STALE_VERSION` returns the latest template).
+- Events (`POST /targets`, `POST /targets/:id/events`) accept an optional `templateId`; the server stores the template and its current version on the event. Only the version number is kept, not the old text.
+- Login and refresh responses now include the user's `name` (used for `{{manager_name}}`).

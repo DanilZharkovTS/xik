@@ -56,6 +56,7 @@ export const authService = {
         user: {
           id: user.id,
           email: user.email,
+          name: user.name,
           role: user.role,
           sessionId: session.id,
         },
@@ -100,6 +101,7 @@ export const authService = {
         user: {
           id: user.id,
           email: user.email,
+          name: user.name,
           role: user.role,
           sessionId: session.id,
         },

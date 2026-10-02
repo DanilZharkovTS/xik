@@ -3,6 +3,7 @@ import { ApiError } from '../../shared/utils/ApiError.js'
 import type { TokenPayload } from '../auth/auth.types.js'
 import { auditRepo } from '../audit/audit.repo.js'
 import { toDetailDto } from './targets.mapper.js'
+import { templatesService } from './templates.service.js'
 import {
   canMarkDoNotContact,
   canRelease,
@@ -47,6 +48,8 @@ export const eventsService = {
     targetId: string,
     dto: AddEventDto
   ) => {
+    const template = await templatesService.resolveForEvent(productId, dto.templateId)
+
     await prisma.$transaction(async (tx) => {
       const target = await lockOrThrow(actor, productId, targetId, tx)
 
@@ -70,6 +73,7 @@ export const eventsService = {
           channel: dto.channel,
           url: dto.url,
           comment: dto.comment,
+          ...template,
           occurredAt,
         },
         tx

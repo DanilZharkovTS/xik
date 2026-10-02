@@ -21,6 +21,7 @@ export const addEventSchema = z.object({
   channel: z.enum(CHANNELS).optional(),
   url: httpUrl.optional(),
   comment: z.string().trim().max(1000).optional(),
+  templateId: z.string().min(1).optional(),
   occurredAt,
 })
 

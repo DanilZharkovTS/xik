@@ -10,7 +10,10 @@ const detailInclude = {
   events: {
     orderBy: { occurredAt: 'desc' as const },
     take: EVENTS_LIMIT,
-    include: { user: { select: { name: true } } },
+    include: {
+      user: { select: { name: true } },
+      template: { select: { id: true, title: true } },
+    },
   },
 }
 
@@ -85,6 +88,8 @@ export const targetsRepo = {
       channel?: Channel
       url?: string
       comment?: string
+      templateId?: string
+      templateVersion?: number
       occurredAt: Date
     },
     db: DbClient = prisma

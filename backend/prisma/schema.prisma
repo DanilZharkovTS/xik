@@ -37,6 +37,11 @@ enum OutreachEventType {
   status
 }
 
+enum OutreachTemplateStatus {
+  active
+  archived
+}
+
 enum OutreachPublicationKind {
   post
   ad
@@ -106,6 +111,7 @@ model User {
   library UserLibrary[]
   memberships ProductMembership[] @relation("MembershipUser")
   ownedTargets OutreachTarget[]
+  outreachTemplates OutreachTemplate[]
   outreachEvents OutreachEvent[]
   grantedMemberships ProductMembership[] @relation("MembershipGrantedBy")
   revokedMemberships ProductMembership[] @relation("MembershipRevokedBy")
@@ -178,6 +184,7 @@ model Product {
   outreachTargets OutreachTarget[]
   outreachIdentifiers OutreachIdentifier[]
   outreachEvents OutreachEvent[]
+  outreachTemplates OutreachTemplate[]
 
   @@unique([createdAt, id])
 }
@@ -316,6 +323,9 @@ model OutreachEvent {
   // Лише для публікацій: нормалізований URL, за яким вони не дублюються в межах продукту.
   urlNormalized String?
   publicationKind OutreachPublicationKind?
+  // Який шаблон використано й у якій версії: сам текст версії не зберігається.
+  templateId String?
+  templateVersion Int?
   comment String?
   occurredAt DateTime @default(now())
   createdAt DateTime @default(now())
@@ -323,8 +333,37 @@ model OutreachEvent {
   product Product @relation(fields: [productId], references: [id])
   target OutreachTarget? @relation(fields: [targetId], references: [id])
   user User @relation(fields: [userId], references: [id])
+  template OutreachTemplate? @relation(fields: [templateId], references: [id], onDelete: Restrict)
 
+  @@index([templateId])
   @@index([targetId, occurredAt])
   @@index([userId, occurredAt])
   @@index([productId, type, occurredAt])
+}
+
+// Заготовка тексту для копіювання. Channel це канал із журналу або 'any' для універсального.
+// Редагує власник або адмін; кожна зміна змісту збільшує version.
+model OutreachTemplate {
+  id String @id @default(uuid())
+
+  productId String
+  ownerUserId String
+
+  channel String
+  title String
+  subject String?
+  body String
+  version Int @default(1)
+
+  status OutreachTemplateStatus @default(active)
+  archivedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id])
+  owner User @relation(fields: [ownerUserId], references: [id])
+  events OutreachEvent[]
+
+  @@index([productId, status, channel])
+  @@index([ownerUserId])
 }

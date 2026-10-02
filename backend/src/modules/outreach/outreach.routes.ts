@@ -16,6 +16,12 @@ import {
   listPublicationsSchema,
 } from './events.schema.js'
 import { targetsController } from './targets.controller.js'
+import { templatesController } from './templates.controller.js'
+import {
+  createTemplateSchema,
+  listTemplatesSchema,
+  updateTemplateSchema,
+} from './templates.schema.js'
 import {
   addIdentifierSchema,
   checkSchema,
@@ -105,6 +111,57 @@ router.get(
   '/publications',
   validateQuery(listPublicationsSchema),
   eventsController.listPublications
+)
+
+router.get(
+  '/templates',
+  validateQuery(listTemplatesSchema),
+  templatesController.list
+)
+
+router.post(
+  '/templates',
+  validateBody(createTemplateSchema),
+  templatesController.create
+)
+
+router.get(
+  '/templates/:templateId',
+  validateParams('templateId'),
+  templatesController.get
+)
+
+router.patch(
+  '/templates/:templateId',
+  validateParams('templateId'),
+  validateBody(updateTemplateSchema),
+  templatesController.update
+)
+
+router.post(
+  '/templates/:templateId/archive',
+  validateParams('templateId'),
+  templatesController.archive
+)
+
+router.post(
+  '/templates/:templateId/restore',
+  validateParams('templateId'),
+  templatesController.restore
+)
+
+router.post(
+  '/templates/:templateId/duplicate',
+  validateParams('templateId'),
+  templatesController.duplicate
+)
+
+// Остаточно видаляє лише адмін.
+router.delete(
+  '/templates/:templateId',
+  authMiddleware.requiresRole('admin'),
+  validateParams('templateId'),
+  templatesController.remove
 )
 
 export default router

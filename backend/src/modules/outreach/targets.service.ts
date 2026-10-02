@@ -5,6 +5,7 @@ import { parseIdentifier, type NormalizedIdentifier } from './normalizers.js'
 import { canModify, canViewDetails, isOwner } from './targets.policy.js'
 import { toDetailDto, toForeignDto, toListItemDto } from './targets.mapper.js'
 import { targetsRepo } from './targets.repo.js'
+import { templatesService } from './templates.service.js'
 import type {
   AddIdentifierDto,
   CheckDto,
@@ -76,6 +77,7 @@ export const targetsService = {
     dto: RegisterTargetDto
   ) => {
     const normalized = parseOrThrow(dto)
+    const template = await templatesService.resolveForEvent(productId, dto.templateId)
     const now = new Date()
 
     try {
@@ -111,6 +113,7 @@ export const targetsService = {
             channel: normalized.channel,
             url: dto.url,
             comment: dto.comment,
+            ...template,
             occurredAt: now,
           },
           tx
