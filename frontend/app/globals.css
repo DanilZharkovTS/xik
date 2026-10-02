@@ -183,3 +183,49 @@ html[data-theme='dark'] .card-orb {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Колір графіків (палітра пройшла validate_palette.js для обох тем). Світла тема за замовчуванням;
+   темна обирається і системою, і перемикачем сайту. */
+.viz-root {
+  --viz-surface: #fcfcfb;
+  --viz-text: #0b0b0b;
+  --viz-text-2: #52514e;
+  --viz-muted: #898781;
+  --viz-grid: #e1e0d9;
+  --viz-axis: #c3c2b7;
+  --viz-s1: #2a78d6;
+  --viz-s2: #eb6834;
+  --viz-s3: #1baf7a;
+  --viz-s4: #eda100;
+  --viz-seq: #2a78d6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) .viz-root {
+    --viz-surface: #1a1a19;
+    --viz-text: #ffffff;
+    --viz-text-2: #c3c2b7;
+    --viz-muted: #898781;
+    --viz-grid: #2c2c2a;
+    --viz-axis: #383835;
+    --viz-s1: #3987e5;
+    --viz-s2: #d95926;
+    --viz-s3: #199e70;
+    --viz-s4: #c98500;
+    --viz-seq: #3987e5;
+  }
+}
+
+:root[data-theme='dark'] .viz-root {
+  --viz-surface: #1a1a19;
+  --viz-text: #ffffff;
+  --viz-text-2: #c3c2b7;
+  --viz-muted: #898781;
+  --viz-grid: #2c2c2a;
+  --viz-axis: #383835;
+  --viz-s1: #3987e5;
+  --viz-s2: #d95926;
+  --viz-s3: #199e70;
+  --viz-s4: #c98500;
+  --viz-seq: #3987e5;
+}

@@ -9,6 +9,7 @@ type ModeratorCardProps = {
   isBusy: boolean
   onProducts: () => void
   onPassword: () => void
+  onTransfer: () => void
   onToggleActive: () => void
 }
 
@@ -19,6 +20,7 @@ export function ModeratorCard({
   isBusy,
   onProducts,
   onPassword,
+  onTransfer,
   onToggleActive,
 }: ModeratorCardProps): ReactElement {
   const isActive = moderator.deactivatedAt === null
@@ -71,7 +73,7 @@ export function ModeratorCard({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <Button
           className={ACTION_CLASS}
           disabled={isBusy}
@@ -87,6 +89,15 @@ export function ModeratorCard({
           onClick={onPassword}
         >
           Password
+        </Button>
+
+        <Button
+          variant="secondary"
+          className={ACTION_CLASS}
+          disabled={isBusy}
+          onClick={onTransfer}
+        >
+          Transfer targets
         </Button>
 
         <Button

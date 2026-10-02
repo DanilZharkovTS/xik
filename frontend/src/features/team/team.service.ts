@@ -1,8 +1,10 @@
 import { api } from '@/src/shared/api/axios'
+import type { TargetListItem } from '@/src/features/outreach/outreach.types'
 import type {
   CreateModeratorInput,
   Moderator,
   TeamProduct,
+  TransferInput,
 } from './team.types'
 
 const withToken = (token: string) => ({
@@ -61,5 +63,22 @@ export const teamService = {
       withToken(token),
     )
     return res.data
+  },
+  // Цілі, якими користувач володіє в продукті (цілі колишнього учасника теж лишаються за ним).
+  listOwnedTargets: async (
+    token: string,
+    productId: string,
+    ownerId: string,
+    lastId?: string,
+  ): Promise<{ targets: TargetListItem[]; nextCursor: string | null }> => {
+    const res = await api.get('/team/targets', {
+      ...withToken(token),
+      params: { productId, ownerId, lastId },
+    })
+    return res.data
+  },
+  transferTargets: async (input: TransferInput, token: string): Promise<number> => {
+    const res = await api.post('/team/transfer-targets', input, withToken(token))
+    return res.data.transferred
   },
 }

@@ -13,6 +13,7 @@ import { CreateModeratorSheet } from './CreateModeratorSheet'
 import { ModeratorCard } from './ModeratorCard'
 import { ProductsSheet } from './ProductsSheet'
 import { ResetPasswordSheet } from './ResetPasswordSheet'
+import { TransferTargetsSheet } from './TransferTargetsSheet'
 
 interface TeamData {
   moderators: Moderator[]
@@ -39,6 +40,7 @@ export function TeamScreen(): ReactElement {
   const [isCreating, setIsCreating] = useState(false)
   const [productsFor, setProductsFor] = useState<string | null>(null)
   const [passwordFor, setPasswordFor] = useState<string | null>(null)
+  const [transferFor, setTransferFor] = useState<string | null>(null)
 
   const applyTeam = useCallback((team: TeamData) => {
     setModerators(team.moderators)
@@ -150,6 +152,7 @@ export function TeamScreen(): ReactElement {
               isBusy={busyId === moderator.id}
               onProducts={() => setProductsFor(moderator.id)}
               onPassword={() => setPasswordFor(moderator.id)}
+              onTransfer={() => setTransferFor(moderator.id)}
               onToggleActive={() => toggleActive(moderator)}
             />
           ))}
@@ -182,6 +185,15 @@ export function TeamScreen(): ReactElement {
             token={token}
             onClose={() => setProductsFor(null)}
             onChanged={reload}
+          />
+
+          <TransferTargetsSheet
+            source={findModerator(transferFor)}
+            moderators={moderators}
+            products={products}
+            token={token}
+            onClose={() => setTransferFor(null)}
+            onDone={reload}
           />
 
           <ResetPasswordSheet

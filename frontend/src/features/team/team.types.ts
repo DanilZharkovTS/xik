@@ -18,3 +18,11 @@ export interface CreateModeratorInput {
   name: string
   password: string
 }
+
+export interface TransferInput {
+  productId: string
+  fromUserId: string
+  toUserId: string
+  // Без targetIds переносяться всі цілі джерела в цьому продукті.
+  targetIds?: string[]
+}

@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import type { ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FileText, ListChecks, Megaphone, Search } from 'lucide-react'
+import { BarChart3, FileText, ListChecks, Megaphone, Search } from 'lucide-react'
 
 import useAuthStore from '@/src/features/auth/store'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { href: '/outreach/targets', label: 'My targets', Icon: ListChecks },
   { href: '/outreach/publications', label: 'Publications', Icon: Megaphone },
   { href: '/outreach/templates', label: 'Templates', Icon: FileText },
+  { href: '/outreach/reports', label: 'Reports', Icon: BarChart3 },
 ]
 
 export function OutreachShell({ children }: { children: ReactNode }): ReactElement {
@@ -63,7 +64,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
               href={href}
               aria-current={pathname === href ? 'page' : undefined}
               className={cn(
-                'inline-flex min-h-11 items-center rounded-full px-4 text-base font-medium',
+                'inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-4 text-base font-medium',
                 pathname === href
                   ? 'bg-[var(--t)] text-[var(--bg)]'
                   : 'text-[var(--m)] hover:text-[var(--t)]',
@@ -94,7 +95,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
 
       <nav
         aria-label="Journal"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[var(--l)] bg-[var(--bg)] pb-[env(safe-area-inset-bottom)] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-[var(--l)] bg-[var(--bg)] pb-[env(safe-area-inset-bottom)] md:hidden"
       >
         {NAV_ITEMS.map(({ href, label, Icon }) => (
           <Link
