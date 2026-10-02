@@ -24,3 +24,15 @@ Tests run against a real Postgres (not SQLite). Point `TEST_DATABASE_URL` at an 
 ```bash
 npm test
 ```
+
+## Outreach ledger: check and first contact (stage 2)
+
+All routes live under `/api/outreach`, need a token and the `X-Product-Id` header (see `requireProduct`).
+
+- `POST /check` `{ value, channel? }`: recognizes the channel, normalizes the value and returns `free`, `mine`, `foreign` or `do_not_contact`. A foreign target exposes only the owner name and the first-contact date; history and identifiers are for the owner and admins.
+- `POST /targets`: registers the first contact atomically (`INSERT ... ON CONFLICT DO NOTHING` in a transaction). The loser of a race gets `409 ALREADY_REGISTERED` with the owner.
+- `POST /targets/:id/identifiers`: adds another channel to your own target.
+- `GET /targets`, `GET /targets/:id`: moderators see only their targets, admins all.
+- Check, register and add-identifier share a per-user limit of 30 requests per minute (`OUTREACH_RATE_LIMIT`).
+
+Normalization lives in `src/modules/outreach/normalizers.ts` (one function per channel, table-driven tests in `tests/normalizers.test.ts`). Websites match by registrable domain (`blog.company.com` is `company.com`); platforms like `github.com` or `medium.com` match by path, and `*.substack.com` by subdomain.

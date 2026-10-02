@@ -23,6 +23,15 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
     if (pathname.startsWith('/admin') && user?.role !== 'admin') {
       router.replace('/dashboard')
     }
+
+    // Журнал для модераторів і адмінів; покупець магазину туди не потрапляє.
+    if (
+      pathname.startsWith('/outreach') &&
+      user?.role !== 'admin' &&
+      user?.role !== 'moderator'
+    ) {
+      router.replace('/dashboard')
+    }
   }, [pathname, user, router, status])
 
   const isHome = pathname === '/'

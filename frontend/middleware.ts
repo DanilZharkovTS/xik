@@ -7,6 +7,7 @@ const AUTH_ROUTES = [
 
 const PROTECTED_ROUTES = [
   '/dashboard',
+  '/outreach',
 ]
 
 export function middleware(request: NextRequest) {
@@ -42,6 +43,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
+    '/outreach/:path*',
     '/auth/:path*',
   ],
 }
