@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '../../generated/prisma/client.js'
+import { Prisma, PrismaClient } from '../../generated/prisma/client.js'
 
 const connectionString = `${process.env.DATABASE_URL}`;
 
@@ -9,3 +9,6 @@ const adapter = new PrismaPg({
 })
 
 export const prisma = new PrismaClient({ adapter })
+
+// Клієнт або транзакція: репозиторії приймають `tx`, щоб кілька записів були атомарними.
+export type DbClient = Prisma.TransactionClient

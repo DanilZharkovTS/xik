@@ -21,6 +21,32 @@ model Test {
 enum UserRole {
   user
   admin
+  moderator
+}
+
+enum OutreachTargetStatus {
+  active
+  do_not_contact
+}
+
+enum OutreachEventType {
+  first
+  repeat
+  reply
+  publication
+  status
+}
+
+enum OutreachTemplateStatus {
+  active
+  archived
+}
+
+enum OutreachPublicationKind {
+  post
+  ad
+  article
+  link_in_offer
 }
 
 enum ProductCategory {
@@ -46,6 +72,19 @@ enum ProductCategory {
   cybersecurity
   dataScience
   lifestyle
+}
+
+// Продукт і агент це один тип: kind лише вирішує, в якому блоці сайту його показати.
+enum ProductKind {
+  product
+  agent
+}
+
+enum ProductStatus {
+  production
+  active
+  beta
+  build
 }
 
 enum ProductCurrency {
@@ -77,11 +116,20 @@ model User {
   role UserRole @default(user)
 
   createdAt DateTime @default(now())
+  deactivatedAt DateTime?
 
   credentials UserCredentials?
   sessions UserSession[]
   savedProducts SavedProduct[]
   library UserLibrary[]
+  memberships ProductMembership[] @relation("MembershipUser")
+  ownedTargets OutreachTarget[]
+  outreachTemplates OutreachTemplate[]
+  outreachEvents OutreachEvent[]
+  grantedMemberships ProductMembership[] @relation("MembershipGrantedBy")
+  revokedMemberships ProductMembership[] @relation("MembershipRevokedBy")
+  auditActions AuditEvent[] @relation("AuditActor")
+  auditTargets AuditEvent[] @relation("AuditTarget")
 
   @@unique([createdAt,id])
 }
@@ -126,8 +174,9 @@ model RefreshToken {
 model Product {
   id String @id @default(uuid())
 
-  stripeProductId String?
-  stripePriceId String?
+  // Звʼязок зі Stripe 1 до 1: один продукт, один Stripe-продукт, одна актуальна ціна.
+  stripeProductId String? @unique
+  stripePriceId String? @unique
 
   slug String @unique
   name String
@@ -136,17 +185,40 @@ model Product {
   categories ProductCategory[]
   features String[]
 
+  kind ProductKind @default(product)
+  status ProductStatus @default(active)
+  categoryLabel String?
+  tagline String?
+  highlights String[]
+  capabilities Json @default("[]")
+  architecture Json?
+  protocols String[]
+  demoUrl String?
+  sortOrder Int @default(0)
+
+  // Ціна є завжди (вона йде в Stripe); showPrice лише вирішує, чи показувати її на сторінці,
+  // чи користувач побачить її тільки на оплаті.
   price Decimal
   currency ProductCurrency
   billingPeriod ProductBillingPeriod
+  showPrice Boolean @default(true)
+
+  // Видалення це архівування: історія, журнал і Stripe-привʼязка не втрачаються.
+  archivedAt DateTime?
 
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 
   savedBy SavedProduct[]
   availableTo UserLibrary[] 
+  memberships ProductMembership[]
+  outreachTargets OutreachTarget[]
+  outreachIdentifiers OutreachIdentifier[]
+  outreachEvents OutreachEvent[]
+  outreachTemplates OutreachTemplate[]
 
   @@unique([createdAt, id])
+  @@index([kind, archivedAt, sortOrder])
 }
 
 model SavedProduct {
@@ -181,4 +253,149 @@ model UserLibrary {
 
   @@unique([stripeSubscriptionId])
   @@unique([subscriptionId])
+}
+
+// Робочий доступ модератора до продукту (журнал звернень).
+// Активним вважається запис з revokedAt = null; унікальність активної пари
+// (userId, productId) забезпечує частковий індекс у міграції.
+model ProductMembership {
+  id String @id @default(uuid())
+
+  userId String
+  productId String
+
+  grantedById String
+  grantedAt DateTime @default(now())
+  revokedById String?
+  revokedAt DateTime?
+
+  user User @relation("MembershipUser", fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  grantedBy User @relation("MembershipGrantedBy", fields: [grantedById], references: [id])
+  revokedBy User? @relation("MembershipRevokedBy", fields: [revokedById], references: [id])
+
+  @@index([userId])
+  @@index([productId])
+}
+
+// Журнал дій адміністраторів. Секрети (паролі, токени) сюди не потрапляють.
+model AuditEvent {
+  id String @id @default(uuid())
+
+  actorUserId String
+  action String
+  targetUserId String?
+  productId String?
+  meta Json?
+
+  createdAt DateTime @default(now())
+
+  actor User @relation("AuditActor", fields: [actorUserId], references: [id])
+  target User? @relation("AuditTarget", fields: [targetUserId], references: [id])
+
+  @@index([actorUserId, createdAt])
+  @@index([targetUserId, createdAt])
+  @@index([action, createdAt])
+}
+
+// Журнал звернень. Ціль (людина, компанія, сайт) належить одному продукту й одному
+// власнику; власника змінює лише адмін через передачу цілей.
+model OutreachTarget {
+  id String @id @default(uuid())
+
+  productId String
+  displayName String
+  ownerUserId String
+
+  status OutreachTargetStatus @default(active)
+  statusReason String?
+
+  firstContactedAt DateTime?
+  lastContactedAt DateTime?
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  owner User @relation(fields: [ownerUserId], references: [id])
+  identifiers OutreachIdentifier[]
+  events OutreachEvent[]
+
+  @@index([ownerUserId, lastContactedAt])
+  @@index([productId, lastContactedAt])
+}
+
+// Одна ціль може мати кілька ідентифікаторів (Telegram, e-mail, сайт). Унікальність у межах
+// продукту не дає двом модераторам зайняти те саме.
+model OutreachIdentifier {
+  id String @id @default(uuid())
+
+  targetId String
+  productId String
+  channel String
+  valueNormalized String
+  createdAt DateTime @default(now())
+
+  target OutreachTarget @relation(fields: [targetId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([productId, channel, valueNormalized])
+  @@index([targetId])
+}
+
+// Лише дописування. Вміст повідомлень не зберігається, лише факт, канал і посилання-доказ.
+model OutreachEvent {
+  id String @id @default(uuid())
+
+  productId String
+  targetId String?
+  userId String
+
+  type OutreachEventType
+  channel String?
+  url String?
+  // Лише для публікацій: нормалізований URL, за яким вони не дублюються в межах продукту.
+  urlNormalized String?
+  publicationKind OutreachPublicationKind?
+  // Який шаблон використано й у якій версії: сам текст версії не зберігається.
+  templateId String?
+  templateVersion Int?
+  comment String?
+  occurredAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  target OutreachTarget? @relation(fields: [targetId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  template OutreachTemplate? @relation(fields: [templateId], references: [id], onDelete: Restrict)
+
+  @@index([templateId])
+  @@index([targetId, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([productId, type, occurredAt])
+}
+
+// Заготовка тексту для копіювання. Channel це канал із журналу або 'any' для універсального.
+// Редагує власник або адмін; кожна зміна змісту збільшує version.
+model OutreachTemplate {
+  id String @id @default(uuid())
+
+  productId String
+  ownerUserId String
+
+  channel String
+  title String
+  subject String?
+  body String
+  version Int @default(1)
+
+  status OutreachTemplateStatus @default(active)
+  archivedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id])
+  owner User @relation(fields: [ownerUserId], references: [id])
+  events OutreachEvent[]
+
+  @@index([productId, status, channel])
+  @@index([ownerUserId])
 }

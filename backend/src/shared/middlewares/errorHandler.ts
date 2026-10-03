@@ -3,13 +3,25 @@ import { ZodError } from 'zod'
 import { Prisma } from '../../generated/prisma/client.js'
 import { isApiError } from '../utils/ApiError.js'
 
+// Помилки Prisma можуть містити вхідні дані запиту, зокрема хеші паролів: у лог їх не пишемо.
+export const redact = (err: unknown): unknown => {
+  if (!(err instanceof Error)) return err
+
+  const clean = new Error(
+    err.message.replace(/(passwordHash|password|tokenHash)(["']?\s*[:=]\s*)(["'])[^"']*\3/gi, '$1$2$3[redacted]$3')
+  )
+  clean.name = err.name
+  clean.stack = err.stack?.replace(err.message, clean.message)
+  return clean
+}
+
 export const errorHandler = (
   err: unknown,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  console.error(err)
+  console.error(redact(err))
   
   if (isApiError(err)) {
     return res.status(err.status).json({
@@ -57,7 +69,7 @@ export const errorHandler = (
         })
 
       default:
-        console.error(err)
+        console.error(redact(err))
 
         return res.status(500).json({
           error: 'Database error',
@@ -66,14 +78,14 @@ export const errorHandler = (
   }
 
   if (err instanceof Prisma.PrismaClientValidationError) {
-    console.error(err)
+    console.error(redact(err))
 
     return res.status(500).json({
       error: 'Database query validation error',
     })
   }
 
-  console.error(err)
+  console.error(redact(err))
 
   return res.status(500).json({
     error: 'Something broke!',

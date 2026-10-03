@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { siteConfig } from '../../src/config/site'
-import { PRODUCTS } from '../../src/features/products/data/products'
+import { PRODUCTS } from '../support/catalog'
 
 const STATIC_METADATA = [
   {

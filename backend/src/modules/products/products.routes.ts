@@ -7,6 +7,8 @@ import {
   validateQuery,
 } from '../../shared/middlewares/helpers.js'
 import {
+  adminListSchema,
+  catalogQuerySchema,
   createProductSchema,
   findProductsSchema,
   updateProductSchema,
@@ -22,6 +24,22 @@ router.post(
   authMiddleware.requiresRole('admin'),
   validateBody(createProductSchema),
   productsController.createProduct
+)
+
+// Блоки сайту: продукти й агенти, без пагінації.
+router.get(
+  '/catalog',
+  validateQuery(catalogQuerySchema),
+  productsController.listCatalog
+)
+
+// Адмін-список разом із архівними й Stripe-привʼязкою.
+router.get(
+  '/admin',
+  authMiddleware.verifyAccess,
+  authMiddleware.requiresRole('admin'),
+  validateQuery(adminListSchema),
+  productsController.listForAdmin
 )
 
 router.get(
@@ -61,12 +79,29 @@ router.patch(
   productsController.updateProduct
 )
 
+// Видалення це архівування; остаточно продукти не видаляються.
 router.delete(
   '/:productId',
   authMiddleware.verifyAccess,
   authMiddleware.requiresRole('admin'),
   validateParams('productId'),
-  productsController.deleteProduct
+  productsController.archiveProduct
+)
+
+router.post(
+  '/:productId/restore',
+  authMiddleware.verifyAccess,
+  authMiddleware.requiresRole('admin'),
+  validateParams('productId'),
+  productsController.restoreProduct
+)
+
+router.post(
+  '/:productId/stripe-sync',
+  authMiddleware.verifyAccess,
+  authMiddleware.requiresRole('admin'),
+  validateParams('productId'),
+  productsController.syncWithStripe
 )
 
 export default router

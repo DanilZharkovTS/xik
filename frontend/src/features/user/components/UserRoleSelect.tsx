@@ -1,9 +1,24 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { useState } from 'react'
 
 import { UserRole, UserRoleSelectProps } from '../user.types'
 import { userService } from '../user.service'
 import useAuthStore from '../../auth/store'
 import { toast } from 'sonner'
+
+import { Picker } from '@/src/shared/ui/picker'
+
+import { getErrorMessage } from '@/src/shared/api/get-error-message'
+
+const ROLE_LABELS: Record<UserRole, string> = {
+  admin: 'Admin',
+  moderator: 'Moderator',
+  user: 'User',
+}
+
+const ROLE_OPTIONS = (Object.keys(ROLE_LABELS) as UserRole[]).map((role) => ({
+  value: role,
+  label: ROLE_LABELS[role],
+}))
 
 export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
   const token = useAuthStore((state) => state.accessToken)
@@ -13,10 +28,8 @@ export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
 
   const isCurrentUser = currentUserId === user.id
 
-  const onChangeRole = async (e: ChangeEvent<HTMLSelectElement>) => {
+  const onChangeRole = async (newRole: UserRole) => {
     if (!token || isCurrentUser) return
-
-    const newRole = e.target.value as UserRole
 
     setSelectedRole(newRole)
 
@@ -25,30 +38,25 @@ export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
     } catch (error) {
       setSelectedRole(user.role)
 
-      if (error instanceof Error) {
-        toast.error(error.message)
-      }
-
-      console.error(error)
+      toast.error(getErrorMessage(error))
     }
   }
 
   if (isCurrentUser) {
     return (
-      <span className="text-sm text-foreground-muted">
-        {selectedRole === 'admin' ? 'Admin' : 'User'}
+      <span className="inline-block rounded-full border border-[var(--t)] px-3 py-1 text-sm">
+        {ROLE_LABELS[selectedRole]}
       </span>
     )
   }
 
   return (
-    <select
+    <Picker
+      label={`Role for ${user.name}`}
+      hideLabel
       value={selectedRole}
-      onChange={onChangeRole}
-      className="cursor-pointer border-pixel border-border bg-background px-3 py-2 font-mono text-xs uppercase tracking-wider outline-none transition-colors hover:bg-muted focus:border-foreground"
-    >
-      <option value="admin">Admin</option>
-      <option value="user">User</option>
-    </select>
+      onChange={(role) => onChangeRole(role as UserRole)}
+      options={ROLE_OPTIONS}
+    />
   )
 }

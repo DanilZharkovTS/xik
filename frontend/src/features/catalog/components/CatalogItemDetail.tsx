@@ -14,17 +14,34 @@ import {
 } from 'lucide-react'
 
 import type { CatalogItem } from '../data/catalog-items'
-import { getAllCatalogItems } from '../data/catalog-items'
+import { PurchaseButton } from './PurchaseButton'
+
+export interface RelatedItem {
+  href: string
+  title: string
+  subtitle: string
+}
+
+export interface PurchaseInfo {
+  productId: string
+  // Порожній рядок означає, що ціну сховано: користувач побачить її на оплаті.
+  priceLabel: string
+}
 
 interface CatalogItemDetailProps {
   item: CatalogItem
+  related?: RelatedItem[]
+  // Є лише в продуктів, придатних до оплати.
+  purchase?: PurchaseInfo
 }
 
-export function CatalogItemDetail({ item }: CatalogItemDetailProps) {
-  // Find related items of different or same types
-  const relatedItems = getAllCatalogItems()
-    .filter((other) => other.slug !== item.slug)
-    .slice(0, 3)
+export function CatalogItemDetail({ item, related = [], purchase }: CatalogItemDetailProps) {
+  const { architecture } = item
+  const hasSpecs =
+    architecture.stack.length > 0 ||
+    architecture.runtime !== '' ||
+    architecture.deployment !== '' ||
+    item.protocols.length > 0
 
   const parentSection =
     item.type === 'product'
@@ -97,7 +114,7 @@ export function CatalogItemDetail({ item }: CatalogItemDetailProps) {
             </p>
 
             {/* Highlights metric pills */}
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-6 flex flex-wrap gap-2" hidden={item.highlights.length === 0}>
               {item.highlights.map((highlight) => (
                 <span
                   key={highlight}
@@ -152,24 +169,28 @@ export function CatalogItemDetail({ item }: CatalogItemDetailProps) {
                 </p>
 
                 <div className="flex flex-wrap gap-2 pt-2">
+                  {item.architecture.runtime && (
                   <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--l)] bg-[var(--bg)]/90 px-3 py-1 text-xs font-medium text-[var(--t)]">
                     <Cpu className="h-3.5 w-3.5 text-indigo-500" />
                     {item.architecture.runtime}
                   </span>
+                  )}
                   <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--l)] bg-[var(--bg)]/90 px-3 py-1 text-xs font-medium text-[var(--t)]">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
                     Enterprise Guardrails
                   </span>
+                  {item.architecture.latency && (
                   <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--l)] bg-[var(--bg)]/90 px-3 py-1 text-xs font-medium text-[var(--t)]">
                     <Layers className="h-3.5 w-3.5 text-[var(--b)]" />
                     {item.architecture.latency}
                   </span>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Core Capabilities */}
-            <section aria-labelledby="capabilities-heading">
+            <section aria-labelledby="capabilities-heading" hidden={item.capabilities.length === 0}>
               <div className="flex items-center justify-between border-b border-[var(--l)] pb-4">
                 <h2
                   id="capabilities-heading"
@@ -205,7 +226,7 @@ export function CatalogItemDetail({ item }: CatalogItemDetailProps) {
             </section>
 
             {/* Technical Specifications */}
-            <section aria-labelledby="specs-heading">
+            <section aria-labelledby="specs-heading" hidden={!hasSpecs}>
               <h2
                 id="specs-heading"
                 className="text-2xl font-bold tracking-tight text-[var(--t)] border-b border-[var(--l)] pb-4"
@@ -214,23 +235,30 @@ export function CatalogItemDetail({ item }: CatalogItemDetailProps) {
               </h2>
 
               <dl className="mt-6 divide-y divide-[var(--l)] rounded-2xl border border-[var(--l)] bg-[var(--s)]/40 overflow-hidden">
-                <div className="grid grid-cols-3 px-6 py-4 text-xs sm:text-sm">
+                <div className="grid grid-cols-3 px-4 py-4 text-xs sm:px-6 sm:text-sm">
                   <dt className="font-medium text-[var(--m)]">Identifier</dt>
                   <dd className="col-span-2 font-mono text-[var(--t)]">{item.slug}</dd>
                 </div>
-                <div className="grid grid-cols-3 px-6 py-4 text-xs sm:text-sm">
+                {architecture.stack.length > 0 && (
+                <div className="grid grid-cols-3 px-4 py-4 text-xs sm:px-6 sm:text-sm">
                   <dt className="font-medium text-[var(--m)]">System Stack</dt>
-                  <dd className="col-span-2 text-[var(--t)]">{item.architecture.stack.join(', ')}</dd>
+                  <dd className="col-span-2 text-[var(--t)]">{architecture.stack.join(', ')}</dd>
                 </div>
-                <div className="grid grid-cols-3 px-6 py-4 text-xs sm:text-sm">
+                )}
+                {architecture.runtime && (
+                <div className="grid grid-cols-3 px-4 py-4 text-xs sm:px-6 sm:text-sm">
                   <dt className="font-medium text-[var(--m)]">Runtime Architecture</dt>
-                  <dd className="col-span-2 text-[var(--t)]">{item.architecture.runtime}</dd>
+                  <dd className="col-span-2 text-[var(--t)]">{architecture.runtime}</dd>
                 </div>
-                <div className="grid grid-cols-3 px-6 py-4 text-xs sm:text-sm">
+                )}
+                {architecture.deployment && (
+                <div className="grid grid-cols-3 px-4 py-4 text-xs sm:px-6 sm:text-sm">
                   <dt className="font-medium text-[var(--m)]">Deployment Model</dt>
-                  <dd className="col-span-2 text-[var(--t)]">{item.architecture.deployment}</dd>
+                  <dd className="col-span-2 text-[var(--t)]">{architecture.deployment}</dd>
                 </div>
-                <div className="grid grid-cols-3 px-6 py-4 text-xs sm:text-sm">
+                )}
+                {item.protocols.length > 0 && (
+                <div className="grid grid-cols-3 px-4 py-4 text-xs sm:px-6 sm:text-sm">
                   <dt className="font-medium text-[var(--m)]">Supported Interfaces</dt>
                   <dd className="col-span-2 flex flex-wrap gap-1.5">
                     {item.protocols.map((proto) => (
@@ -243,6 +271,7 @@ export function CatalogItemDetail({ item }: CatalogItemDetailProps) {
                     ))}
                   </dd>
                 </div>
+                )}
               </dl>
             </section>
           </div>
@@ -250,7 +279,7 @@ export function CatalogItemDetail({ item }: CatalogItemDetailProps) {
           {/* Sticky Sidebar Action Card */}
           <aside
             aria-label="Access and Engagement"
-            className="sticky top-20 space-y-6"
+            className="order-first space-y-6 lg:sticky lg:top-20 lg:order-none"
           >
             <div className="rounded-3xl border border-[var(--l)] bg-[var(--s)]/90 p-7 shadow-xl backdrop-blur-xl">
               <div className="flex items-center justify-between">
@@ -264,26 +293,50 @@ export function CatalogItemDetail({ item }: CatalogItemDetailProps) {
 
               <div className="mt-5">
                 <div className="text-2xl font-bold tracking-tight text-[var(--t)] sm:text-3xl">
-                  {item.type === 'product'
+                  {purchase
+                    ? purchase.priceLabel || 'Subscription'
+                    : item.type === 'product'
                     ? 'Dedicated License'
                     : item.type === 'agent'
                     ? 'Autonomous Agent'
                     : 'Engineering Service'}
                 </div>
                 <p className="mt-1.5 text-xs text-[var(--m)]">
-                  Available for immediate deployment, pilot integration, or dedicated enterprise support.
+                  {purchase
+                    ? purchase.priceLabel
+                      ? 'Billed through Stripe. Cancel any time.'
+                      : 'The price is shown at checkout before you pay.'
+                    : 'Available for immediate deployment, pilot integration, or dedicated enterprise support.'}
                 </p>
               </div>
 
               {/* Action Buttons */}
               <div className="mt-6 space-y-3">
+                {purchase && <PurchaseButton productId={purchase.productId} label="Subscribe" />}
+
+                {item.demoUrl && (
+                  <a
+                    href={item.demoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--l)] bg-[var(--bg)] px-6 text-sm font-medium text-[var(--t)] transition-colors hover:bg-[var(--s)]"
+                  >
+                    Open live demo
+                    <ArrowUpRight className="h-4 w-4" />
+                  </a>
+                )}
+
                 <a
                   href={`mailto:contact@xik.app?subject=${encodeURIComponent(
                     `Inquiry: ${item.title} (${item.typeLabel})`
                   )}`}
-                  className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--b)] px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:brightness-105 active:scale-[0.99]"
+                  className={
+                    purchase
+                      ? 'inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-[var(--l)] bg-[var(--bg)] px-6 text-sm font-medium text-[var(--t)] transition-colors hover:bg-[var(--s)]'
+                      : 'inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--b)] px-6 text-sm font-medium text-white shadow-sm transition-all hover:brightness-105 active:scale-[0.99]'
+                  }
                 >
-                  Request Access & Demo
+                  {purchase ? 'Ask a question' : 'Request Access & Demo'}
                   <ArrowUpRight className="h-4 w-4" />
                 </a>
 
@@ -323,46 +376,36 @@ export function CatalogItemDetail({ item }: CatalogItemDetailProps) {
                 </a>
               </div>
             </div>
-
-            {/* Related Studio Items */}
-            {relatedItems.length > 0 && (
-              <div className="rounded-3xl border border-[var(--l)] bg-[var(--s)]/70 p-6 shadow-sm">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--m)]">
-                  More in XIK Studio
-                </h4>
-
-                <div className="mt-4 space-y-3">
-                  {relatedItems.map((other) => {
-                    const otherRoute =
-                      other.type === 'product'
-                        ? `/products/${other.slug}`
-                        : other.type === 'agent'
-                        ? `/ai/${other.slug}`
-                        : `/services/${other.slug}`
-
-                    return (
-                      <Link
-                        key={other.slug}
-                        href={otherRoute}
-                        className="group flex items-center justify-between rounded-2xl border border-[var(--l)] bg-[var(--bg)] p-3 transition-all hover:border-[var(--m)] hover:shadow-2xs"
-                      >
-                        <div>
-                          <p className="text-xs font-semibold text-[var(--t)] group-hover:text-[var(--b)] transition-colors">
-                            {other.title}
-                          </p>
-                          <p className="text-[11px] text-[var(--m)] line-clamp-1">
-                            {other.subtitle}
-                          </p>
-                        </div>
-                        <ArrowUpRight className="h-3.5 w-3.5 text-[var(--m)] group-hover:text-[var(--b)] transition-colors shrink-0 ml-2" />
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
           </aside>
         </div>
+
+        {/* Related Studio Items */}
+        {related.length > 0 && (
+          <section aria-labelledby="related-heading" className="mt-14">
+            <h2 id="related-heading" className="text-xs font-semibold uppercase tracking-wider text-[var(--m)]">
+              More in XIK Studio
+            </h2>
+
+            <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {related.map((other) => (
+                <li key={other.href}>
+                  <Link
+                    href={other.href}
+                    className="group flex h-full min-h-16 items-center justify-between gap-3 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-4 transition-all hover:border-[var(--m)]"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-[var(--t)] transition-colors group-hover:text-[var(--b)]">
+                        {other.title}
+                      </p>
+                      <p className="line-clamp-2 text-xs text-[var(--m)]">{other.subtitle}</p>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-[var(--m)] transition-colors group-hover:text-[var(--b)]" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </div>
   )

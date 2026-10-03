@@ -5,6 +5,11 @@
   "main": "src/app.ts",
   "scripts": {
     "dev": "tsx watch src/app.ts",
+    "start": "tsx src/app.ts",
+    "admin:create": "tsx src/scripts/create-admin.ts",
+    "products:import": "tsx src/scripts/import-catalog.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "postinstall": "prisma skills sync || exit 0"
   },
   "author": "",
@@ -18,9 +23,11 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
     "stripe": "^22.6.2",
+    "tldts": "^7.4.16",
     "tsx": "^4.23.12",
     "zod": "^4.5.1"
   },
@@ -31,7 +38,10 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.4.0",
+    "@types/supertest": "^7.2.1",
     "prisma": "^7.10.0",
-    "typescript": "^7.0.2"
+    "supertest": "^7.3.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
   }
 }

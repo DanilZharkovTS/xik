@@ -57,6 +57,9 @@ services:
       NOTIFICATIONS_SERVICE_SECRET: ${NOTIFICATIONS_SERVICE_SECRET}
       STRIPE_SECRET: ${STRIPE_SECRET}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      REPORT_TIMEZONE: ${REPORT_TIMEZONE:-Europe/Kyiv}
+      OUTREACH_RATE_LIMIT: ${OUTREACH_RATE_LIMIT:-30}
+      LOGIN_RATE_LIMIT: ${LOGIN_RATE_LIMIT:-10}
     depends_on:
       postgres:
         condition: service_healthy
@@ -80,6 +83,7 @@ services:
       NODE_ENV: production
       PORT: 3000
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5001}
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://backend:5001}
     depends_on:
       - backend
     networks:

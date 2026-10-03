@@ -1,6 +1,6 @@
 export type AuthStateStatus = 'checking' | 'authenticated' | 'unauthenticated'
 
-export type UserRole = 'user' | 'admin'
+export type UserRole = 'user' | 'admin' | 'moderator'
 
 export interface AuthState {
   status: AuthStateStatus
@@ -9,6 +9,7 @@ export interface AuthState {
   user: {
     id: string
     email: string
+    name?: string
     role: UserRole
     sessionId: string
   } | null
@@ -32,6 +33,7 @@ export interface SetAuthData {
   user: {
     id: string
     email: string
+    name?: string
     role: UserRole
     sessionId: string
   } | null
@@ -46,6 +48,8 @@ export interface SetAuthFormData {
 
 export interface AuthInputProps  {
   name: string
+  label: string
+  autoComplete?: string
   value: string
   placeholder: string
   type?: string

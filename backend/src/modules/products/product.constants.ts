@@ -40,3 +40,6 @@ export const PRODUCT_BILLING_PERIODS = [
   'month',
   'year',
 ] as const
+export const PRODUCT_KINDS = ['product', 'agent'] as const
+
+export const PRODUCT_STATUSES = ['production', 'active', 'beta', 'build'] as const

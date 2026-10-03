@@ -1,44 +1,34 @@
-import { AuthInputProps } from "../auth.types"
-
+import { TextField } from '@/src/shared/ui/text-field'
+import { AuthInputProps } from '../auth.types'
 
 export const AuthInput = ({
   name,
+  label,
   value,
   placeholder,
   type = 'text',
+  autoComplete,
   error,
   onChange,
 }: AuthInputProps) => {
   return (
-    <div className="space-y-2">
-      <label
-        htmlFor={name}
-        className="block font-mono text-xs uppercase tracking-widest text-foreground-muted"
-      >
-        {name}
-      </label>
-
-      <input
+    <div className="space-y-1">
+      <TextField
         id={name}
         name={name}
+        label={label}
         type={type}
+        autoComplete={autoComplete}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
         aria-invalid={!!error}
-        className={[
-          'w-full border border-border bg-background px-4 py-3',
-          'font-mono text-sm text-foreground',
-          'outline-none transition-colors',
-          'placeholder:text-foreground-muted',
-          'focus:border-foreground',
-          error ? 'border-red-500' : '',
-        ].join(' ')}
+        aria-describedby={error ? `${name}-error` : undefined}
+        className={error ? 'border-red-500' : undefined}
       />
 
       {error && (
-        <p className="font-mono text-xs text-red-500">
-          <span className="mr-2">&gt;</span>
+        <p id={`${name}-error`} className="text-sm text-red-500">
           {error}
         </p>
       )}

@@ -83,6 +83,20 @@ docker compose -f docker-compose.local.yml up -d --build
 
 ---
 
+## 🗂 Outreach ledger
+
+A manual journal for moderators: who was contacted, in which channel, when and by whom, so nobody writes twice, "do not contact" is respected, and the team's work is counted by day, week, month and year. It sends nothing. See [docs/outreach-ledger.md](docs/outreach-ledger.md) for roles, features, configuration, acceptance checklist and known limitations.
+
+First administrator (once, after migrations):
+
+```bash
+cd backend && ADMIN_EMAIL=you@example.com ADMIN_NAME=You ADMIN_PASSWORD='at-least-8-chars' npm run admin:create
+```
+
+Then sign in, open **Dashboard → Team**, create moderators and give them products.
+
+---
+
 ## 🚀 2. Production Deployment (Docker)
 
 The production configuration is optimized for security, performance, and minimal image size:

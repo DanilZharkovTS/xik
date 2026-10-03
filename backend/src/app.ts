@@ -9,7 +9,7 @@ import { billingController } from './modules/billing/billing.controller.js'
 
 dotenv.config()
 
-const app = express()
+export const app = express()
 
 app.use(
   cors({
@@ -34,7 +34,10 @@ app.use(errorHandler)
 
 const PORT = process.env.PORT || 5001
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`)
-})
+// У тестах сервер не слухає порт: supertest сам піднімає app.
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Example app listening on port ${PORT}!`)
+  })
+}
 

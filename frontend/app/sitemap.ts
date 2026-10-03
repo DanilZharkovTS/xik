@@ -1,13 +1,23 @@
 import type { MetadataRoute } from 'next'
 
 import { getAbsoluteUrl } from '@/src/config/site'
+import { fetchCatalog } from '@/src/features/catalog/catalog-api'
+import { productHref } from '@/src/features/catalog/catalog-product'
+import { getItemsByType } from '@/src/features/catalog/data/catalog-items'
+
+// Каталог живе в БД: сторінка збирається на кожен запит, не під час білду.
+export const dynamic = 'force-dynamic'
 
 const STATIC_PATHS = ['/'] as const
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPages = STATIC_PATHS.map((pathname) => ({
-    url: getAbsoluteUrl(pathname),
-  }))
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [catalog] = await Promise.all([fetchCatalog()])
 
-  return [...staticPages]
+  const paths = [
+    ...STATIC_PATHS,
+    ...catalog.map((product) => productHref(product)),
+    ...getItemsByType('service').map((service) => `/services/${service.slug}`),
+  ]
+
+  return paths.map((pathname) => ({ url: getAbsoluteUrl(pathname) }))
 }

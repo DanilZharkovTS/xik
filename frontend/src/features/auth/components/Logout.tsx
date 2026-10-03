@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { authService } from '../auth.service'
 import useAuthStore from '../store'
 
-import { PixelButton } from '@/src/shared/ui/pixel/pixel-button'
+import { Button } from '@/src/shared/ui/button'
 import { useRouter } from 'next/navigation'
 
 export const Logout = () => {
@@ -36,32 +36,27 @@ export const Logout = () => {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <span className="font-mono text-xs uppercase tracking-widest text-foreground-muted">
+    <div className="overflow-hidden rounded-2xl border border-[var(--l)] bg-[var(--s)]">
+      <div className="flex items-center justify-between border-b border-[var(--l)] px-4 py-3">
+        <span className="font-mono text-xs uppercase tracking-widest text-[var(--m)]">
           session
         </span>
 
-        <span className="font-mono text-xs text-foreground-muted">active</span>
+        <span className="font-mono text-xs text-[var(--m)]">active</span>
       </div>
 
       <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="font-mono text-sm">Terminate session</p>
 
-          <p className="mt-1 font-mono text-xs text-foreground-muted">
+          <p className="mt-1 font-mono text-xs text-[var(--m)]">
             Sign out from the current device.
           </p>
         </div>
 
-        <PixelButton
-          type="button"
-          variant="secondary"
-          onClick={handleLogout}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Terminating...' : 'Logout'}
-        </PixelButton>
+        <Button variant="secondary" onClick={handleLogout} disabled={isLoading}>
+          {isLoading ? 'Signing out...' : 'Log out'}
+        </Button>
       </div>
     </div>
   )

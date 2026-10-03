@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { PRODUCTS } from '../../src/features/products/data/products'
+import { PRODUCTS } from '../support/catalog'
 
 test.describe('motion safety and progressive enhancement', () => {
   test('primary content remains present without JavaScript', async ({

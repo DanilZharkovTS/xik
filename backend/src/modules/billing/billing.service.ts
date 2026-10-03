@@ -2,10 +2,7 @@ import Stripe from 'stripe'
 import { ApiError } from '../../shared/utils/ApiError.js'
 import { TokenPayload } from '../auth/auth.types.js'
 import { productsRepo } from '../products/products.repo.js'
-import { CreateProductDto } from '../products/products.schema.js'
-import { Product } from '../products/products.types.js'
 import { CheckoutSessionDto } from './billing.schema.js'
-import { stripe } from './stripe.js'
 import { stripeService } from './stripe.service.js'
 
 export const billingService = {
@@ -15,8 +12,13 @@ export const billingService = {
   ) => {
     const product = await productsRepo.findById(data.productId)
 
-    if (!product) {
-      throw ApiError(404, 'Product not found', 'NOT_FOUND')
+    if (!product || product.archivedAt) {
+      throw ApiError(404, 'NOT_FOUND', 'Product not found')
+    }
+
+    // Без ціни у Stripe оплатити нічого: це не помилка клієнта, а стан продукту.
+    if (!product.stripePriceId) {
+      throw ApiError(409, 'NOT_PURCHASABLE', 'This product cannot be purchased yet')
     }
 
     const url = await stripeService.getStripeCheckoutUrl(product, {
@@ -25,68 +27,6 @@ export const billingService = {
     })
 
     return { response: { url } }
-  },
-  createStripeProduct: async (product: Product) => {
-    const stripeProduct = await stripe.products.create({
-      name: product.name,
-      description: product.description,
-
-      metadata: {
-        productId: product.id,
-      },
-    })
-    const stripePrice = await billingService.createStripePrice(
-      stripeProduct.id,
-      product
-    )
-
-    return { stripeProduct, stripePrice }
-  },
-  createStripePrice: async (stripeProductId: string, product: Product) => {
-    const stripePrice = await stripe.prices.create({
-      product: stripeProductId,
-      currency: product.currency,
-      unit_amount: product.price.mul(100).toNumber(),
-      recurring: {
-        interval: product.billingPeriod,
-      },
-    })
-    return stripePrice
-  },
-  deactivateStripeProduct: async (stripeProductId: string) => {
-    await stripe.products.update(stripeProductId, {
-      active: false,
-    })
-  },
-  deactivateStripePrice: async (stripePriceId: string) => {
-    await stripe.prices.update(stripePriceId, {
-      active: false,
-    })
-  },
-  updateStripeProduct: async (
-    stripeProductId: string,
-    product: Product,
-    data
-  ) => {
-    await stripe.products.update(stripeProductId, {
-      ...(data.name && { name: data.name }),
-      ...(data.description && { description: data.description }),
-    })
-
-    if (
-      data.price !== undefined ||
-      data.billingPeriod !== undefined ||
-      data.currency !== undefined
-    ) {
-      const newPrice = await billingService.createStripePrice(
-        stripeProductId,
-        product
-      )
-
-      await billingService.deactivateStripePrice(product.stripePriceId)
-
-      await productsRepo.updateStripePriceIdById(product.id, newPrice.id)
-    }
   },
   handleWebhookEvent: async (event: Stripe.Event) => {
     console.log('Webhook event received:', event.type)

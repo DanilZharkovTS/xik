@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 
-import { PRODUCTS } from '../../src/features/products/data/products'
+import { PRODUCTS } from '../support/catalog'
 import { THEME_STORAGE_KEY } from '../../src/features/theme/theme-config'
 
 const ACCESSIBILITY_ROUTES = [

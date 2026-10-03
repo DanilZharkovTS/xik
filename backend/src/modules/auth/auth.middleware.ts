@@ -1,9 +1,47 @@
-import z from 'zod'
 import jwt from 'jsonwebtoken'
 import type { NextFunction, Request, Response } from 'express'
 import { tokenService } from '../../shared/services/token.service.js'
 import { ApiError } from '../../shared/utils/ApiError.js'
 import { UserRole } from '../user/user.types.js'
+import { sessionRepo } from './repos/session.repo.js'
+import type { TokenPayload } from './auth.types.js'
+
+// JWT сам по собі нічого не гарантує: сесію можуть відкликати, акаунт деактивувати,
+// роль змінити. Тому кожен запит звіряється з БД, а роль береться звідти, не з токена.
+const authenticate = async (req: Request): Promise<TokenPayload> => {
+  const token = req.headers.authorization?.split(' ')[1]
+
+  if (!token) {
+    throw ApiError(401, 'UNAUTHORIZED', 'Missing token')
+  }
+
+  let payload: TokenPayload
+  try {
+    payload = jwt.verify(token, process.env.JWT_SECRET!, {
+      algorithms: ['HS256'],
+    }) as TokenPayload
+  } catch {
+    throw ApiError(401, 'UNAUTHORIZED', 'Invalid token')
+  }
+
+  const session = await sessionRepo.findActiveWithUser(payload.sessionId)
+
+  if (
+    !session ||
+    session.revokedAt ||
+    session.userId !== payload.id ||
+    session.user.deactivatedAt
+  ) {
+    throw ApiError(401, 'UNAUTHORIZED', 'Session is expired or invalid')
+  }
+
+  return {
+    id: session.user.id,
+    email: session.user.email,
+    role: session.user.role,
+    sessionId: session.id,
+  }
+}
 
 export const authMiddleware = {
   hashTokens: (...names: string[]) => {
@@ -25,38 +63,25 @@ export const authMiddleware = {
       next()
     }
   },
-  verifyAccess: (req: Request, res: Response, next: NextFunction) => {
+  verifyAccess: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const token = req.headers.authorization?.split(' ')[1]
-
-      if (!token) {
-        throw ApiError(401, 'UNAUTHORIZED', 'Missing token')
-      }
-
-      const payload = jwt.verify(token, process.env.JWT_SECRET!, {
-        algorithms: ['HS256'],
-      }) as { id: string; email: string; role: UserRole; sessionId: string }
-
-      req.user = payload
+      req.user = await authenticate(req)
       next()
     } catch (err) {
-      throw ApiError(401, 'UNAUTHORIZED', 'Invalid token')
+      next(err)
     }
   },
-  verifyOptionalAccess: (req: Request, res: Response, next: NextFunction) => {
+  verifyOptionalAccess: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const token = req.headers.authorization?.split(' ')[1]
-
-      const payload = jwt.verify(token, process.env.JWT_SECRET!, {
-        algorithms: ['HS256'],
-      }) as { id: string; email: string; role: UserRole; sessionId: string }
-
-      req.user = payload
-      next()
+      req.user = await authenticate(req)
     } catch (err) {
       req.user = null
-      next()
     }
+    next()
   },
   requiresRole: (role: UserRole) => {
     return (req: Request, res: Response, next: NextFunction) => {

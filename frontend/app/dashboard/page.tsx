@@ -1,18 +1,14 @@
-'use client'
-import { Logout } from '@/src/features/auth/components/Logout'
-import useAuthStore from '@/src/features/auth/store'
+import type { Metadata } from 'next'
+
+import { DashboardScreen } from '@/src/features/dashboard/components/DashboardScreen'
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  robots: { index: false, follow: false },
+}
 
 const Dashboard = () => {
-  const user = useAuthStore((state) => state.user)
-
-  const isAdmin = user?.role === 'admin'
-
-  return (
-    <div>
-      {isAdmin && 'Admin Dashboard'}
-      <Logout />
-    </div>
-  )
+  return <DashboardScreen />
 }
 
 export default Dashboard
