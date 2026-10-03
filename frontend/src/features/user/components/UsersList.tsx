@@ -42,7 +42,7 @@ export const UsersList = () => {
   }, [token, search])
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 md:py-10">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:py-10">
       <div>
         <h1 className="text-3xl font-medium md:text-4xl">Users</h1>
         <p className="mt-1 text-[var(--m)]">Everyone with an account and their role.</p>
@@ -58,7 +58,7 @@ export const UsersList = () => {
           <p className="mt-1 text-sm text-[var(--m)]">Try changing your search.</p>
         </div>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2">
+        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {users.map((user) => (
             <UserCard key={user.id} user={user} />
           ))}

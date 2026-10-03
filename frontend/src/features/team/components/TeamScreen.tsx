@@ -114,7 +114,7 @@ export function TeamScreen(): ReactElement {
     moderators.find((moderator) => moderator.id === id) ?? null
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 md:py-10">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:py-10">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-medium md:text-4xl">Team</h1>
@@ -144,7 +144,7 @@ export function TeamScreen(): ReactElement {
           </p>
         </div>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2">
+        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {moderators.map((moderator) => (
             <ModeratorCard
               key={moderator.id}

@@ -3,6 +3,7 @@
 import { AppProvider } from '@/src/providers/AppProvider'
 import { JsonLd } from '@/src/shared/seo/json-ld'
 import { SiteHeader } from './site-header'
+import { AdminHeader } from './admin-header'
 import { ModernFooter } from '@/src/layouts/site-footer/modern-footer'
 import { Toaster } from 'sonner'
 import { siteConfig } from '@/src/config/site'
@@ -36,6 +37,13 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
 
   const isHome = pathname === '/'
 
+  // Робоча зона для залогіненого адміна/модератора: своя шапка, без меню й футера сайту.
+  const isWorkspace =
+    (user?.role === 'admin' || user?.role === 'moderator') &&
+    (pathname.startsWith('/admin') ||
+      pathname.startsWith('/outreach') ||
+      pathname.startsWith('/dashboard'))
+
   return (
     <>
       <a
@@ -45,17 +53,17 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
         Skip to content
       </a>
 
-      <SiteHeader />
+      {isWorkspace ? <AdminHeader /> : <SiteHeader />}
 
       <main
         id="main-content"
-        className={`flex-1 ${!isHome ? 'pt-[52px]' : ''}`}
+        className={`flex-1 ${isWorkspace ? 'pt-[52px] max-md:pt-[92px]' : !isHome ? 'pt-[52px]' : ''}`}
         tabIndex={-1}
       >
         {children}
       </main>
 
-      <ModernFooter />
+      {!isWorkspace && <ModernFooter />}
       <Toaster richColors position="bottom-right" expand={false} />
     </>
   )

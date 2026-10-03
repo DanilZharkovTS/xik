@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import type { ReactElement } from 'react'
 
-import { Logout } from '@/src/features/auth/components/Logout'
 import useAuthStore from '@/src/features/auth/store'
 
 type DashboardLink = {
@@ -48,7 +47,7 @@ function LinkCards({ title, links }: { title: string; links: DashboardLink[] }):
     <section className="space-y-3">
       <h2 className="text-sm uppercase tracking-wider text-[var(--m)]">{title}</h2>
 
-      <ul className="grid gap-3 sm:grid-cols-2">
+      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {links.map((link) => (
           <li key={link.href}>
             <Link
@@ -72,7 +71,7 @@ const Dashboard = () => {
   const canUseJournal = isAdmin || user?.role === 'moderator'
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 md:py-10">
+    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 md:py-10">
       <div>
         <h1 className="text-3xl font-medium">{isAdmin ? 'Admin dashboard' : 'Dashboard'}</h1>
         {user && (
@@ -86,7 +85,6 @@ const Dashboard = () => {
       {canUseJournal && <LinkCards title="Journal" links={JOURNAL_LINKS} />}
       {isAdmin && <LinkCards title="Administration" links={ADMIN_LINKS} />}
 
-      <Logout />
     </div>
   )
 }

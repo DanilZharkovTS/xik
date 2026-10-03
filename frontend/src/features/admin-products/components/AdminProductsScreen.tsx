@@ -15,41 +15,33 @@ import { ProductFormSheet } from './ProductFormSheet'
 
 type KindFilter = ProductKind | 'all'
 
-const KIND_TABS: { value: KindFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'product', label: 'Products' },
-  { value: 'agent', label: 'Agents' },
-]
-
 const STATE_TABS: { value: ListState; label: string }[] = [
   { value: 'active', label: 'Active' },
   { value: 'archived', label: 'Archived' },
 ]
 
-function Tabs<T extends string>({
-  label,
-  tabs,
+// Підкреслені вкладки: окремий тип контролу від полів пошуку й типу, щоб не плутати.
+function StateTabs({
   value,
   onChange,
 }: {
-  label: string
-  tabs: { value: T; label: string }[]
-  value: T
-  onChange: (value: T) => void
+  value: ListState
+  onChange: (value: ListState) => void
 }): ReactElement {
   return (
-    <div role="group" aria-label={label} className="flex gap-1.5">
-      {tabs.map((tab) => (
+    <div role="tablist" aria-label="Product state" className="flex border-b border-[var(--l)]">
+      {STATE_TABS.map((tab) => (
         <button
           key={tab.value}
           type="button"
-          aria-pressed={value === tab.value}
+          role="tab"
+          aria-selected={value === tab.value}
           onClick={() => onChange(tab.value)}
           className={cn(
-            'min-h-10 rounded-full border px-4 text-sm font-medium transition-colors',
+            '-mb-px min-h-11 flex-1 border-b-2 px-4 text-base font-medium transition-colors md:flex-none md:px-8',
             value === tab.value
-              ? 'border-[var(--t)] bg-[var(--t)] text-[var(--bg)]'
-              : 'border-[var(--l)] text-[var(--m)] hover:border-[var(--t)]',
+              ? 'border-[var(--t)] text-[var(--t)]'
+              : 'border-transparent text-[var(--m)] hover:text-[var(--t)]',
           )}
         >
           {tab.label}
@@ -138,7 +130,7 @@ export function AdminProductsScreen(): ReactElement {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 md:py-10">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:py-10">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-medium md:text-4xl">Products</h1>
@@ -154,7 +146,9 @@ export function AdminProductsScreen(): ReactElement {
         </div>
       </div>
 
-      <div className="space-y-3">
+      <StateTabs value={state} onChange={setState} />
+
+      <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
         <input
           type="search"
           aria-label="Search products"
@@ -164,10 +158,16 @@ export function AdminProductsScreen(): ReactElement {
           className="min-h-11 w-full rounded-xl border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
         />
 
-        <div className="flex flex-wrap gap-x-4 gap-y-2">
-          <Tabs label="Type" tabs={KIND_TABS} value={kind} onChange={setKind} />
-          <Tabs label="State" tabs={STATE_TABS} value={state} onChange={setState} />
-        </div>
+        <select
+          aria-label="Type"
+          value={kind}
+          onChange={(e) => setKind(e.target.value as KindFilter)}
+          className="min-h-11 w-full rounded-xl border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
+        >
+          <option value="all">All types</option>
+          <option value="product">Products</option>
+          <option value="agent">Agents</option>
+        </select>
       </div>
 
       {isLoading ? (
@@ -184,7 +184,7 @@ export function AdminProductsScreen(): ReactElement {
           </p>
         </div>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2">
+        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {products.map((product) => (
             <AdminProductCard
               key={product.id}

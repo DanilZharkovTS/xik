@@ -53,7 +53,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
   }, [token, setProducts, setError])
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pb-28 pt-4 md:pb-10 md:pt-8">
+    <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-4 md:pb-10 md:pt-8">
       <div className="mb-4 flex items-center justify-between gap-3">
         <ProductSwitcher />
 
