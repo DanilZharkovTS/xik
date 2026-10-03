@@ -139,7 +139,7 @@ export function AdminProductsScreen(): ReactElement {
           </p>
         </div>
 
-        <div className="hidden md:block">
+        <div>
           <Button className="shrink-0" disabled={!token} onClick={openCreate}>
             New product
           </Button>
@@ -184,7 +184,7 @@ export function AdminProductsScreen(): ReactElement {
           </p>
         </div>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {products.map((product) => (
             <AdminProductCard
               key={product.id}
@@ -211,11 +211,6 @@ export function AdminProductsScreen(): ReactElement {
         </ul>
       )}
 
-      <div className="sticky bottom-0 -mx-4 border-t border-[var(--l)] bg-[var(--bg)] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:hidden">
-        <Button className="min-h-11 w-full" disabled={!token} onClick={openCreate}>
-          New product
-        </Button>
-      </div>
 
       {token && (
         <ProductFormSheet

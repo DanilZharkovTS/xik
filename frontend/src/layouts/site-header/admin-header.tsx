@@ -9,19 +9,26 @@ import { authService } from '@/src/features/auth/auth.service'
 import useAuthStore from '@/src/features/auth/store'
 import { ThemeToggle } from '@/src/features/theme/components/theme-toggle'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
+import { BookOpen, Package, UserCog, Users } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/src/shared/lib/cn'
 
-type NavItem = { href: string; label: string; match: string; adminOnly?: boolean }
+type NavItem = { href: string; label: string; match: string; Icon: LucideIcon; adminOnly?: boolean }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/outreach/check', label: 'Journal', match: '/outreach' },
-  { href: '/admin/team', label: 'Team', match: '/admin/team', adminOnly: true },
-  { href: '/admin/products', label: 'Products', match: '/admin/products', adminOnly: true },
-  { href: '/admin/users', label: 'Users', match: '/admin/users', adminOnly: true },
+  { href: '/outreach/check', label: 'Journal', match: '/outreach', Icon: BookOpen },
+  { href: '/admin/team', label: 'Team', match: '/admin/team', Icon: Users, adminOnly: true },
+  { href: '/admin/products', label: 'Products', match: '/admin/products', Icon: Package, adminOnly: true },
+  { href: '/admin/users', label: 'Users', match: '/admin/users', Icon: UserCog, adminOnly: true },
 ]
 
 // Шапка робочої зони (адмін і модератор): замість меню сайту. Навігація на телефоні
 // окремим рядком, що гортається, щоб пункти лишалися великими й під рукою.
+export function useWorkspaceNav(): NavItem[] {
+  const role = useAuthStore((state) => state.user?.role)
+  return NAV_ITEMS.filter((item) => !item.adminOnly || role === 'admin')
+}
+
 export function AdminHeader() {
   const pathname = usePathname()
   const router = useRouter()
@@ -30,7 +37,7 @@ export function AdminHeader() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const isAdmin = user?.role === 'admin'
-  const items = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin)
+  const items = useWorkspaceNav()
 
   const logout = async () => {
     try {
@@ -83,16 +90,6 @@ export function AdminHeader() {
         </div>
       </div>
 
-      {/* У модератора один пункт, окремий рядок меню не потрібен. */}
-      <nav
-        aria-label="Main"
-        hidden={items.length < 2}
-        className={`${items.length < 2 ? 'hidden' : 'flex'} gap-1 overflow-x-auto border-t border-[var(--l)] px-3 py-0.5 [scrollbar-width:none] md:!hidden`}
-      >
-        {items.map((item) => (
-          <HeaderLink key={item.href} item={item} pathname={pathname} />
-        ))}
-      </nav>
     </header>
   )
 }
@@ -113,5 +110,39 @@ function HeaderLink({ item, pathname }: { item: NavItem; pathname: string }) {
     >
       {item.label}
     </Link>
+  )
+}
+
+// Головне меню на телефоні внизу, як у мобільному застосунку. У модератора один пункт, тож панелі немає.
+export function AdminTabBar() {
+  const pathname = usePathname()
+  const items = useWorkspaceNav()
+
+  if (items.length < 2) return null
+
+  return (
+    <nav
+      aria-label="Main"
+      className="fixed inset-x-0 bottom-0 z-40 grid border-t border-[var(--l)] bg-[var(--bg)] pb-[env(safe-area-inset-bottom)] md:hidden"
+      style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+    >
+      {items.map(({ href, label, match, Icon }) => {
+        const isActive = pathname.startsWith(match)
+        return (
+          <Link
+            key={href}
+            href={href}
+            aria-current={isActive ? 'page' : undefined}
+            className={cn(
+              'flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-medium',
+              isActive ? 'text-[var(--t)]' : 'text-[var(--m)]',
+            )}
+          >
+            <Icon aria-hidden="true" className="h-5 w-5" />
+            {label}
+          </Link>
+        )
+      })}
+    </nav>
   )
 }

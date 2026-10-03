@@ -28,7 +28,7 @@ export function ModeratorCard({
   return (
     <li
       className={cn(
-        'space-y-2 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-3 md:space-y-3 md:p-4',
+        'min-w-0 space-y-2 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-3 md:space-y-3 md:p-4',
         !isActive && 'opacity-70',
       )}
     >

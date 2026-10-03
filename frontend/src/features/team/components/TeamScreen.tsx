@@ -123,7 +123,7 @@ export function TeamScreen(): ReactElement {
           </p>
         </div>
 
-        <div className="hidden md:block">
+        <div>
           <Button
             className="shrink-0"
             disabled={!token}
@@ -144,7 +144,7 @@ export function TeamScreen(): ReactElement {
           </p>
         </div>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {moderators.map((moderator) => (
             <ModeratorCard
               key={moderator.id}
@@ -159,16 +159,6 @@ export function TeamScreen(): ReactElement {
         </ul>
       )}
 
-      {/* Головна дія на телефоні закріплена внизу, де її дістає великий палець. */}
-      <div className="sticky bottom-0 -mx-4 border-t border-[var(--l)] bg-[var(--bg)] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:hidden">
-        <Button
-          className="min-h-11 w-full"
-          disabled={!token}
-          onClick={() => setIsCreating(true)}
-        >
-          Add moderator
-        </Button>
-      </div>
 
       {token && (
         <>

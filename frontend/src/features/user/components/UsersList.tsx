@@ -58,7 +58,7 @@ export const UsersList = () => {
           <p className="mt-1 text-sm text-[var(--m)]">Try changing your search.</p>
         </div>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {users.map((user) => (
             <UserCard key={user.id} user={user} />
           ))}

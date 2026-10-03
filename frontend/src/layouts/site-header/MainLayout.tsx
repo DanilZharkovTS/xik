@@ -3,7 +3,7 @@
 import { AppProvider } from '@/src/providers/AppProvider'
 import { JsonLd } from '@/src/shared/seo/json-ld'
 import { SiteHeader } from './site-header'
-import { AdminHeader } from './admin-header'
+import { AdminHeader, AdminTabBar } from './admin-header'
 import { ModernFooter } from '@/src/layouts/site-footer/modern-footer'
 import { Toaster } from 'sonner'
 import { siteConfig } from '@/src/config/site'
@@ -74,12 +74,13 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
 
       <main
         id="main-content"
-        className={`flex-1 ${isWorkspace ? `pt-[52px] ${user?.role === 'admin' ? 'max-md:pt-[82px]' : 'max-md:pt-[45px]'}` : !isHome ? 'pt-[52px]' : ''}`}
+        className={`flex-1 ${isWorkspace ? `pt-[45px] md:pt-[52px] ${user?.role === 'admin' ? 'max-md:pb-[calc(3.5rem+env(safe-area-inset-bottom))]' : ''}` : !isHome ? 'pt-[52px]' : ''}`}
         tabIndex={-1}
       >
         {children}
       </main>
 
+      {isWorkspace && <AdminTabBar />}
       {!isWorkspace && <ModernFooter />}
       <Toaster richColors position="bottom-right" expand={false} />
     </>

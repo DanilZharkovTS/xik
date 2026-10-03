@@ -53,11 +53,11 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
   }, [token, setProducts, setError])
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 pb-20 pt-2 md:pb-10 md:pt-8">
+    <div className="mx-auto w-full max-w-5xl px-4 pb-4 pt-2 md:pb-10 md:pt-8">
       <div className="mb-2 flex items-center md:mb-4 md:items-center justify-between gap-3">
         <ProductSwitcher />
 
-        {/* На десктопі навігація зверху, на телефоні знизу. */}
+        {/* Розділи журналу: на десктопі праворуч від продукту, на телефоні окремим рядком нижче. */}
         <nav aria-label="Journal" className="hidden gap-1 md:flex">
           {NAV_ITEMS.map(({ href, label }) => (
             <Link
@@ -76,6 +76,29 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
           ))}
         </nav>
       </div>
+
+      {products.length > 0 && (
+        <nav
+          aria-label="Journal sections"
+          className="-mx-4 mb-3 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] md:hidden"
+        >
+          {NAV_ITEMS.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={pathname === href ? 'page' : undefined}
+              className={cn(
+                'inline-flex min-h-9 shrink-0 items-center whitespace-nowrap rounded-full border px-3.5 text-sm font-medium',
+                pathname === href
+                  ? 'border-[var(--t)] bg-[var(--t)] text-[var(--bg)]'
+                  : 'border-[var(--l)] text-[var(--m)]',
+              )}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {status === 'loading' || (token === null && status !== 'error') ? (
         <p className="py-12 text-center text-[var(--m)]">Loading...</p>
@@ -112,25 +135,6 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
         children
       )}
 
-      <nav
-        aria-label="Journal"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-[var(--l)] bg-[var(--bg)] pb-[env(safe-area-inset-bottom)] md:hidden"
-      >
-        {NAV_ITEMS.map(({ href, label, Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            aria-current={pathname === href ? 'page' : undefined}
-            className={cn(
-              'flex min-h-12 flex-col items-center justify-center gap-0.5 text-xs font-medium',
-              pathname === href ? 'text-[var(--t)]' : 'text-[var(--m)]',
-            )}
-          >
-            <Icon aria-hidden="true" className="h-5 w-5" />
-            {label}
-          </Link>
-        ))}
-      </nav>
     </div>
   )
 }
