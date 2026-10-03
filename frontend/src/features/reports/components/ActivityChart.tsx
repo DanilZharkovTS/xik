@@ -8,9 +8,10 @@ import { niceScale } from '../chart-scale'
 import { useElementWidth } from '../use-element-width'
 import {
   EVENT_TYPE_COLORS,
-  EVENT_TYPE_LABELS,
+  EVENT_LABEL_KEYS,
 } from '../reports.types'
 import type { EventType, Report, SeriesPoint } from '../reports.types'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 const PLOT_HEIGHT = 200
 const TOP_PAD = 8
@@ -40,6 +41,7 @@ const bucketLabel = (bucket: string, granularity: 'day' | 'month'): string =>
   granularity === 'month' ? formatMonthShort(bucket) : formatDay(bucket)
 
 export function ActivityChart({ report, types }: ActivityChartProps): ReactElement {
+  const { t } = useI18n()
   const containerRef = useRef<HTMLDivElement>(null)
   const width = useElementWidth(containerRef)
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
@@ -87,7 +89,7 @@ export function ActivityChart({ report, types }: ActivityChartProps): ReactEleme
         className="relative"
         tabIndex={0}
         role="group"
-        aria-label="Activity by period. Use the left and right arrow keys to read each value."
+        aria-label={t('reports.chartLabel')}
         onKeyDown={onKeyDown}
         onBlur={() => setActiveIndex(null)}
       >
@@ -203,7 +205,7 @@ export function ActivityChart({ report, types }: ActivityChartProps): ReactEleme
                 fontSize={14}
                 fill="var(--viz-muted)"
               >
-                No activity in this period
+                {t('reports.noActivity')}
               </text>
             )}
           </svg>
@@ -226,14 +228,14 @@ export function ActivityChart({ report, types }: ActivityChartProps): ReactEleme
                   style={{ background: EVENT_TYPE_COLORS[type] }}
                 />
                 <strong className="font-semibold text-[var(--viz-text)]">{active[type]}</strong>
-                <span className="text-[var(--viz-text-2)]">{EVENT_TYPE_LABELS[type]}</span>
+                <span className="text-[var(--viz-text-2)]">{t(EVENT_LABEL_KEYS[type])}</span>
               </p>
             ))}
           </div>
         )}
       </div>
 
-      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm" aria-label="Legend">
+      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm" aria-label={t('reports.legend')}>
         {types.map((type) => (
           <li key={type} className="flex items-center gap-2 text-[var(--viz-text-2)]">
             <span
@@ -241,7 +243,7 @@ export function ActivityChart({ report, types }: ActivityChartProps): ReactEleme
               className="inline-block h-2.5 w-2.5 rounded-sm"
               style={{ background: EVENT_TYPE_COLORS[type] }}
             />
-            {EVENT_TYPE_LABELS[type]}
+            {t(EVENT_LABEL_KEYS[type])}
             <strong className="font-semibold text-[var(--viz-text)]">
               {report.totals[type].toLocaleString()}
             </strong>
@@ -251,19 +253,19 @@ export function ActivityChart({ report, types }: ActivityChartProps): ReactEleme
 
       <details className="mt-3 text-sm">
         <summary className="min-h-11 cursor-pointer py-3 text-[var(--viz-text-2)]">
-          Show as table
+          {t('reports.showTable')}
         </summary>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[320px] text-left">
-            <caption className="sr-only">Activity by period</caption>
+            <caption className="sr-only">{t('reports.tableCaption')}</caption>
             <thead>
               <tr className="text-[var(--viz-muted)]">
                 <th scope="col" className="py-1 pr-3 font-normal">
-                  {range.granularity === 'month' ? 'Month' : 'Day'}
+                  {range.granularity === 'month' ? t('reports.colMonth') : t('reports.colDay')}
                 </th>
                 {types.map((type) => (
                   <th key={type} scope="col" className="py-1 pr-3 text-right font-normal">
-                    {EVENT_TYPE_LABELS[type]}
+                    {t(EVENT_LABEL_KEYS[type])}
                   </th>
                 ))}
               </tr>

@@ -1,9 +1,7 @@
-const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-})
+import { useI18nStore } from '@/src/shared/i18n/i18n-store'
+import { translateNow } from '@/src/shared/i18n/translate'
 
-const relativeFormat = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
+const currentLocale = () => useI18nStore.getState().locale
 
 const RELATIVE_UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
   ['year', 365 * 24 * 3600],
@@ -21,13 +19,14 @@ const parse = (value: string | null | undefined): Date | null => {
 }
 
 // Некоректну дату показуємо явно: «—» сховав би помилку в даних.
-const INVALID = 'Invalid date'
 
 export const formatDateTime = (value: string | null | undefined): string => {
   if (!value) return '—'
 
   const date = parse(value)
-  return date ? dateTimeFormat.format(date) : INVALID
+  return date
+    ? new Intl.DateTimeFormat(currentLocale(), { dateStyle: 'medium', timeStyle: 'short' }).format(date)
+    : translateNow('date.invalid')
 }
 
 export const formatRelative = (
@@ -37,9 +36,11 @@ export const formatRelative = (
   if (!value) return '—'
 
   const date = parse(value)
-  if (!date) return INVALID
+  if (!date) return translateNow('date.invalid')
 
   const seconds = Math.round((date.getTime() - now.getTime()) / 1000)
+
+  const relativeFormat = new Intl.RelativeTimeFormat(currentLocale(), { numeric: 'auto' })
 
   for (const [unit, size] of RELATIVE_UNITS) {
     if (Math.abs(seconds) >= size) {

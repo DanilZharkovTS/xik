@@ -13,8 +13,10 @@ import { useOutreachContext } from '../use-outreach-context'
 import { IdentifierLink } from './IdentifierLink'
 import { TargetActions } from './TargetActions'
 import { TargetDetailCard } from './TargetDetailCard'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 export function TargetsScreen(): ReactElement {
+  const { t } = useI18n()
   const { token, productId, handleError } = useOutreachContext()
 
   const [targets, setTargets] = useState<TargetListItem[]>([])
@@ -105,25 +107,25 @@ export function TargetsScreen(): ReactElement {
   return (
     <div className="space-y-3 md:space-y-5">
       <div>
-        <h1 className="text-2xl font-medium md:text-4xl">My targets</h1>
+        <h1 className="text-2xl font-medium md:text-4xl">{t('targets.title')}</h1>
         <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
-          People and companies you have written to in this product.
+          {t('targets.intro')}
         </p>
       </div>
 
       {isLoading ? (
-        <p className="py-12 text-center text-[var(--m)]">Loading...</p>
+        <p className="py-12 text-center text-[var(--m)]">{t('common.loading')}</p>
       ) : targets.length === 0 ? (
         <div className="rounded-2xl border border-[var(--l)] px-4 py-12 text-center">
-          <p className="font-medium">Nothing here yet</p>
+          <p className="font-medium">{t('targets.emptyTitle')}</p>
           <p className="mt-1 text-sm text-[var(--m)]">
-            Check a contact and register your first message.
+            {t('targets.emptyText')}
           </p>
           <Link
             href="/outreach/check"
             className="mt-4 inline-flex min-h-11 items-center rounded-full bg-[var(--t)] px-5 font-medium text-[var(--bg)]"
           >
-            Go to Check
+            {t('targets.goCheck')}
           </Link>
         </div>
       ) : (
@@ -143,7 +145,7 @@ export function TargetsScreen(): ReactElement {
                   <div className="min-w-0">
                     <p className="break-words text-lg font-medium">{target.displayName}</p>
                     <p className="text-sm text-[var(--m)]">
-                      {target.owner.name} · last contact{' '}
+                      {target.owner.name} · {t('targets.lastContact')}{' '}
                       <span title={formatDateTime(target.lastContactedAt)}>
                         {formatRelative(target.lastContactedAt)}
                       </span>
@@ -152,7 +154,7 @@ export function TargetsScreen(): ReactElement {
 
                   {target.status === 'do_not_contact' && (
                     <span className="shrink-0 rounded-full border border-red-500/60 px-2.5 py-0.5 text-xs font-medium">
-                      Do not contact
+                      {t('targets.doNotContact')}
                     </span>
                   )}
                 </div>
@@ -171,7 +173,7 @@ export function TargetsScreen(): ReactElement {
                   aria-expanded={openId === target.id}
                   onClick={() => toggleDetails(target.id)}
                 >
-                  {openId === target.id ? 'Hide details' : 'Details'}
+                  {openId === target.id ? t('targets.hide') : t('targets.details')}
                 </Button>
 
                 {openId === target.id &&
@@ -190,7 +192,7 @@ export function TargetsScreen(): ReactElement {
                     </div>
                   ) : (
                     loadingDetailId === target.id && (
-                      <p className="py-4 text-center text-[var(--m)]">Loading...</p>
+                      <p className="py-4 text-center text-[var(--m)]">{t('common.loading')}</p>
                     )
                   ))}
               </li>
@@ -204,7 +206,7 @@ export function TargetsScreen(): ReactElement {
               disabled={isLoadingMore}
               onClick={loadMore}
             >
-              {isLoadingMore ? 'Loading...' : 'Load more'}
+              {isLoadingMore ? t('common.loading') : t('targets.loadMore')}
             </Button>
           )}
         </>

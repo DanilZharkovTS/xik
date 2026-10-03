@@ -128,6 +128,15 @@ docker compose -f docker-compose.local.yml exec backend npm run products:import 
 The import is idempotent (matched by slug). Prices in the file are placeholders: set the real ones in Admin -> Products.
 The Next.js server reads the catalog through `API_INTERNAL_URL` (`http://backend:5001` inside Docker) with no caching.
 
+## Language (English / Ukrainian)
+
+The workspace (dashboard, journal, reports, Team, Products, Users) and the sign-in pages are available in English and
+Ukrainian. The switch (EN | УК) sits in the header and on the sign-in page; the choice is stored in the browser
+(`xik-locale`), the first visit follows the browser language. Texts live in `frontend/src/shared/i18n/messages/*`
+(English and Ukrainian side by side; the type checker fails the build if a key is missing in one language).
+In Ukrainian, API errors are shown by error code from the same dictionary; unknown codes fall back to the server text.
+The public site (home, product pages) and product content from the catalog are not translated.
+
 ## Known limitations and deliberately deferred
 
 - **Suppression list and personal-data policy.** "Do not contact" works per product. The cross-product, hashed

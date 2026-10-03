@@ -9,6 +9,7 @@ import { Button } from '@/src/shared/ui/button'
 import { Sheet } from '@/src/shared/ui/sheet'
 import { teamService } from '../team.service'
 import type { Moderator, TeamProduct } from '../team.types'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type ProductsSheetProps = {
   moderator: Moderator | null
@@ -26,6 +27,7 @@ export function ProductsSheet({
   onClose,
   onChanged,
 }: ProductsSheetProps): ReactElement {
+  const { t } = useI18n()
   const [busyId, setBusyId] = useState<string | null>(null)
 
   const grantedIds = new Set(moderator?.products.map((p) => p.id))
@@ -51,14 +53,14 @@ export function ProductsSheet({
   }
 
   return (
-    <Sheet title="Products" isOpen={moderator !== null} onClose={onClose}>
+    <Sheet title={t('team.products')} isOpen={moderator !== null} onClose={onClose}>
       <p className="mb-4 break-all text-sm text-[var(--m)]">
         {moderator?.name} · {moderator?.email}
       </p>
 
       {products.length === 0 ? (
         <p className="py-6 text-center text-[var(--m)]">
-          No products yet.
+          {t('team.productsSheet.empty')}
         </p>
       ) : (
         <ul className="divide-y divide-[var(--l)] overflow-hidden rounded-2xl border border-[var(--l)]">
@@ -73,7 +75,7 @@ export function ProductsSheet({
                 <div className="min-w-0">
                   <p className="truncate font-medium">{product.name}</p>
                   <p className="text-sm text-[var(--m)]">
-                    {isGranted ? 'Has access' : 'No access'}
+                    {isGranted ? t('team.productsSheet.has') : t('team.productsSheet.no')}
                   </p>
                 </div>
 
@@ -86,8 +88,8 @@ export function ProductsSheet({
                   {busyId === product.id
                     ? '...'
                     : isGranted
-                      ? 'Remove'
-                      : 'Add'}
+                      ? t('team.productsSheet.remove')
+                      : t('team.productsSheet.add')}
                 </Button>
               </li>
             )

@@ -1,11 +1,27 @@
 import { isAxiosError } from 'axios'
 
-// Бекенд повертає { code, message }; показуємо його текст, а не "Request failed with status code 409".
+import { translateNow } from '@/src/shared/i18n/translate'
+import { useI18nStore } from '@/src/shared/i18n/i18n-store'
+import { messages } from '@/src/shared/i18n/messages'
+import type { MessageKey } from '@/src/shared/i18n/messages'
+
+// Бекенд повертає { code, message }. Англійською показуємо його точний текст, українською
+// переклад за кодом (якщо він є), інакше текст сервера.
 export function getErrorMessage(error: unknown): string {
   if (isAxiosError(error)) {
     const data = error.response?.data as
-      | { message?: unknown; errors?: { field?: unknown; message?: unknown }[] }
+      | {
+          code?: unknown
+          message?: unknown
+          errors?: { field?: unknown; message?: unknown }[]
+        }
       | undefined
+
+    const key = `err.${String(data?.code)}`
+
+    if (useI18nStore.getState().locale === 'uk' && key in messages.uk) {
+      return translateNow(key as MessageKey)
+    }
 
     if (typeof data?.message === 'string' && data.message) {
       return data.message
@@ -22,5 +38,5 @@ export function getErrorMessage(error: unknown): string {
     return error.message
   }
 
-  return 'Something went wrong'
+  return translateNow('common.somethingWrong')
 }

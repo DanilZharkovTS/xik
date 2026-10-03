@@ -12,6 +12,7 @@ import { Sheet } from '@/src/shared/ui/sheet'
 import type { TargetListItem } from '@/src/features/outreach/outreach.types'
 import { teamService } from '../team.service'
 import type { Moderator, TeamProduct } from '../team.types'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type TransferTargetsSheetProps = {
   source: Moderator | null
@@ -26,10 +27,11 @@ type Mode = 'all' | 'selected'
 
 // Передача цілей: адмін вибирає продукт, одержувача й усі цілі або вибрані. Історія не переписується.
 export function TransferTargetsSheet(props: TransferTargetsSheetProps): ReactElement {
+  const { t } = useI18n()
   const { source, onClose } = props
 
   return (
-    <Sheet title="Transfer targets" isOpen={source !== null} onClose={onClose}>
+    <Sheet title={t('team.transfer.title')} isOpen={source !== null} onClose={onClose}>
       {/* key перемонтовує форму зі свіжим станом для кожного модератора. */}
       {source && <TransferForm key={source.id} {...props} source={source} />}
     </Sheet>
@@ -44,6 +46,7 @@ function TransferForm({
   onClose,
   onDone,
 }: Omit<TransferTargetsSheetProps, 'source'> & { source: Moderator }): ReactElement {
+  const { t } = useI18n()
   const [productId, setProductId] = useState(products[0]?.id ?? '')
   const [toUserId, setToUserId] = useState('')
   const [mode, setMode] = useState<Mode>('all')
@@ -125,8 +128,11 @@ function TransferForm({
     event.preventDefault()
     if (!canSubmit) return
 
-    const what = mode === 'all' ? 'all targets' : `${selected.size} selected target(s)`
-    if (!window.confirm(`Transfer ${what} of ${source.name} to ${recipient?.name}? The history is kept.`)) return
+    const confirmText =
+      mode === 'all'
+        ? t('team.transfer.confirmAll', { from: source.name, to: recipient?.name ?? '' })
+        : t('team.transfer.confirmSelected', { count: selected.size, from: source.name, to: recipient?.name ?? '' })
+    if (!window.confirm(confirmText)) return
 
     try {
       setIsSaving(true)
@@ -139,7 +145,7 @@ function TransferForm({
         },
         token,
       )
-      toast.success(`Transferred ${transferred} target(s) to ${recipient?.name}.`)
+      toast.success(t('team.transfer.success', { count: transferred, to: recipient?.name ?? '' }))
       await onDone()
       onClose()
     } catch (err) {
@@ -152,12 +158,11 @@ function TransferForm({
   return (
     <form onSubmit={submit} className="space-y-4">
       <p className="break-all text-sm text-[var(--m)]">
-        From {source.name} · {source.email}. Targets stay with their owner until you
-        transfer them.
+        {t('team.transfer.intro', { name: source.name, email: source.email })}
       </p>
 
       <SelectField
-        label="Product"
+        label={t('team.transfer.product')}
         value={productId}
         onChange={(event) => {
           setProductId(event.target.value)
@@ -171,8 +176,8 @@ function TransferForm({
         ))}
       </SelectField>
 
-      <SelectField label="Transfer to" value={toUserId} onChange={(event) => setToUserId(event.target.value)}>
-        <option value="">{recipients.length === 0 ? 'No eligible moderators' : 'Choose a moderator'}</option>
+      <SelectField label={t('team.transfer.to')} value={toUserId} onChange={(event) => setToUserId(event.target.value)}>
+        <option value="">{recipients.length === 0 ? t('team.transfer.noRecipients') : t('team.transfer.choose')}</option>
         {recipients.map((moderator) => (
           <option key={moderator.id} value={moderator.id}>
             {moderator.name}
@@ -181,14 +186,14 @@ function TransferForm({
       </SelectField>
 
       {isLoading ? (
-        <p className="py-4 text-center text-[var(--m)]">Loading...</p>
+        <p className="py-4 text-center text-[var(--m)]">{t('common.loading')}</p>
       ) : targets.length === 0 ? (
         <p className="rounded-xl border border-[var(--l)] px-3 py-4 text-center text-sm text-[var(--m)]">
-          {source.name} has no targets in this product.
+          {t('team.transfer.none', { name: source.name })}
         </p>
       ) : (
         <>
-          <div role="group" aria-label="What to transfer" className="grid grid-cols-2 rounded-full border border-[var(--l)] p-1">
+          <div role="group" aria-label={t('team.transfer.what')} className="grid grid-cols-2 rounded-full border border-[var(--l)] p-1">
             {(['all', 'selected'] as const).map((item) => (
               <button
                 key={item}
@@ -200,7 +205,7 @@ function TransferForm({
                   mode === item ? 'bg-[var(--t)] text-[var(--bg)]' : 'text-[var(--m)]',
                 )}
               >
-                {item === 'all' ? 'All targets' : 'Choose targets'}
+                {item === 'all' ? t('team.transfer.all') : t('team.transfer.selected')}
               </button>
             ))}
           </div>
@@ -232,14 +237,14 @@ function TransferForm({
                 <Button
                   variant="secondary"
                   onClick={() =>
-                    setSelected(selected.size === targets.length ? new Set() : new Set(targets.map((t) => t.id)))
+                    setSelected(selected.size === targets.length ? new Set() : new Set(targets.map((item) => item.id)))
                   }
                 >
-                  {selected.size === targets.length ? 'Clear' : 'Select all'}
+                  {selected.size === targets.length ? t('team.transfer.clear') : t('team.transfer.selectAll')}
                 </Button>
                 {nextCursor && (
                   <Button variant="secondary" disabled={isLoadingMore} onClick={loadMore}>
-                    {isLoadingMore ? 'Loading...' : 'Load more'}
+                    {isLoadingMore ? t('common.loading') : t('team.transfer.loadMore')}
                   </Button>
                 )}
               </div>
@@ -249,7 +254,7 @@ function TransferForm({
       )}
 
       <Button type="submit" className="min-h-11 w-full" disabled={!canSubmit}>
-        {isSaving ? 'Transferring...' : `Transfer ${countLabel} target${count === 1 ? '' : 's'}`}
+        {isSaving ? t('team.transfer.submitting') : t('team.transfer.submit', { count: countLabel })}
       </Button>
     </form>
   )

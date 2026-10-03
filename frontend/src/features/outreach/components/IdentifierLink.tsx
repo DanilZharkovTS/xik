@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 
-import { CHANNEL_LABELS } from '../outreach.types'
+import { channelLabel } from '../outreach.types'
 import type { Channel } from '../outreach.types'
 
 // Кожен ідентифікатор відкривається за посиланням одним дотиком.
@@ -15,7 +15,7 @@ export function IdentifierLink({
 }): ReactElement {
   const content = (
     <>
-      <span className="text-[var(--m)]">{CHANNEL_LABELS[channel]}</span>
+      <span className="text-[var(--m)]">{channelLabel(channel)}</span>
       <span className="min-w-0 break-all font-medium">{value}</span>
     </>
   )

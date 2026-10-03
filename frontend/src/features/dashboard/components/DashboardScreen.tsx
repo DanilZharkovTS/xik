@@ -8,18 +8,18 @@ import useAuthStore from '@/src/features/auth/store'
 import {
   EVENT_TYPES,
   EVENT_TYPE_COLORS,
-  EVENT_TYPE_LABELS,
+  EVENT_LABEL_KEYS,
 } from '@/src/features/reports/reports.types'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
 import { dashboardService } from '../dashboard.service'
 import type { DashboardData } from '../dashboard.service'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
-const dayFormat = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' })
-
-const formatRange = (from: string, to: string): string =>
-  from && to
-    ? `${dayFormat.format(new Date(`${from}T12:00:00Z`))} – ${dayFormat.format(new Date(`${to}T12:00:00Z`))}`
-    : ''
+const formatRange = (locale: string, from: string, to: string): string => {
+  if (!from || !to) return ''
+  const format = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' })
+  return `${format.format(new Date(`${from}T12:00:00Z`))} – ${format.format(new Date(`${to}T12:00:00Z`))}`
+}
 
 function Panel({
   title,
@@ -66,6 +66,7 @@ function Leaderboard({
 }
 
 export function DashboardScreen(): ReactElement {
+  const { t, locale } = useI18n()
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.accessToken)
   const isAdmin = user?.role === 'admin'
@@ -100,22 +101,22 @@ export function DashboardScreen(): ReactElement {
     <div className="mx-auto w-full max-w-7xl space-y-3 px-4 py-3 md:space-y-6 md:py-10">
       <div>
         <h1 className="text-2xl font-medium md:text-4xl">
-          Hi{user?.name ? `, ${user.name}` : ''}
+          {t('dash.hi')}{user?.name ? `, ${user.name}` : ''}
         </h1>
         <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
-          {isAdmin ? 'Your team this week.' : canUseJournal ? 'Your work this week.' : user?.email}
+          {isAdmin ? t('dash.teamWeek') : canUseJournal ? t('dash.myWeek') : user?.email}
         </p>
       </div>
 
       {!canUseJournal ? (
         <p className="rounded-2xl border border-[var(--l)] px-4 py-8 text-center text-[var(--m)]">
-          Your account has no workspace yet.
+          {t('dash.noWorkspace')}
         </p>
       ) : isLoading || !data ? (
-        <p className="py-12 text-center text-[var(--m)]">Loading...</p>
+        <p className="py-12 text-center text-[var(--m)]">{t('common.loading')}</p>
       ) : (
         <>
-          <Panel vizRoot title={`This week · ${formatRange(data.periodLabel.from, data.periodLabel.to)}`}>
+          <Panel vizRoot title={`${t('dash.thisWeek')} · ${formatRange(locale, data.periodLabel.from, data.periodLabel.to)}`}>
             <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
               {EVENT_TYPES.map((type) => (
                 <div key={type}>
@@ -125,7 +126,7 @@ export function DashboardScreen(): ReactElement {
                       className="h-2 w-2 rounded-full"
                       style={{ background: EVENT_TYPE_COLORS[type] }}
                     />
-                    {EVENT_TYPE_LABELS[type]}
+                    {t(EVENT_LABEL_KEYS[type])}
                   </dt>
                   <dd className="text-3xl font-medium">{data.week[type]}</dd>
                 </div>
@@ -135,33 +136,33 @@ export function DashboardScreen(): ReactElement {
 
           <div className="grid gap-3 md:grid-cols-2 md:gap-6 xl:grid-cols-3">
             {data.byProduct.length > 0 && (
-              <Panel title="Top products">
+              <Panel title={t('dash.topProducts')}>
                 <Leaderboard rows={data.byProduct} />
               </Panel>
             )}
 
             {data.byModerator.length > 0 && (
-              <Panel title="Top moderators">
+              <Panel title={t('dash.topModerators')}>
                 <Leaderboard rows={data.byModerator} />
               </Panel>
             )}
 
             {data.catalog && (
-              <Panel title="Catalog">
+              <Panel title={t('dash.catalog')}>
                 <dl className="grid grid-cols-3 gap-3">
                   <div>
-                    <dt className="text-sm text-[var(--m)]">Active</dt>
+                    <dt className="text-sm text-[var(--m)]">{t('dash.active')}</dt>
                     <dd className="text-3xl font-medium">{data.catalog.total}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-[var(--m)]">In Stripe</dt>
+                    <dt className="text-sm text-[var(--m)]">{t('dash.inStripe')}</dt>
                     <dd className="text-3xl font-medium">
                       {data.catalog.inStripe}
                       <span className="text-base text-[var(--m)]">/{data.catalog.total}</span>
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-sm text-[var(--m)]">Price hidden</dt>
+                    <dt className="text-sm text-[var(--m)]">{t('dash.priceHidden')}</dt>
                     <dd className="text-3xl font-medium">{data.catalog.hiddenPrice}</dd>
                   </div>
                 </dl>
@@ -171,7 +172,7 @@ export function DashboardScreen(): ReactElement {
 
           {data.week.total === 0 && (
             <p className="text-center text-sm text-[var(--m)]">
-              No activity yet this week. Open the Journal to log the first contact.
+              {t('dash.noActivity')}
             </p>
           )}
         </>

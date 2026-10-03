@@ -8,13 +8,16 @@ import { cn } from '@/src/shared/lib/cn'
 import { Button } from '@/src/shared/ui/button'
 import { outreachService } from '../outreach.service'
 import { useOutreachStore } from '../outreach-store'
-import { CHANNELS, TEMPLATE_CHANNEL_LABELS } from '../outreach.types'
+import { CHANNELS, templateChannelLabel } from '../outreach.types'
 import type { Channel, Template, TemplateStatus } from '../outreach.types'
 import { useOutreachContext } from '../use-outreach-context'
 import { CopyTemplateSheet } from './CopyTemplateSheet'
+import { SelectField } from '@/src/shared/ui/select-field'
 import { TemplateEditorSheet } from './TemplateEditorSheet'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 export function TemplatesScreen(): ReactElement {
+  const { t } = useI18n()
   const { token, productId, handleError } = useOutreachContext()
   const product = useOutreachStore(
     (state) => state.products.find((item) => item.id === state.selectedProductId) ?? null,
@@ -75,10 +78,10 @@ export function TemplatesScreen(): ReactElement {
       await outreachService.templateAction(template.id, action, token, productId)
       toast.success(
         action === 'archive'
-          ? 'Archived. You can restore it from the Archived tab.'
+          ? t('tpl.archivedToast')
           : action === 'restore'
-            ? 'Restored.'
-            : 'Duplicated. The copy is yours: edit it as you like.',
+            ? t('tpl.restoredToast')
+            : t('tpl.duplicatedToast'),
       )
       await reload()
     } catch (err) {
@@ -90,12 +93,12 @@ export function TemplatesScreen(): ReactElement {
 
   const remove = async (template: Template) => {
     if (!token || !productId) return
-    if (!window.confirm(`Delete "${template.title}" permanently?`)) return
+    if (!window.confirm(t('tpl.confirmDelete', { title: template.title }))) return
 
     try {
       setBusyId(template.id)
       await outreachService.deleteTemplate(template.id, token, productId)
-      toast.success('Deleted.')
+      toast.success(t('tpl.deleted'))
       await reload()
     } catch (err) {
       await handleError(err)
@@ -113,19 +116,19 @@ export function TemplatesScreen(): ReactElement {
     <div className="space-y-3 md:space-y-5">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-medium md:text-4xl">Templates</h1>
+          <h1 className="text-2xl font-medium md:text-4xl">{t('tpl.title')}</h1>
           <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
-            Ready texts to copy and send, so nobody has to invent them.
+            {t('tpl.intro')}
           </p>
         </div>
 
         <Button className="shrink-0" disabled={!token || !productId} onClick={() => openEditor(null)}>
-          New
+          {t('tpl.new')}
         </Button>
       </div>
 
       <div className="flex gap-2">
-        <div role="group" aria-label="Status" className="flex shrink-0 rounded-full border border-[var(--l)] p-1">
+        <div role="group" aria-label={t('tpl.status')} className="flex shrink-0 rounded-full border border-[var(--l)] p-1">
           {(['active', 'archived'] as const).map((item) => (
             <button
               key={item}
@@ -140,42 +143,42 @@ export function TemplatesScreen(): ReactElement {
                 status === item ? 'bg-[var(--t)] text-[var(--bg)]' : 'text-[var(--m)]',
               )}
             >
-              {item}
+              {t(`tpl.status.${item}`)}
             </button>
           ))}
         </div>
 
-        <label htmlFor="template-channel" className="sr-only">
-          Channel
-        </label>
-        <select
-          id="template-channel"
-          value={channel}
-          onChange={(event) => {
-            setIsLoading(true)
-            setChannel(event.target.value as Channel | '')
-          }}
-          className="min-h-11 min-w-0 flex-1 rounded-full border border-[var(--l)] bg-[var(--bg)] px-4 text-base outline-none focus:border-[var(--t)]"
-        >
-          <option value="">All channels</option>
-          {CHANNELS.map((item) => (
-            <option key={item} value={item}>
-              {TEMPLATE_CHANNEL_LABELS[item]}
-            </option>
-          ))}
-        </select>
+        <div className="min-w-0 flex-1">
+          <SelectField
+            label={t('tpl.channel')}
+            hideLabel
+            pill
+            value={channel}
+            onChange={(event) => {
+              setIsLoading(true)
+              setChannel(event.target.value as Channel | '')
+            }}
+          >
+            <option value="">{t('tpl.allChannels')}</option>
+            {CHANNELS.map((item) => (
+              <option key={item} value={item}>
+                {templateChannelLabel(item)}
+              </option>
+            ))}
+          </SelectField>
+        </div>
       </div>
 
       {isLoading ? (
-        <p className="py-12 text-center text-[var(--m)]">Loading...</p>
+        <p className="py-12 text-center text-[var(--m)]">{t('common.loading')}</p>
       ) : templates.length === 0 ? (
         <div className="rounded-2xl border border-[var(--l)] px-4 py-12 text-center">
           <p className="font-medium">
-            {status === 'archived' ? 'No archived templates' : 'No templates yet'}
+            {status === 'archived' ? t('tpl.emptyArchived') : t('tpl.empty')}
           </p>
           {status === 'active' && (
             <p className="mt-1 text-sm text-[var(--m)]">
-              Create the first one: an email, a Telegram message or a universal text.
+              {t('tpl.emptyHint')}
             </p>
           )}
         </div>
@@ -190,8 +193,8 @@ export function TemplatesScreen(): ReactElement {
                 <div className="min-w-0">
                   <p className="break-words text-lg font-medium">{template.title}</p>
                   <p className="text-sm text-[var(--m)]">
-                    {TEMPLATE_CHANNEL_LABELS[template.channel]} · v{template.version} ·{' '}
-                    {template.isMine ? 'yours' : template.owner.name}
+                    {templateChannelLabel(template.channel)} · v{template.version} ·{' '}
+                    {template.isMine ? t('tpl.yours') : template.owner.name}
                   </p>
                 </div>
               </div>
@@ -204,31 +207,31 @@ export function TemplatesScreen(): ReactElement {
               <div className="grid grid-cols-2 gap-2">
                 {template.status === 'active' && (
                   <Button className="col-span-2 min-h-11" onClick={() => setCopying(template)}>
-                    Copy
+                    {t('tpl.copy')}
                   </Button>
                 )}
 
                 {template.permissions.canEdit && (
                   <Button variant="secondary" disabled={busyId === template.id} onClick={() => openEditor(template)}>
-                    Edit
+                    {t('tpl.edit')}
                   </Button>
                 )}
 
                 {template.permissions.canDuplicate && (
                   <Button variant="secondary" disabled={busyId === template.id} onClick={() => run(template, 'duplicate')}>
-                    Duplicate
+                    {t('tpl.duplicate')}
                   </Button>
                 )}
 
                 {template.permissions.canArchive && (
                   <Button variant="secondary" disabled={busyId === template.id} onClick={() => run(template, 'archive')}>
-                    Archive
+                    {t('tpl.archive')}
                   </Button>
                 )}
 
                 {template.permissions.canRestore && (
                   <Button variant="secondary" disabled={busyId === template.id} onClick={() => run(template, 'restore')}>
-                    Restore
+                    {t('tpl.restore')}
                   </Button>
                 )}
 
@@ -239,7 +242,7 @@ export function TemplatesScreen(): ReactElement {
                     disabled={busyId === template.id}
                     onClick={() => remove(template)}
                   >
-                    Delete
+                    {t('tpl.delete')}
                   </Button>
                 )}
               </div>

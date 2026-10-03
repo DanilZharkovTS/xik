@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 import type { ReactElement, ReactNode } from 'react'
 import { X } from 'lucide-react'
 
@@ -31,6 +32,7 @@ export function Sheet({
   children,
   size = 'md',
 }: SheetProps): ReactElement | null {
+  const { t } = useI18n()
   const titleId = useId()
   const sheetKey = useRef(Symbol('sheet'))
   const panelRef = useRef<HTMLDivElement>(null)
@@ -100,7 +102,7 @@ export function Sheet({
     <div className="fixed inset-0 z-[110]">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t('common.close')}
         tabIndex={-1}
         className="absolute inset-0 h-full w-full cursor-default bg-black/60"
         onClick={onClose}
@@ -121,7 +123,7 @@ export function Sheet({
 
           <button
             type="button"
-            aria-label="Close"
+            aria-label={t('common.close')}
             onClick={onClose}
             className="-mr-2 flex h-11 w-11 items-center justify-center text-[var(--m)] hover:text-[var(--t)]"
           >

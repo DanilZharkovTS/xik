@@ -3,6 +3,7 @@ import type { ReactElement } from 'react'
 import { cn } from '@/src/shared/lib/cn'
 import { Button } from '@/src/shared/ui/button'
 import type { Moderator } from '../team.types'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type ModeratorCardProps = {
   moderator: Moderator
@@ -23,6 +24,7 @@ export function ModeratorCard({
   onTransfer,
   onToggleActive,
 }: ModeratorCardProps): ReactElement {
+  const { t } = useI18n()
   const isActive = moderator.deactivatedAt === null
 
   return (
@@ -48,13 +50,13 @@ export function ModeratorCard({
               : 'border-[var(--l)] text-[var(--m)]',
           )}
         >
-          {isActive ? 'Active' : 'Deactivated'}
+          {isActive ? t('team.active') : t('team.deactivated')}
         </span>
       </div>
 
       <div>
         <p className="mb-1.5 text-xs uppercase tracking-wider text-[var(--m)]">
-          Products
+          {t('team.products')}
         </p>
 
         {moderator.products.length > 0 ? (
@@ -69,7 +71,7 @@ export function ModeratorCard({
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-[var(--m)]">No products</p>
+          <p className="text-sm text-[var(--m)]">{t('team.noProducts')}</p>
         )}
       </div>
 
@@ -79,7 +81,7 @@ export function ModeratorCard({
           disabled={isBusy}
           onClick={onProducts}
         >
-          Products
+          {t('team.products')}
         </Button>
 
         <Button
@@ -88,7 +90,7 @@ export function ModeratorCard({
           disabled={isBusy}
           onClick={onPassword}
         >
-          Password
+          {t('team.password')}
         </Button>
 
         <Button
@@ -97,7 +99,7 @@ export function ModeratorCard({
           disabled={isBusy}
           onClick={onTransfer}
         >
-          Transfer targets
+          {t('team.transfer')}
         </Button>
 
         <Button
@@ -106,7 +108,7 @@ export function ModeratorCard({
           disabled={isBusy}
           onClick={onToggleActive}
         >
-          {isActive ? 'Deactivate' : 'Activate'}
+          {isActive ? t('team.deactivate') : t('team.activate')}
         </Button>
       </div>
     </li>

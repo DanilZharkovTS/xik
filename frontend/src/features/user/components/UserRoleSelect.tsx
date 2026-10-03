@@ -8,19 +8,12 @@ import { toast } from 'sonner'
 import { Picker } from '@/src/shared/ui/picker'
 
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
-const ROLE_LABELS: Record<UserRole, string> = {
-  admin: 'Admin',
-  moderator: 'Moderator',
-  user: 'User',
-}
-
-const ROLE_OPTIONS = (Object.keys(ROLE_LABELS) as UserRole[]).map((role) => ({
-  value: role,
-  label: ROLE_LABELS[role],
-}))
+const ROLES: UserRole[] = ['admin', 'moderator', 'user']
 
 export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
+  const { t } = useI18n()
   const token = useAuthStore((state) => state.accessToken)
   const currentUserId = useAuthStore((state) => state.user?.id)
 
@@ -45,18 +38,18 @@ export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
   if (isCurrentUser) {
     return (
       <span className="inline-block rounded-full border border-[var(--t)] px-3 py-1 text-sm">
-        {ROLE_LABELS[selectedRole]}
+        {t(`role.${selectedRole}`)}
       </span>
     )
   }
 
   return (
     <Picker
-      label={`Role for ${user.name}`}
+      label={t('users.roleFor', { name: user.name })}
       hideLabel
       value={selectedRole}
       onChange={(role) => onChangeRole(role as UserRole)}
-      options={ROLE_OPTIONS}
+      options={ROLES.map((role) => ({ value: role, label: t(`role.${role}`) }))}
     />
   )
 }

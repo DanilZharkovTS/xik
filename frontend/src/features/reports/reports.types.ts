@@ -1,12 +1,14 @@
+import type { MessageKey } from '@/src/shared/i18n/messages'
+
 export type EventType = 'first' | 'repeat' | 'reply' | 'publication'
 
 export const EVENT_TYPES: readonly EventType[] = ['first', 'repeat', 'reply', 'publication']
 
-export const EVENT_TYPE_LABELS: Record<EventType, string> = {
-  first: 'New contacts',
-  repeat: 'Repeat contacts',
-  reply: 'Replies',
-  publication: 'Publications',
+export const EVENT_LABEL_KEYS: Record<EventType, MessageKey> = {
+  first: 'reports.type.first',
+  repeat: 'reports.type.repeat',
+  reply: 'reports.type.reply',
+  publication: 'reports.type.publication',
 }
 
 // Колір належить типу події, а не позиції: фільтр не перефарбовує решту.
@@ -21,12 +23,12 @@ export type Period = 'day' | 'week' | 'month' | 'year' | 'custom'
 
 export const PERIODS: readonly Period[] = ['day', 'week', 'month', 'year', 'custom']
 
-export const PERIOD_LABELS: Record<Period, string> = {
-  day: 'Day',
-  week: 'Week',
-  month: 'Month',
-  year: 'Year',
-  custom: 'Custom',
+export const PERIOD_LABEL_KEYS: Record<Period, MessageKey> = {
+  day: 'reports.period.day',
+  week: 'reports.period.week',
+  month: 'reports.period.month',
+  year: 'reports.period.year',
+  custom: 'reports.period.custom',
 }
 
 export interface ReportCounts {

@@ -10,10 +10,16 @@ import { siteConfig } from '@/src/config/site'
 import useAuthStore from '@/src/features/auth/store'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { useI18nStore } from '@/src/shared/i18n/i18n-store'
 
 const MainContent = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
   const router = useRouter()
+  const initLocale = useI18nStore((state) => state.initLocale)
+
+  useEffect(() => {
+    initLocale()
+  }, [initLocale])
 
   const user = useAuthStore((state) => state.user)
   const status = useAuthStore((state) => state.status)

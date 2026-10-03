@@ -5,16 +5,19 @@ import type { FormEvent, ReactElement } from 'react'
 import { isAxiosError } from 'axios'
 import { toast } from 'sonner'
 
+import { getErrorMessage } from '@/src/shared/api/get-error-message'
 import { Button } from '@/src/shared/ui/button'
 import { SelectField } from '@/src/shared/ui/select-field'
 import { TextField } from '@/src/shared/ui/text-field'
 import { outreachService } from '../outreach.service'
-import { CHANNELS, CHANNEL_LABELS } from '../outreach.types'
+import { CHANNELS, channelLabel } from '../outreach.types'
 import type { Channel, CheckResult, TargetDetail } from '../outreach.types'
 import { useOutreachContext } from '../use-outreach-context'
 import { CheckResultCard } from './CheckResultCard'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 export function CheckScreen(): ReactElement {
+  const { t } = useI18n()
   const { token, productId, handleError } = useOutreachContext()
 
   const [value, setValue] = useState('')
@@ -38,7 +41,7 @@ export function CheckScreen(): ReactElement {
 
       if (isAxiosError(err) && err.response?.data?.code === 'INVALID_IDENTIFIER') {
         setNeedsChannel(true)
-        toast.error(err.response.data.message)
+        toast.error(getErrorMessage(err))
       } else {
         await handleError(err)
       }
@@ -52,7 +55,7 @@ export function CheckScreen(): ReactElement {
       setValue(await navigator.clipboard.readText())
       setResult(null)
     } catch {
-      toast.error('Could not read the clipboard. Paste manually.')
+      toast.error(t('check.clipboardFailed'))
     }
   }
 
@@ -73,18 +76,17 @@ export function CheckScreen(): ReactElement {
   return (
     <div className="space-y-3 md:space-y-5">
       <div>
-        <h1 className="text-2xl font-medium md:text-4xl">Check</h1>
+        <h1 className="text-2xl font-medium md:text-4xl">{t('check.title')}</h1>
         <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
-          Paste a Telegram username, email, LinkedIn, Facebook or website link to see
-          whether anyone has already written to them.
+          {t('check.intro')}
         </p>
       </div>
 
       <form onSubmit={runCheck} className="space-y-3">
         <TextField
-          label="Username, email or link"
+          label={t('check.input')}
           value={value}
-          placeholder="@username, name@company.com, https://..."
+          placeholder={t('check.placeholder')}
           autoComplete="off"
           autoCapitalize="off"
           autoCorrect="off"
@@ -97,20 +99,20 @@ export function CheckScreen(): ReactElement {
 
         <div className="grid grid-cols-2 gap-2">
           <Button variant="secondary" onClick={paste}>
-            Paste
+            {t('check.paste')}
           </Button>
 
           <SelectField
-            label="Channel"
+            label={t('check.channel')}
             hideLabel
             pill
             value={channel}
             onChange={(event) => setChannel(event.target.value as Channel | '')}
           >
-            <option value="">Auto-detect</option>
+            <option value="">{t('check.auto')}</option>
             {CHANNELS.map((item) => (
               <option key={item} value={item}>
-                {CHANNEL_LABELS[item]}
+                {channelLabel(item)}
               </option>
             ))}
           </SelectField>
@@ -118,7 +120,7 @@ export function CheckScreen(): ReactElement {
 
         {needsChannel && (
           <p className="text-sm text-amber-500" role="status">
-            Could not recognize the value. Choose the channel and check again.
+            {t('check.needChannel')}
           </p>
         )}
 
@@ -127,7 +129,7 @@ export function CheckScreen(): ReactElement {
           className="min-h-11 w-full"
           disabled={isChecking || !value.trim() || !productId}
         >
-          {isChecking ? 'Checking...' : 'Check'}
+          {isChecking ? t('check.checking') : t('check.submit')}
         </Button>
       </form>
 

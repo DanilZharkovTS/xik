@@ -11,6 +11,7 @@ import { teamService } from '../team.service'
 import { generatePassword } from '../generate-password'
 import { PasswordField } from './PasswordField'
 import type { Moderator } from '../team.types'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type ResetPasswordSheetProps = {
   moderator: Moderator | null
@@ -23,6 +24,7 @@ export function ResetPasswordSheet({
   token,
   onClose,
 }: ResetPasswordSheetProps): ReactElement | null {
+  const { t } = useI18n()
   const [password, setPassword] = useState(() => generatePassword())
   const [isSaving, setIsSaving] = useState(false)
   const [isDone, setIsDone] = useState(false)
@@ -50,7 +52,7 @@ export function ResetPasswordSheet({
 
   return (
     <Sheet
-      title="New password"
+      title={t('team.reset.title')}
       isOpen={moderator !== null}
       onClose={close}
     >
@@ -61,14 +63,13 @@ export function ResetPasswordSheet({
       {isDone ? (
         <div className="space-y-4">
           <p className="text-base">
-            Password changed and all sessions of this moderator were signed
-            out. Send the new password to them.
+            {t('team.reset.done')}
           </p>
 
           <PasswordField value={password} onChange={() => undefined} />
 
           <Button className="min-h-11 w-full" onClick={close}>
-            Done
+            {t('team.done')}
           </Button>
         </div>
       ) : (
@@ -80,7 +81,7 @@ export function ResetPasswordSheet({
             className="min-h-11 w-full"
             disabled={isSaving}
           >
-            {isSaving ? 'Saving...' : 'Set password'}
+            {isSaving ? t('team.reset.submitting') : t('team.reset.submit')}
           </Button>
         </form>
       )}

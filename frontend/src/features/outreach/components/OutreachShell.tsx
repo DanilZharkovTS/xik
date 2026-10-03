@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import type { ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart3, FileText, ListChecks, Megaphone, Search } from 'lucide-react'
+import type { MessageKey } from '@/src/shared/i18n/messages'
 
 import useAuthStore from '@/src/features/auth/store'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
@@ -13,16 +13,18 @@ import { toast } from 'sonner'
 import { outreachService } from '../outreach.service'
 import { useOutreachStore } from '../outreach-store'
 import { ProductSwitcher } from './ProductSwitcher'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
-const NAV_ITEMS = [
-  { href: '/outreach/check', label: 'Check', Icon: Search },
-  { href: '/outreach/targets', label: 'My targets', Icon: ListChecks },
-  { href: '/outreach/publications', label: 'Publications', Icon: Megaphone },
-  { href: '/outreach/templates', label: 'Templates', Icon: FileText },
-  { href: '/outreach/reports', label: 'Reports', Icon: BarChart3 },
+const NAV_ITEMS: { href: string; labelKey: MessageKey }[] = [
+  { href: '/outreach/check', labelKey: 'journal.check' },
+  { href: '/outreach/targets', labelKey: 'journal.targets' },
+  { href: '/outreach/publications', labelKey: 'journal.publications' },
+  { href: '/outreach/templates', labelKey: 'journal.templates' },
+  { href: '/outreach/reports', labelKey: 'journal.reports' },
 ]
 
 export function OutreachShell({ children }: { children: ReactNode }): ReactElement {
+  const { t } = useI18n()
   const pathname = usePathname()
   const token = useAuthStore((state) => state.accessToken)
   const isAdmin = useAuthStore((state) => state.user?.role === 'admin')
@@ -58,8 +60,8 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
         <ProductSwitcher />
 
         {/* Розділи журналу: на десктопі праворуч від продукту, на телефоні окремим рядком нижче. */}
-        <nav aria-label="Journal" className="hidden gap-1 md:flex">
-          {NAV_ITEMS.map(({ href, label }) => (
+        <nav aria-label={t('nav.journal')} className="hidden gap-1 md:flex">
+          {NAV_ITEMS.map(({ href, labelKey }) => (
             <Link
               key={href}
               href={href}
@@ -71,7 +73,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
                   : 'text-[var(--m)] hover:text-[var(--t)]',
               )}
             >
-              {label}
+              {t(labelKey)}
             </Link>
           ))}
         </nav>
@@ -79,10 +81,10 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
 
       {products.length > 0 && (
         <nav
-          aria-label="Journal sections"
+          aria-label={t('journal.section')}
           className="-mx-4 mb-3 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] md:hidden"
         >
-          {NAV_ITEMS.map(({ href, label }) => (
+          {NAV_ITEMS.map(({ href, labelKey }) => (
             <Link
               key={href}
               href={href}
@@ -94,25 +96,25 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
                   : 'border-[var(--l)] text-[var(--m)]',
               )}
             >
-              {label}
+              {t(labelKey)}
             </Link>
           ))}
         </nav>
       )}
 
       {status === 'loading' || (token === null && status !== 'error') ? (
-        <p className="py-12 text-center text-[var(--m)]">Loading...</p>
+        <p className="py-12 text-center text-[var(--m)]">{t('common.loading')}</p>
       ) : status === 'error' ? (
         <p className="py-12 text-center text-[var(--m)]">
-          Could not load your products. Reload the page.
+          {t('journal.loadFailed')}
         </p>
       ) : products.length === 0 ? (
         <div className="rounded-2xl border border-[var(--l)] px-4 py-12 text-center">
-          <p className="font-medium">No products assigned</p>
+          <p className="font-medium">{t('journal.noProducts')}</p>
           <p className="mt-1 text-sm text-[var(--m)]">
             {isAdmin
-              ? 'Create a product, then give a moderator access to it.'
-              : 'Ask an administrator to give you access to a product.'}
+              ? t('journal.noProductsAdmin')
+              : t('journal.noProductsMod')}
           </p>
           {isAdmin && (
             <div className="mt-4 flex flex-col justify-center gap-2 sm:flex-row">
@@ -120,13 +122,13 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
                 href="/admin/products"
                 className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--t)] bg-[var(--t)] px-5 font-medium text-[var(--bg)]"
               >
-                Products
+                {t('nav.products')}
               </Link>
               <Link
                 href="/admin/team"
                 className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--l)] px-5 font-medium"
               >
-                Team
+                {t('nav.team')}
               </Link>
             </div>
           )}

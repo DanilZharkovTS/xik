@@ -1,3 +1,5 @@
+import { translateNow } from '@/src/shared/i18n/translate'
+
 export type Channel = 'telegram' | 'email' | 'linkedin' | 'facebook' | 'website'
 
 export const CHANNELS: readonly Channel[] = [
@@ -8,13 +10,7 @@ export const CHANNELS: readonly Channel[] = [
   'website',
 ]
 
-export const CHANNEL_LABELS: Record<Channel, string> = {
-  telegram: 'Telegram',
-  email: 'Email',
-  linkedin: 'LinkedIn',
-  facebook: 'Facebook',
-  website: 'Website',
-}
+export const channelLabel = (channel: Channel): string => translateNow(`channel.${channel}`)
 
 export type TargetStatus = 'active' | 'do_not_contact'
 
@@ -57,18 +53,8 @@ export const PUBLICATION_CHANNELS: readonly PublicationChannel[] = [
   'other',
 ]
 
-export const PUBLICATION_CHANNEL_LABELS: Record<PublicationChannel, string> = {
-  facebook: 'Facebook',
-  instagram: 'Instagram',
-  threads: 'Threads',
-  tiktok: 'TikTok',
-  x: 'X',
-  youtube: 'YouTube',
-  linkedin: 'LinkedIn',
-  telegram: 'Telegram',
-  website: 'Website',
-  other: 'Other',
-}
+export const publicationChannelLabel = (channel: PublicationChannel): string =>
+  translateNow(`pubchan.${channel}`)
 
 export type PublicationKind = 'post' | 'ad' | 'article' | 'link_in_offer'
 
@@ -79,12 +65,7 @@ export const PUBLICATION_KINDS: readonly PublicationKind[] = [
   'link_in_offer',
 ]
 
-export const PUBLICATION_KIND_LABELS: Record<PublicationKind, string> = {
-  post: 'Post',
-  ad: 'Ad placement',
-  article: 'Article',
-  link_in_offer: 'Link in an offer',
-}
+export const publicationKindLabel = (kind: PublicationKind): string => translateNow(`pubkind.${kind}`)
 
 export interface Publication {
   id: string
@@ -130,10 +111,8 @@ export interface ActivityInput {
 
 export type TemplateChannel = Channel | 'any'
 
-export const TEMPLATE_CHANNEL_LABELS: Record<TemplateChannel, string> = {
-  ...CHANNEL_LABELS,
-  any: 'Any channel',
-}
+export const templateChannelLabel = (channel: TemplateChannel): string =>
+  translateNow(`channel.${channel}`)
 
 export type TemplateStatus = 'active' | 'archived'
 

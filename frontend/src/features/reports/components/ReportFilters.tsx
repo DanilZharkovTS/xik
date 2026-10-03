@@ -9,11 +9,12 @@ import { TextField } from '@/src/shared/ui/text-field'
 import {
   EVENT_TYPES,
   EVENT_TYPE_COLORS,
-  EVENT_TYPE_LABELS,
+  EVENT_LABEL_KEYS,
   PERIODS,
-  PERIOD_LABELS,
+  PERIOD_LABEL_KEYS,
 } from '../reports.types'
 import type { EventType, Period } from '../reports.types'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 export const ALL_PRODUCTS = 'all'
 
@@ -53,11 +54,12 @@ export function ReportFilters({
   onToggleType,
   admin,
 }: ReportFiltersProps): ReactElement {
+  const { t } = useI18n()
   return (
     <div className="space-y-3">
       <div
         role="group"
-        aria-label="Period"
+        aria-label={t('reports.period')}
         className="grid grid-cols-5 rounded-full border border-[var(--l)] p-1"
       >
         {PERIODS.map((item) => (
@@ -71,7 +73,7 @@ export function ReportFilters({
               period === item ? 'bg-[var(--t)] text-[var(--bg)]' : 'text-[var(--m)]',
             )}
           >
-            {PERIOD_LABELS[item]}
+            {t(PERIOD_LABEL_KEYS[item])}
           </button>
         ))}
       </div>
@@ -79,14 +81,14 @@ export function ReportFilters({
       {period === 'custom' ? (
         <div className="grid grid-cols-2 gap-3">
           <TextField
-            label="From"
+            label={t('reports.from')}
             type="date"
             value={customFrom}
             max={customTo || undefined}
             onChange={(event) => onCustomFrom(event.target.value)}
           />
           <TextField
-            label="To"
+            label={t('reports.to')}
             type="date"
             value={customTo}
             min={customFrom || undefined}
@@ -95,17 +97,17 @@ export function ReportFilters({
         </div>
       ) : (
         <div className="flex items-center justify-between gap-2">
-          <Button variant="secondary" aria-label="Previous period" className="w-12 px-0" onClick={() => onShift(-1)}>
+          <Button variant="secondary" aria-label={t('reports.prev')} className="w-12 px-0" onClick={() => onShift(-1)}>
             ‹
           </Button>
           <p className="min-w-0 flex-1 text-center text-base font-medium">{rangeLabel}</p>
-          <Button variant="secondary" aria-label="Next period" className="w-12 px-0" onClick={() => onShift(1)}>
+          <Button variant="secondary" aria-label={t('reports.next')} className="w-12 px-0" onClick={() => onShift(1)}>
             ›
           </Button>
         </div>
       )}
 
-      <div role="group" aria-label="Event types" className="flex flex-wrap gap-2">
+      <div role="group" aria-label={t('reports.eventTypes')} className="flex flex-wrap gap-2">
         {EVENT_TYPES.map((type) => {
           const isOn = types.includes(type)
 
@@ -125,7 +127,7 @@ export function ReportFilters({
                 className="viz-root inline-block h-2.5 w-2.5 rounded-sm"
                 style={{ background: isOn ? EVENT_TYPE_COLORS[type] : 'transparent', border: isOn ? 'none' : '1px solid var(--l)' }}
               />
-              {EVENT_TYPE_LABELS[type]}
+              {t(EVENT_LABEL_KEYS[type])}
             </button>
           )
         })}
@@ -133,8 +135,8 @@ export function ReportFilters({
 
       {admin && (
         <div className="grid gap-3 sm:grid-cols-2">
-          <SelectField label="Report scope" value={admin.scope} onChange={(event) => admin.onScope(event.target.value)}>
-            <option value={ALL_PRODUCTS}>All products</option>
+          <SelectField label={t('reports.scope')} value={admin.scope} onChange={(event) => admin.onScope(event.target.value)}>
+            <option value={ALL_PRODUCTS}>{t('reports.allProducts')}</option>
             {admin.products.map((product) => (
               <option key={product.id} value={product.id}>
                 {product.name}
@@ -142,8 +144,8 @@ export function ReportFilters({
             ))}
           </SelectField>
 
-          <SelectField label="Moderator" value={admin.userId} onChange={(event) => admin.onUser(event.target.value)}>
-            <option value="">All moderators</option>
+          <SelectField label={t('reports.moderator')} value={admin.userId} onChange={(event) => admin.onUser(event.target.value)}>
+            <option value="">{t('reports.allModerators')}</option>
             {admin.moderators.map((moderator) => (
               <option key={moderator.id} value={moderator.id}>
                 {moderator.name}
