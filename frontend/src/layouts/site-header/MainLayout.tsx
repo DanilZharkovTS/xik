@@ -21,6 +21,23 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!user && status === 'checking') return
 
+    // Захист на клієнті: бекенд усе одно перевіряє кожен запит, тож тут лише зручність.
+    // Гість не бачить робочих сторінок, а залогінений не лишається на формі входу.
+    const isWorkspacePath =
+      pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/outreach') ||
+      pathname.startsWith('/admin')
+
+    if (!user && isWorkspacePath) {
+      router.replace('/auth/login')
+      return
+    }
+
+    if (user && pathname.startsWith('/auth/')) {
+      router.replace('/dashboard')
+      return
+    }
+
     if (pathname.startsWith('/admin') && user?.role !== 'admin') {
       router.replace('/dashboard')
     }

@@ -1,92 +1,14 @@
-'use client'
+import type { Metadata } from 'next'
 
-import Link from 'next/link'
-import type { ReactElement } from 'react'
+import { DashboardScreen } from '@/src/features/dashboard/components/DashboardScreen'
 
-import useAuthStore from '@/src/features/auth/store'
-
-type DashboardLink = {
-  href: string
-  title: string
-  description: string
-}
-
-const JOURNAL_LINKS: DashboardLink[] = [
-  {
-    href: '/outreach/check',
-    title: 'Journal',
-    description: 'Check a contact, log outreach, templates and publications.',
-  },
-  {
-    href: '/outreach/reports',
-    title: 'Reports',
-    description: 'Your work by period, channel and product.',
-  },
-]
-
-const ADMIN_LINKS: DashboardLink[] = [
-  {
-    href: '/admin/team',
-    title: 'Team',
-    description: 'Moderators, their products and passwords, transfer of targets.',
-  },
-  {
-    href: '/admin/products',
-    title: 'Products',
-    description: 'Create and edit the product catalog.',
-  },
-  {
-    href: '/admin/users',
-    title: 'Users',
-    description: 'Find users and change their roles.',
-  },
-]
-
-function LinkCards({ title, links }: { title: string; links: DashboardLink[] }): ReactElement {
-  return (
-    <section className="space-y-3">
-      <h2 className="text-sm uppercase tracking-wider text-[var(--m)]">{title}</h2>
-
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {links.map((link) => (
-          <li key={link.href}>
-            <Link
-              href={link.href}
-              className="block h-full rounded-2xl border border-[var(--l)] bg-[var(--s)] p-4 transition-colors hover:border-[var(--t)]"
-            >
-              <span className="block text-lg font-medium">{link.title}</span>
-              <span className="mt-1 block text-sm text-[var(--m)]">{link.description}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
-  )
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  robots: { index: false, follow: false },
 }
 
 const Dashboard = () => {
-  const user = useAuthStore((state) => state.user)
-
-  const isAdmin = user?.role === 'admin'
-  const canUseJournal = isAdmin || user?.role === 'moderator'
-
-  return (
-    <div className="mx-auto w-full max-w-5xl space-y-3 px-4 py-3 md:space-y-6 md:py-10">
-      <div>
-        <h1 className="text-2xl font-medium md:text-4xl">{isAdmin ? 'Admin dashboard' : 'Dashboard'}</h1>
-        {user && (
-          <p className="mt-1 break-all text-[var(--m)]">
-            {user.name ? `${user.name} · ` : ''}
-            {user.email}
-          </p>
-        )}
-      </div>
-
-      {canUseJournal && <LinkCards title="Journal" links={JOURNAL_LINKS} />}
-      {isAdmin && <LinkCards title="Administration" links={ADMIN_LINKS} />}
-
-    </div>
-  )
+  return <DashboardScreen />
 }
 
 export default Dashboard
