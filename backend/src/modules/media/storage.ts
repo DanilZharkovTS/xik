@@ -34,6 +34,8 @@ export const storage: Storage = {
     }
 
     client ??= new S3Client({
+      // Недоступне сховище не має зависати на довгі повтори.
+      maxAttempts: 2,
       region: process.env.S3_REGION ?? (process.env.S3_ENDPOINT ? 'auto' : 'us-east-1'),
       endpoint: process.env.S3_ENDPOINT,
       forcePathStyle: Boolean(process.env.S3_ENDPOINT),
@@ -43,16 +45,22 @@ export const storage: Storage = {
       },
     })
 
-    await client.send(
-      new PutObjectCommand({
-        Bucket: process.env.S3_BUCKET!,
-        Key: key,
-        Body: body,
-        ContentType: contentType,
-        // Ім'я файлу містить випадковий id і не змінюється, тож кешувати можна надовго.
-        CacheControl: 'public, max-age=31536000, immutable',
-      })
-    )
+    try {
+      await client.send(
+        new PutObjectCommand({
+          Bucket: process.env.S3_BUCKET!,
+          Key: key,
+          Body: body,
+          ContentType: contentType,
+          // Ім'я файлу містить випадковий id і не змінюється, тож кешувати можна надовго.
+          CacheControl: 'public, max-age=31536000, immutable',
+        })
+      )
+    } catch (err) {
+      // Сховище не відповіло або відмовило (немає bucket, невірні ключі): це не збій нашого коду.
+      console.error('Image storage request failed:', err instanceof Error ? err.message : err)
+      throw ApiError(502, 'STORAGE_UNAVAILABLE', 'Image storage is unavailable. Check the S3 settings and that the storage is running.')
+    }
 
     return publicUrlFor(key)
   },
