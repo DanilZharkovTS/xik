@@ -2,6 +2,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { revalidateTag } from 'next/cache'
 import { NextResponse } from 'next/server'
 
+import { BLOG_TAG } from '@/src/features/blog/blog-api'
 import { CATALOG_TAG } from '@/src/features/catalog/catalog-api'
 
 const matches = (given: string | null, expected: string): boolean => {
@@ -13,7 +14,7 @@ const matches = (given: string | null, expected: string): boolean => {
   return a.length === b.length && timingSafeEqual(a, b)
 }
 
-// Бекенд викликає після будь-якої зміни продукту. Без секрету ендпоінт вимкнений.
+// Бекенд викликає після будь-якої зміни продукту або статті. Без секрету ендпоінт вимкнений.
 export async function POST(request: Request): Promise<NextResponse> {
   const secret = process.env.REVALIDATE_SECRET
 
@@ -26,6 +27,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   revalidateTag(CATALOG_TAG, 'max')
+  revalidateTag(BLOG_TAG, 'max')
 
   return NextResponse.json({ revalidated: true })
 }

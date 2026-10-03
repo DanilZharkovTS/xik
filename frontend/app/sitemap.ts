@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 
 import { getAbsoluteUrl } from '@/src/config/site'
+import { fetchFeed } from '@/src/features/blog/blog-api'
 import { fetchCatalog } from '@/src/features/catalog/catalog-api'
 import { productHref } from '@/src/features/catalog/catalog-product'
 import { getItemsByType, hasTranslation } from '@/src/features/catalog/data/catalog-items'
@@ -30,9 +31,24 @@ const entries = (
   }))
 }
 
+// Стаття має власний slug у кожній мові, тож адреси збираються окремо для кожного перекладу.
+const articleEntries = (article: Awaited<ReturnType<typeof fetchFeed>>[number]): Entry[] => {
+  const languages = Object.fromEntries(
+    article.translations.map((item) => [item.locale, getAbsoluteUrl(localizedPath(`/blog/${item.slug}`, item.locale))]),
+  )
+
+  return article.translations.map((item) => ({
+    url: getAbsoluteUrl(localizedPath(`/blog/${item.slug}`, item.locale)),
+    alternates: { languages },
+    lastModified: new Date(item.updatedAt),
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }))
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Англійський каталог містить усі продукти разом з переліком їхніх перекладів.
-  const catalog = await fetchCatalog()
+  const [catalog, articles] = await Promise.all([fetchCatalog(), fetchFeed()])
 
   // Дата зміни сторінок-рубрик і головної: остання зміна серед їхніх продуктів.
   const latest = (kind?: 'product' | 'agent'): Date | undefined => {
@@ -49,6 +65,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...entries('/products', LOCALES, { lastModified: latest('product'), changeFrequency: 'weekly', priority: 0.9 }),
     ...entries('/ai', LOCALES, { lastModified: latest('agent'), changeFrequency: 'weekly', priority: 0.9 }),
     ...entries('/services', LOCALES, { changeFrequency: 'monthly', priority: 0.8 }),
+    ...entries('/blog', LOCALES, {
+      lastModified: articles.length > 0 ? new Date(Math.max(...articles.map((a) => Date.parse(a.updatedAt)))) : undefined,
+      changeFrequency: 'daily',
+      priority: 0.8,
+    }),
+    ...articles.flatMap(articleEntries),
     ...catalog.flatMap((product) =>
       entries(productHref(product), product.availableLocales, {
         lastModified: new Date(product.updatedAt),

@@ -8,6 +8,7 @@ import { cn } from '@/src/shared/lib/cn'
 import { LOCALES, WORKSPACE_LOCALES } from './i18n-store'
 import type { Locale } from './i18n-store'
 import { areaOf, localizedPath } from './paths'
+import { useAlternatesStore } from './alternates'
 import { useI18n } from './use-i18n'
 
 const LABELS: Record<Locale, string> = { en: 'EN', es: 'ES', uk: 'УК' }
@@ -23,6 +24,7 @@ export function LanguageSwitch({ className }: { className?: string }): ReactElem
   const pathname = usePathname()
   const area = areaOf(pathname)
   const locales = area === 'workspace' ? WORKSPACE_LOCALES : LOCALES
+  const alternates = useAlternatesStore((state) => state.paths)
 
   return (
     <div
@@ -34,7 +36,8 @@ export function LanguageSwitch({ className }: { className?: string }): ReactElem
         area === 'public' ? (
           <Link
             key={item}
-            href={localizedPath(pathname, item)}
+            // Стаття в мові без перекладу: ведемо до списку блогу цією мовою.
+            href={alternates ? localizedPath(alternates[item] ?? '/blog', item) : localizedPath(pathname, item)}
             hrefLang={item}
             lang={item}
             aria-current={locale === item ? 'true' : undefined}

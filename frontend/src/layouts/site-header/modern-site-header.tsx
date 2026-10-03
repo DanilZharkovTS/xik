@@ -24,6 +24,7 @@ export function ModernSiteHeader() {
     { label: t('site.nav.products'), href: isHome ? '#products' : lp('/#products') },
     { label: t('site.nav.ai'), href: isHome ? '#ai' : lp('/#ai') },
     { label: t('site.nav.services'), href: isHome ? '#services' : lp('/#services') },
+    { label: t('site.nav.blog'), href: lp('/blog') },
     { label: t('site.nav.about'), href: isHome ? '#about' : lp('/#about') },
   ]
 

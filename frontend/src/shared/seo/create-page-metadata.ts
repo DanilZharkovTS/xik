@@ -17,6 +17,8 @@ type CreatePageMetadataInput = {
   // Мови, де сторінка має власний переклад: лише вони потрапляють у hreflang. Решта показують
   // англійський текст, тому закриті від індексу, щоб не плодити дублікати.
   readonly availableLocales?: readonly Locale[]
+  // Адреса сторінки в кожній мові, коли вона різна (slug статті); решта беруть pathname.
+  readonly alternatePaths?: Partial<Record<Locale, string>>
   // Адреса картки для соцмереж без префікса мови; без неї береться спільна.
   readonly image?: string
 }
@@ -27,20 +29,22 @@ export function createPageMetadata({
   image = siteConfig.openGraphImage,
   locale = DEFAULT_LOCALE,
   availableLocales = LOCALES,
+  alternatePaths,
   pathname,
   title,
 }: CreatePageMetadataInput): Metadata {
   const socialTitle = absoluteTitle ? title : `${title} | ${siteConfig.shortName}`
-  const canonical = localizedPath(pathname, locale)
+  const pathFor = (code: Locale): string => alternatePaths?.[code] ?? pathname
+  const canonical = localizedPath(pathFor(locale), locale)
   const isIndexable = availableLocales.includes(locale)
 
   // hreflang: кожна мова вказує на всі свої версії плюс x-default на англійську.
   const languages: Record<string, string> = {}
   for (const code of availableLocales) {
-    languages[code] = getAbsoluteUrl(localizedPath(pathname, code))
+    languages[code] = getAbsoluteUrl(localizedPath(pathFor(code), code))
   }
   if (availableLocales.includes(DEFAULT_LOCALE)) {
-    languages['x-default'] = getAbsoluteUrl(localizedPath(pathname, DEFAULT_LOCALE))
+    languages['x-default'] = getAbsoluteUrl(localizedPath(pathFor(DEFAULT_LOCALE), DEFAULT_LOCALE))
   }
 
   const imageUrl = image.startsWith('/') && locale !== DEFAULT_LOCALE && image !== siteConfig.openGraphImage

@@ -12,6 +12,7 @@ const LOCALIZED_ROOTS = [
   'outreach',
   'dashboard',
   'account',
+  'blog',
 ]
 
 const nextConfig: NextConfig = {

@@ -7,14 +7,15 @@ import { content } from './content'
 import { auth } from './auth'
 import { publicSite } from './public'
 import { account } from './account'
+import { blog } from './blog'
 
-const en = { ...common.en, ...team.en, ...admin.en, ...outreach.en, ...reports.en, ...content.en, ...auth.en, ...publicSite.en, ...account.en }
-const uk = { ...common.uk, ...team.uk, ...admin.uk, ...outreach.uk, ...reports.uk, ...content.uk, ...auth.uk, ...publicSite.uk, ...account.uk }
+const en = { ...common.en, ...team.en, ...admin.en, ...outreach.en, ...reports.en, ...content.en, ...auth.en, ...publicSite.en, ...account.en, ...blog.en }
+const uk = { ...common.uk, ...team.uk, ...admin.uk, ...outreach.uk, ...reports.uk, ...content.uk, ...auth.uk, ...publicSite.uk, ...account.uk, ...blog.uk }
 
 export type MessageKey = keyof typeof en
 
 // Іспанська підключається разом із публічними й клієнтськими словниками (messages/public.ts).
-const es: Partial<Record<MessageKey, string>> = { ...auth.es, ...publicSite.es, ...account.es }
+const es: Partial<Record<MessageKey, string>> = { ...auth.es, ...publicSite.es, ...account.es, ...blog.es }
 
 export const messages: { en: typeof en; uk: Record<MessageKey, string>; es: Partial<Record<MessageKey, string>> } = {
   en,

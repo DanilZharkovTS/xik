@@ -27,6 +27,9 @@ export function ModernFooter() {
           <Link href={lp('/services')} className="transition-colors hover:text-[var(--t)]">
             {t('site.nav.services')}
           </Link>
+          <Link href={lp('/blog')} className="transition-colors hover:text-[var(--t)]">
+            {t('site.nav.blog')}
+          </Link>
           <Link href={lp('/#about')} className="transition-colors hover:text-[var(--t)]">
             {t('site.nav.about')}
           </Link>
