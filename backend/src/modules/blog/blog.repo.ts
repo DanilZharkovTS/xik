@@ -7,6 +7,7 @@ const full = {
   cover: true,
   category: true,
   tags: true,
+  author: { select: { name: true } },
 } satisfies Prisma.ArticleInclude
 
 export type ArticleFull = Prisma.ArticleGetPayload<{ include: typeof full }>

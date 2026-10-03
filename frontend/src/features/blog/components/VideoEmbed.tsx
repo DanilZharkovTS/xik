@@ -33,7 +33,7 @@ export function VideoEmbed({ block }: { block: VideoBlock }): ReactElement {
       : block.embedUrl
 
   return (
-    <figure className={cn('my-8', isPortrait && 'mx-auto max-w-sm')}>
+    <figure className={cn('my-8', isPortrait ? 'mx-auto max-w-sm' : 'lg:-mx-12')}>
       <div
         className={cn(
           'relative overflow-hidden rounded-2xl border border-[var(--l)] bg-[var(--s)]',

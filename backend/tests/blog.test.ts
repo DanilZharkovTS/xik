@@ -306,6 +306,42 @@ describe('блоки', () => {
   })
 })
 
+describe('блоки коду й виносок, автор', () => {
+  it('приймає код і виноску та віддає їх без змін', async () => {
+    const t = await setup()
+    const blocks = [
+      { id: 'c', type: 'code', language: 'ts', code: 'const a = "<b>" // 1 < 2' },
+      { id: 'n', type: 'callout', tone: 'warning', title: 'Heads up', text: 'Careful here' },
+    ]
+    await create(t.admin, { status: 'published', translations: { en: { ...EN, blocks } } }).expect(201)
+
+    const shown = (await api().get('/api/blog/articles/hello-world')).body.article.blocks
+
+    expect(shown[0]).toMatchObject({ type: 'code', language: 'ts', code: 'const a = "<b>" // 1 < 2' })
+    expect(shown[1]).toMatchObject({ type: 'callout', tone: 'warning', title: 'Heads up' })
+  })
+
+  it('відхиляє порожній код, невідомий тон і небезпечну назву мови', async () => {
+    const t = await setup()
+    const blocks = (list: unknown[]) => create(t.admin, { status: 'draft', translations: { en: { ...EN, blocks: list } } })
+
+    expect((await blocks([{ id: 'c', type: 'code', code: '' }])).status).toBe(400)
+    expect((await blocks([{ id: 'c', type: 'code', language: '"><script>', code: 'x' }])).status).toBe(400)
+    expect((await blocks([{ id: 'n', type: 'callout', tone: 'danger', text: 'x' }])).status).toBe(400)
+    expect((await blocks([{ id: 'n', type: 'callout', tone: 'info', text: '' }])).status).toBe(400)
+  })
+
+  it('стаття віддає імʼя автора, але не пошту й токен', async () => {
+    const t = await setup()
+    await create(t.admin).expect(201)
+
+    const article = (await api().get('/api/blog/articles/hello-world')).body.article
+
+    expect(article.author).toEqual({ name: 'admin' })
+    expect(JSON.stringify(article)).not.toContain('admin@test.io')
+  })
+})
+
 describe('рубрики, теги, перелінковка', () => {
   const mk = async (token: string) => {
     const category = (await api().post('/api/blog/admin/categories').set(auth(token)).send({ slug: 'guides', names: { en: 'Guides', uk: 'Гайди' } })).body.category

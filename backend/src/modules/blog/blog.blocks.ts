@@ -70,7 +70,32 @@ const cta = z
 
 const product = z.object({ id, type: z.literal('product'), productId: z.uuid() }).strict()
 
-export const blockSchema = z.discriminatedUnion('type', [text, heading, image, video, quote, cta, product])
+// Код показується як є (екранується при відображенні); мова потрібна лише для підсвічування.
+const code = z
+  .object({
+    id,
+    type: z.literal('code'),
+    language: z
+      .string()
+      .trim()
+      .max(20)
+      .regex(/^[a-z0-9+#-]*$/i, 'Language may contain letters, digits, + # -')
+      .optional(),
+    code: z.string().min(1).max(8000),
+  })
+  .strict()
+
+const callout = z
+  .object({
+    id,
+    type: z.literal('callout'),
+    tone: z.enum(['info', 'tip', 'warning']),
+    title: z.string().trim().max(80).optional(),
+    text: z.string().trim().min(1).max(1000),
+  })
+  .strict()
+
+export const blockSchema = z.discriminatedUnion('type', [text, heading, image, video, quote, cta, product, code, callout])
 
 export const blocksSchema = z.array(blockSchema).max(200)
 
@@ -100,6 +125,8 @@ export const readingMinutes = (blocks: Block[]): number => {
           return [block.text]
         case 'cta':
           return [block.title, block.text ?? '']
+        case 'callout':
+          return [block.text]
         default:
           return []
       }

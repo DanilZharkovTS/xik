@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, Info, Lightbulb, TriangleAlert } from 'lucide-react'
 import type { ReactElement } from 'react'
 
 import { formatPrice, productHref } from '@/src/features/catalog/catalog-product'
@@ -8,6 +8,8 @@ import { withLocale } from '@/src/shared/i18n/paths'
 import { translate } from '@/src/shared/i18n/translate'
 import type { PublicBlock } from '../blog.types'
 import { RichText } from '../rich-text'
+import { ArticleImage } from './ArticleImage'
+import { CodeBlock } from './CodeBlock'
 import { VideoEmbed } from './VideoEmbed'
 
 const isInternal = (url: string): boolean => url.startsWith('/') && !url.startsWith('//')
@@ -39,24 +41,36 @@ function Block({
     }
 
     case 'image':
-      return (
-        <figure className="my-8">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={block.url}
-            alt={block.alt}
-            width={block.width}
-            height={block.height}
-            loading="lazy"
-            decoding="async"
-            className="h-auto w-full rounded-2xl border border-[var(--l)]"
-          />
-          {block.caption && <figcaption className="mt-2 text-center text-sm text-[var(--m)]">{block.caption}</figcaption>}
-        </figure>
-      )
+      return <ArticleImage url={block.url} width={block.width} height={block.height} alt={block.alt} caption={block.caption} />
 
     case 'video':
       return <VideoEmbed block={block} />
+
+    case 'code':
+      return (
+        <div className="lg:-mx-12">
+          <CodeBlock code={block.code} language={block.language} />
+        </div>
+      )
+
+    case 'callout': {
+      const tone = {
+        info: { Icon: Info, box: 'border-sky-500/40 bg-sky-500/10' },
+        tip: { Icon: Lightbulb, box: 'border-emerald-500/40 bg-emerald-500/10' },
+        warning: { Icon: TriangleAlert, box: 'border-amber-500/50 bg-amber-500/10' },
+      }[block.tone]
+      return (
+        <aside className={`my-8 flex gap-3 rounded-2xl border p-4 md:p-5 ${tone.box}`}>
+          <tone.Icon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          <div className="min-w-0 text-base leading-relaxed">
+            <p className="font-semibold text-[var(--t)]">{block.title || translate(locale, `blog.callout.${block.tone}` as 'blog.callout.info')}</p>
+            <div className="[&>p]:my-2 [&>ul]:my-2">
+              <RichText text={block.text} locale={locale} />
+            </div>
+          </div>
+        </aside>
+      )
+    }
 
     case 'quote':
       return (

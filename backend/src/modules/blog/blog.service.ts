@@ -121,6 +121,7 @@ const toPublicArticle = async (article: ArticleFull, lang: ContentLocale, isPrev
     seoTitle: translation.seoTitle,
     seoDescription: translation.seoDescription,
     keywords: translation.keywords,
+    author: { name: article.author.name },
     blocks: resolveBlocks(blocksOf(translation), assets, products, lang),
     alternates: alternatesOf(article),
     related: related.map((item) => toCard(item, lang)),

@@ -23,6 +23,8 @@ export type EditorBlock =
   | { id: string; type: 'quote'; text: string; author?: string }
   | { id: string; type: 'cta'; title: string; text?: string; buttonLabel: string; url: string }
   | { id: string; type: 'product'; productId: string }
+  | { id: string; type: 'code'; language?: string; code: string }
+  | { id: string; type: 'callout'; tone: 'info' | 'tip' | 'warning'; title?: string; text: string }
 
 export type BlockType = EditorBlock['type']
 

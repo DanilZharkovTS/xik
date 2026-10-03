@@ -48,11 +48,14 @@ export type PublicBlock =
   | { id: string; type: 'quote'; text: string; author?: string }
   | { id: string; type: 'cta'; title: string; text?: string; buttonLabel: string; url: string }
   | { id: string; type: 'product'; product: ApiCatalogProduct }
+  | { id: string; type: 'code'; language?: string; code: string }
+  | { id: string; type: 'callout'; tone: 'info' | 'tip' | 'warning'; title?: string; text: string }
 
 export interface Article extends ArticleCard {
   seoTitle: string | null
   seoDescription: string | null
   keywords: string[]
+  author: { name: string } | null
   blocks: PublicBlock[]
   // slug статті в кожній мові, де є готовий переклад.
   alternates: Partial<Record<Locale, string>>

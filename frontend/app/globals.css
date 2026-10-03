@@ -8,7 +8,7 @@
   --m: #6e6e73;
   --l: #ddd;
   --g: #ffffffcc;
-  --b: #0071e3;
+  --b: #0066cc;
 
   --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, Arial, sans-serif;
   --header-height: 52px;
@@ -229,3 +229,45 @@ html[data-theme='dark'] .card-orb {
   --viz-s4: #c98500;
   --viz-seq: #3987e5;
 }
+
+/* Підсвічування коду в статтях блогу: кольори з достатнім контрастом у світлій і темній темі. */
+.code-block {
+  --code-keyword: #a626a4;
+  --code-string: #176b2c;
+  --code-number: #9a4a00;
+  --code-title: #0b5fc5;
+  --code-comment: #6e6e73;
+}
+html[data-theme='dark'] .code-block {
+  --code-keyword: #ff7ab2;
+  --code-string: #7bd88f;
+  --code-number: #ffb86b;
+  --code-title: #6cb6ff;
+  --code-comment: #a1a1a6;
+}
+.code-block .hljs-keyword,
+.code-block .hljs-selector-tag,
+.code-block .hljs-literal,
+.code-block .hljs-doctag { color: var(--code-keyword); }
+.code-block .hljs-string,
+.code-block .hljs-regexp,
+.code-block .hljs-addition,
+.code-block .hljs-symbol { color: var(--code-string); }
+.code-block .hljs-number,
+.code-block .hljs-attr,
+.code-block .hljs-attribute,
+.code-block .hljs-variable,
+.code-block .hljs-template-variable,
+.code-block .hljs-built_in { color: var(--code-number); }
+.code-block .hljs-title,
+.code-block .hljs-section,
+.code-block .hljs-selector-class,
+.code-block .hljs-selector-id,
+.code-block .hljs-type,
+.code-block .hljs-class .hljs-title { color: var(--code-title); }
+.code-block .hljs-comment,
+.code-block .hljs-quote,
+.code-block .hljs-meta,
+.code-block .hljs-deletion { color: var(--code-comment); font-style: italic; }
+.code-block .hljs-emphasis { font-style: italic; }
+.code-block .hljs-strong { font-weight: 700; }

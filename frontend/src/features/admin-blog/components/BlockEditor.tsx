@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { ReactElement, ReactNode } from 'react'
-import { ArrowDown, ArrowUp, Heading2, Image as ImageIcon, MousePointerClick, Package, Quote, Type, Video } from 'lucide-react'
+import { ArrowDown, ArrowUp, Code, Heading2, Image as ImageIcon, Info, MousePointerClick, Package, Quote, Type, Video } from 'lucide-react'
 
 import useAuthStore from '@/src/features/auth/store'
 import { adminProductsService } from '@/src/features/admin-products/admin-products.service'
@@ -25,6 +25,8 @@ const TYPES: { type: BlockType; labelKey: MessageKey; Icon: typeof Type }[] = [
   { type: 'quote', labelKey: 'blogAdmin.block.quote', Icon: Quote },
   { type: 'cta', labelKey: 'blogAdmin.block.cta', Icon: MousePointerClick },
   { type: 'product', labelKey: 'blogAdmin.block.product', Icon: Package },
+  { type: 'code', labelKey: 'blogAdmin.block.code', Icon: Code },
+  { type: 'callout', labelKey: 'blogAdmin.block.callout', Icon: Info },
 ]
 
 // Лише підказка в редакторі; остаточно посилання перевіряє бекенд.
@@ -175,6 +177,52 @@ export function BlockEditor({ blocks, assets, onChange, onAsset }: BlockEditorPr
               <TextareaField label={t('blogAdmin.block.ctaText')} maxLength={300} value={block.text ?? ''} onChange={(e) => patch(block.id, { text: e.target.value })} />
               <TextField label={t('blogAdmin.block.ctaButton')} maxLength={40} value={block.buttonLabel} onChange={(e) => patch(block.id, { buttonLabel: e.target.value })} />
               <TextField label={t('blogAdmin.block.ctaUrl')} maxLength={500} value={block.url} onChange={(e) => patch(block.id, { url: e.target.value })} />
+            </>
+          )}
+
+          {block.type === 'code' && (
+            <>
+              <TextField
+                label={t('blogAdmin.block.codeLang')}
+                maxLength={20}
+                placeholder="ts, js, bash, json, python, sql, php, go, yaml, html, css"
+                value={block.language ?? ''}
+                onChange={(e) => patch(block.id, { language: e.target.value })}
+              />
+              <TextareaField
+                label={t('blogAdmin.block.codeText')}
+                className="min-h-40 font-mono text-sm"
+                spellCheck={false}
+                maxLength={8000}
+                value={block.code}
+                onChange={(e) => patch(block.id, { code: e.target.value })}
+              />
+            </>
+          )}
+
+          {block.type === 'callout' && (
+            <>
+              <SelectField
+                label={t('blogAdmin.block.calloutTone')}
+                value={block.tone}
+                onChange={(e) => patch(block.id, { tone: e.target.value as 'info' | 'tip' | 'warning' })}
+              >
+                <option value="info">{t('blogAdmin.block.tone.info')}</option>
+                <option value="tip">{t('blogAdmin.block.tone.tip')}</option>
+                <option value="warning">{t('blogAdmin.block.tone.warning')}</option>
+              </SelectField>
+              <TextField
+                label={t('blogAdmin.block.calloutTitle')}
+                maxLength={80}
+                value={block.title ?? ''}
+                onChange={(e) => patch(block.id, { title: e.target.value })}
+              />
+              <TextareaField
+                label={t('blogAdmin.block.calloutText')}
+                maxLength={1000}
+                value={block.text}
+                onChange={(e) => patch(block.id, { text: e.target.value })}
+              />
             </>
           )}
 

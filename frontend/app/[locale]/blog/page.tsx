@@ -155,11 +155,16 @@ export default async function BlogPage({ params, searchParams }: Props) {
             </p>
           ) : (
             <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {list.articles.map((article, index) => (
-                <li key={article.id}>
-                  <ArticleCardView article={article} locale={locale} priority={index < 2 && page === 1} />
-                </li>
-              ))}
+              {list.articles.map((article, index) => {
+                // Перша стаття головної сторінки блогу (без фільтрів) показується великою.
+                const isFeatured = index === 0 && page === 1 && !tag && !category && list.articles.length > 1
+
+                return (
+                  <li key={article.id} className={isFeatured ? 'sm:col-span-2 lg:col-span-3' : undefined}>
+                    <ArticleCardView article={article} locale={locale} priority={index < 2 && page === 1} featured={isFeatured} />
+                  </li>
+                )
+              })}
             </ul>
           )}
 

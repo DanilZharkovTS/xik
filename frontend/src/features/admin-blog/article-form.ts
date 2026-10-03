@@ -81,6 +81,8 @@ export const createBlock = (type: EditorBlock['type']): EditorBlock => {
     case 'quote': return { id, type, text: '' }
     case 'cta': return { id, type, title: '', buttonLabel: '', url: '' }
     case 'product': return { id, type, productId: '' }
+    case 'code': return { id, type, code: '' }
+    case 'callout': return { id, type, tone: 'info', text: '' }
   }
 }
 
@@ -143,6 +145,8 @@ const cleanBlock = (block: EditorBlock): EditorBlock => {
     case 'video': return { ...block, caption: emptyToUndefined(block.caption) }
     case 'quote': return { ...block, author: emptyToUndefined(block.author) }
     case 'cta': return { ...block, text: emptyToUndefined(block.text) }
+    case 'code': return { ...block, language: emptyToUndefined(block.language) }
+    case 'callout': return { ...block, title: emptyToUndefined(block.title) }
     default: return block
   }
 }
