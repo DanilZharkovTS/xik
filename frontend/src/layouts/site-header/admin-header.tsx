@@ -12,6 +12,7 @@ import { getErrorMessage } from '@/src/shared/api/get-error-message'
 import { BookOpen, House, Newspaper, Package, UserCog, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/src/shared/lib/cn'
+import { Logo } from '@/src/shared/ui/logo'
 import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
 import { useI18n } from '@/src/shared/i18n/use-i18n'
 import type { MessageKey } from '@/src/shared/i18n/messages'
@@ -66,7 +67,7 @@ export function AdminHeader() {
           href="/dashboard"
           className="text-[19px] font-[750] tracking-tight text-[var(--t)]"
         >
-          XIK_
+          <Logo />
           <span className="ml-2 text-xs font-medium text-[var(--m)]">
             {isAdmin ? t('nav.admin') : t('nav.journal')}
           </span>

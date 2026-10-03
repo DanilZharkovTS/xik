@@ -7,7 +7,7 @@ export const size = {
 }
 export const contentType = 'image/png'
 
-// Загальна картка для соцмереж: той самий знак, що й у іконці вкладки (X і синій курсор).
+// Загальна картка для соцмереж: той самий знак X][K_, що й у шапці сайту (у картинці без анімації).
 export default function OpenGraphImage(): ImageResponse {
   return new ImageResponse(
     (
@@ -24,15 +24,14 @@ export default function OpenGraphImage(): ImageResponse {
           width: '100%',
         }}
       >
-        <div style={{ alignItems: 'center', display: 'flex', gap: 14 }}>
-          <div style={{ background: '#2997ff', borderRadius: 4, display: 'flex', height: 10, width: 36 }} />
-          <span style={{ color: '#a1a1a6', fontSize: 30, letterSpacing: '0.04em' }}>xik.app</span>
-        </div>
+        <span style={{ color: '#a1a1a6', fontSize: 30, letterSpacing: '0.04em' }}>xik.app</span>
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ alignItems: 'flex-end', display: 'flex' }}>
-            <span style={{ fontSize: 210, fontWeight: 800, letterSpacing: '-0.06em', lineHeight: 0.9 }}>XIK</span>
-            <div style={{ background: '#2997ff', borderRadius: 10, display: 'flex', height: 26, marginBottom: 14, marginLeft: 14, width: 120 }} />
+          <div style={{ alignItems: 'baseline', display: 'flex', fontSize: 210, fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 0.95 }}>
+            <span>X</span>
+            <span style={{ color: '#a1a1a6' }}>][</span>
+            <span>K</span>
+            <span style={{ color: '#2997ff' }}>_</span>
           </div>
           <span style={{ color: '#a1a1a6', fontSize: 46, marginTop: 28 }}>
             Product & AI Lab: building things that should exist.

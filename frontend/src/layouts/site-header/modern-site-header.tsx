@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import useAuthStore from '@/src/features/auth/store'
 import { ThemeToggle } from '@/src/features/theme/components/theme-toggle'
+import { Logo } from '@/src/shared/ui/logo'
 import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
 import { splitLocale } from '@/src/shared/i18n/paths'
 import { useI18n, useLocalePath } from '@/src/shared/i18n/use-i18n'
@@ -40,7 +41,7 @@ export function ModernSiteHeader() {
             href={lp('/')}
             className="mr-auto text-[19px] font-[750] tracking-tight text-[var(--t)] transition-opacity hover:opacity-80"
           >
-            XIK_
+            <Logo />
           </Link>
 
           {/* Desktop Navigation */}

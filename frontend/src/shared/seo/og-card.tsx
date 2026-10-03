@@ -27,8 +27,13 @@ export function renderOgCard({ eyebrow, title, subtitle }: OgCardInput): ImageRe
       >
         <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
           <div style={{ alignItems: 'center', display: 'flex', gap: 14 }}>
-            <div style={{ background: '#2997ff', borderRadius: 4, display: 'flex', height: 10, width: 36 }} />
-            <span style={{ color: '#f5f5f7', fontSize: 30, fontWeight: 700 }}>{eyebrow}</span>
+            <div style={{ alignItems: 'baseline', display: 'flex', fontSize: 44, fontWeight: 800, letterSpacing: '-0.03em' }}>
+              <span>X</span>
+              <span style={{ color: '#a1a1a6' }}>][</span>
+              <span>K</span>
+              <span style={{ color: '#2997ff' }}>_</span>
+            </div>
+            <span style={{ color: '#a1a1a6', fontSize: 28, marginLeft: 18 }}>{eyebrow}</span>
           </div>
           <span style={{ color: '#a1a1a6', fontSize: 28 }}>xik.app</span>
         </div>
