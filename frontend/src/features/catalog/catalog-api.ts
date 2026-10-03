@@ -9,15 +9,20 @@ const apiBase = (): string => {
   return `${base.replace(/\/$/, '')}/api`
 }
 
-// Без кешу: архівований продукт мусить зникнути одразу, а зміна showPrice чи ціни бути видимою
-// одразу. Запит дешевий; кеш можна повернути пізніше разом із явним скиданням з адмінки.
-const NO_CACHE = { cache: 'no-store' } as const
+// Каталог кешується з тегом: сторінки віддаються швидко, а після змін в адмінці бекенд
+// викликає /api/revalidate, і кеш скидається одразу. Година це страховка, якщо виклик не дійшов.
+const REVALIDATE_SECONDS = 3600
+export const CATALOG_TAG = 'catalog'
+
+const cached = (extraTags: string[] = []): RequestInit => ({
+  next: { revalidate: REVALIDATE_SECONDS, tags: [CATALOG_TAG, ...extraTags] },
+})
 
 // Блоки сайту не повинні падати разом із бекендом: без даних блок просто порожній.
 export async function fetchCatalog(kind?: ProductKind): Promise<ApiCatalogProduct[]> {
   try {
     const url = `${apiBase()}/products/catalog${kind ? `?kind=${kind}` : ''}`
-    const res = await fetch(url, NO_CACHE)
+    const res = await fetch(url, cached())
 
     if (!res.ok) {
       console.error(`Catalog request failed: ${res.status}`)
@@ -33,7 +38,7 @@ export async function fetchCatalog(kind?: ProductKind): Promise<ApiCatalogProduc
 
 // null означає, що продукту немає (404). Збій бекенду кидає помилку, а не маскується під "не знайдено".
 export async function fetchProduct(slug: string): Promise<ApiProductDetail | null> {
-  const res = await fetch(`${apiBase()}/products/${encodeURIComponent(slug)}`, NO_CACHE)
+  const res = await fetch(`${apiBase()}/products/${encodeURIComponent(slug)}`, cached([`product:${slug}`]))
 
   if (res.status === 404) return null
 

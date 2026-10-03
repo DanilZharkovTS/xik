@@ -29,6 +29,7 @@ export const toCatalogDto = (product: Product) => ({
   showPrice: product.showPrice,
   ...publicPrice(product),
   isPurchasable: isPurchasable(product),
+  updatedAt: product.updatedAt,
 })
 
 // Сторінка продукту. Stripe-ідентифікатори назовні не віддаємо.

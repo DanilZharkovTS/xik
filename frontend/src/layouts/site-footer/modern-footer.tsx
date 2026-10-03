@@ -10,7 +10,7 @@ export function ModernFooter() {
           <span>Products · Services · Autonomous AI · 2026</span>
         </div>
 
-        <nav className="flex items-center gap-6 text-xs">
+        <nav aria-label="Footer" className="flex items-center gap-6 text-xs">
           <Link href="/#products" className="transition-colors hover:text-[var(--t)]">
             Products
           </Link>

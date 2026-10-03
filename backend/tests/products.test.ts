@@ -849,3 +849,71 @@ describe('імпорт статичного каталогу', () => {
     expect(agents.every((a: { price: string | null }) => a.price === null)).toBe(true)
   })
 })
+
+describe('сповіщення фронтенда про зміну каталогу', () => {
+  const fetchSpy = () => vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}'))
+  const revalidateCalls = (spy: ReturnType<typeof fetchSpy>) =>
+    spy.mock.calls.filter(([url]) => String(url).endsWith('/api/revalidate'))
+
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 20))
+
+  it('після створення, оновлення, архіву, відновлення й синхронізації просить скинути кеш', async () => {
+    vi.stubEnv('REVALIDATE_SECRET', 'secret-1')
+    vi.stubEnv('FRONTEND_INTERNAL_URL', 'http://frontend:3000')
+    const spy = fetchSpy()
+    const { tokens } = await setup()
+
+    const id = (await create(tokens.admin)).body.product.id
+    await patch(tokens.admin, id, { tagline: 'New tagline' })
+    await api().delete(`/api/products/${id}`).set(auth(tokens.admin))
+    await action(tokens.admin, id, 'restore')
+    await action(tokens.admin, id, 'stripe-sync')
+    await flush()
+
+    const calls = revalidateCalls(spy)
+    expect(calls).toHaveLength(5)
+    expect(String(calls[0][0])).toBe('http://frontend:3000/api/revalidate')
+    expect((calls[0][1] as RequestInit).headers).toMatchObject({ 'x-revalidate-secret': 'secret-1' })
+
+    spy.mockRestore()
+    vi.unstubAllEnvs()
+  })
+
+  it('без REVALIDATE_SECRET нічого не надсилає', async () => {
+    vi.stubEnv('REVALIDATE_SECRET', '')
+    const spy = fetchSpy()
+    const { tokens } = await setup()
+
+    await create(tokens.admin)
+    await flush()
+
+    expect(revalidateCalls(spy)).toHaveLength(0)
+    spy.mockRestore()
+    vi.unstubAllEnvs()
+  })
+
+  it('збій сповіщення не ламає запит адміна', async () => {
+    vi.stubEnv('REVALIDATE_SECRET', 'secret-1')
+    vi.stubEnv('FRONTEND_INTERNAL_URL', 'http://frontend:3000')
+    const spy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('connection refused'))
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const { tokens } = await setup()
+
+    const res = await create(tokens.admin)
+    await flush()
+
+    expect(res.status).toBe(201)
+    expect(warn).toHaveBeenCalled()
+    spy.mockRestore()
+    warn.mockRestore()
+    vi.unstubAllEnvs()
+  })
+
+  it('каталог віддає updatedAt для sitemap', async () => {
+    const { tokens } = await setup()
+    await create(tokens.admin)
+
+    const [product] = (await api().get('/api/products/catalog')).body.products
+    expect(Number.isNaN(Date.parse(product.updatedAt))).toBe(false)
+  })
+})

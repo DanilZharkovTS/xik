@@ -34,7 +34,7 @@ export function ModernSiteHeader() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden items-center gap-7 text-[13px] font-medium text-[var(--m)] md:flex">
+          <nav aria-label="Primary navigation" className="hidden items-center gap-7 text-[13px] font-medium text-[var(--m)] md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.label}

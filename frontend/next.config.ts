@@ -9,24 +9,9 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       {
-        source: '/products',
-        destination: '/#products',
-        permanent: false,
-      },
-      {
-        source: '/services',
-        destination: '/#services',
-        permanent: false,
-      },
-      {
-        source: '/ai',
-        destination: '/#ai',
-        permanent: false,
-      },
-      {
         source: '/agents',
-        destination: '/#ai',
-        permanent: false,
+        destination: '/ai',
+        permanent: true,
       },
       // Moved items redirects
       {

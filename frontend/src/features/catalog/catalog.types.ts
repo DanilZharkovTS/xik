@@ -20,6 +20,7 @@ export interface ApiCatalogProduct {
   currency: string | null
   billingPeriod: 'week' | 'month' | 'year' | null
   isPurchasable: boolean
+  updatedAt: string
 }
 
 export interface ApiProductDetail extends ApiCatalogProduct {

@@ -86,7 +86,7 @@ a dedicated database, never at real data.
 | Report equals the event table for each period; admin sees a per-moderator breakdown | `tests/reports.test.ts` (DST and midnight boundaries) |
 | A deactivated moderator cannot sign in and the open session ends | `tests/access.test.ts` |
 | Products are added and removed one by one; revoked access fails on the next request; transfer keeps history and is audited | `tests/access.test.ts`, `tests/transfer.test.ts` |
-| All automated tests pass on Postgres | `npm test` (374 tests) |
+| All automated tests pass on Postgres | `npm test` (378 tests) |
 | Manual check on mobile (390px) and desktop | Checklist below |
 
 Manual check (390px and 1280px, both themes), signed in as admin and as a moderator:
@@ -127,6 +127,19 @@ docker compose -f docker-compose.local.yml exec backend npm run products:import 
 
 The import is idempotent (matched by slug). Prices in the file are placeholders: set the real ones in Admin -> Products.
 The Next.js server reads the catalog through `API_INTERNAL_URL` (`http://backend:5001` inside Docker) with no caching.
+
+## Public site: SEO and caching
+
+- Public pages: `/`, `/products`, `/ai`, `/services` and the detail pages. Titles stay under ~60 characters, descriptions under
+  ~160; each page has a canonical URL, its own Open Graph card and JSON-LD (Organization, WebSite, SoftwareApplication or
+  Service, BreadcrumbList, ItemList on list pages). A price appears in the markup only when it is shown on the page.
+- `robots.txt` blocks `/admin`, `/outreach`, `/dashboard`, `/auth`, `/api`; sign-in pages are `noindex`. The sitemap has
+  `lastmod` from each product's `updatedAt`.
+- The catalog is cached on the Next.js server with the tag `catalog` (one hour as a safety net). Product and agent pages are
+  cached HTML (`s-maxage=3600, stale-while-revalidate`), so a CDN can serve them. After any product change the backend calls
+  `POST {FRONTEND_INTERNAL_URL}/api/revalidate` with the header `x-revalidate-secret`; the next visit or two shows fresh data.
+  Set the same `REVALIDATE_SECRET` on backend and frontend (empty disables it).
+- `NEXT_PUBLIC_SITE_URL` sets the canonical domain (build time; default `https://xik.app`). Set it to the real domain.
 
 ## Language (English / Ukrainian)
 

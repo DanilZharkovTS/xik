@@ -72,6 +72,16 @@ export function ModernProducts({ products }: ModernProductsProps) {
             })}
           </div>
         )}
+
+        <div className="mt-8 text-center">
+          <Link
+            href="/products"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[var(--l)] px-5 text-sm font-semibold text-[var(--t)] transition-colors hover:border-[var(--t)]"
+          >
+            View all products
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
     </section>
   )

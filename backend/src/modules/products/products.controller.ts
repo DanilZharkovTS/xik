@@ -1,3 +1,4 @@
+import { notifyCatalogChanged } from './catalog-revalidate.js'
 import { NextFunction, Request, Response } from 'express'
 import { productsService } from './products.service.js'
 
@@ -72,6 +73,7 @@ export const productsController = {
     try {
       const result = await productsService.createProduct(req.validData.body)
       res.status(201).json(result.response)
+      notifyCatalogChanged()
     } catch (err) {
       next(err)
     }
@@ -83,6 +85,7 @@ export const productsController = {
         req.validData.body
       )
       res.status(200).json(result.response)
+      notifyCatalogChanged()
     } catch (err) {
       next(err)
     }
@@ -93,6 +96,7 @@ export const productsController = {
         req.validData.params.productId
       )
       res.status(200).json(result.response)
+      notifyCatalogChanged()
     } catch (err) {
       next(err)
     }
@@ -103,6 +107,7 @@ export const productsController = {
         req.validData.params.productId
       )
       res.status(200).json(result.response)
+      notifyCatalogChanged()
     } catch (err) {
       next(err)
     }
@@ -113,6 +118,7 @@ export const productsController = {
         req.validData.params.productId
       )
       res.status(200).json(result.response)
+      notifyCatalogChanged()
     } catch (err) {
       next(err)
     }

@@ -24,6 +24,10 @@ ENV NODE_ENV=production
 ARG NEXT_PUBLIC_API_URL=http://localhost:5001
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
+# Канонічний домен для canonical, sitemap і Open Graph (вшивається у збірку)
+ARG NEXT_PUBLIC_SITE_URL=https://xik.app
+ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+
 COPY package*.json ./
 RUN npm install
 
