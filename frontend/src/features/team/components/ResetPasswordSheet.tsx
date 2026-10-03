@@ -67,7 +67,7 @@ export function ResetPasswordSheet({
 
           <PasswordField value={password} onChange={() => undefined} />
 
-          <Button className="min-h-12 w-full" onClick={close}>
+          <Button className="min-h-11 w-full" onClick={close}>
             Done
           </Button>
         </div>
@@ -77,7 +77,7 @@ export function ResetPasswordSheet({
 
           <Button
             type="submit"
-            className="min-h-12 w-full"
+            className="min-h-11 w-full"
             disabled={isSaving}
           >
             {isSaving ? 'Saving...' : 'Set password'}

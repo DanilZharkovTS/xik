@@ -105,7 +105,7 @@ export function CopyTemplateSheet({
               </Button>
             )}
 
-            <Button className="min-h-12 text-lg" onClick={() => copy('body')}>
+            <Button className="min-h-11" onClick={() => copy('body')}>
               {copied === 'body' ? 'Text copied' : 'Copy text'}
             </Button>
           </div>

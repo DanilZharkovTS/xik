@@ -72,11 +72,11 @@ export function PublicationsScreen(): ReactElement {
   }, [token, productId, nextCursor, handleError])
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 md:space-y-5">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-medium">Publications</h1>
-          <p className="mt-1 text-[var(--m)]">
+          <h1 className="text-2xl font-medium md:text-4xl">Publications</h1>
+          <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
             Posts, ads and articles you placed for this product.
           </p>
         </div>
@@ -258,7 +258,7 @@ function AddPublicationSheet({
           onChange={(event) => setComment(event.target.value)}
         />
 
-        <Button type="submit" className="min-h-12 w-full text-lg" disabled={isSaving || !url.trim()}>
+        <Button type="submit" className="min-h-11 w-full" disabled={isSaving || !url.trim()}>
           {isSaving ? 'Saving...' : 'Save publication'}
         </Button>
       </form>

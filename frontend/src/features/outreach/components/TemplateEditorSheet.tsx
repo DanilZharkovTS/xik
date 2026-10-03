@@ -194,7 +194,7 @@ function EditorForm({
 
       <Button
         type="submit"
-        className="min-h-12 w-full text-lg"
+        className="min-h-11 w-full"
         disabled={isSaving || !title.trim() || !body.trim()}
       >
         {isSaving ? 'Saving...' : template ? 'Save changes' : 'Create template'}

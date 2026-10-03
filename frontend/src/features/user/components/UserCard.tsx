@@ -9,7 +9,7 @@ export const UserCard: React.FC<UserCardProps> = ({ user }) => {
   const isCurrentUser = currentUserId === user.id
 
   return (
-    <li className="space-y-3 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-4">
+    <li className="space-y-2 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-3 md:space-y-3 md:p-4">
       <div className="min-w-0">
         <p className="truncate text-lg font-medium">
           {user.name}

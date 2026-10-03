@@ -110,11 +110,11 @@ export function TemplatesScreen(): ReactElement {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 md:space-y-5">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-medium">Templates</h1>
-          <p className="mt-1 text-[var(--m)]">
+          <h1 className="text-2xl font-medium md:text-4xl">Templates</h1>
+          <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
             Ready texts to copy and send, so nobody has to invent them.
           </p>
         </div>
@@ -203,7 +203,7 @@ export function TemplatesScreen(): ReactElement {
 
               <div className="grid grid-cols-2 gap-2">
                 {template.status === 'active' && (
-                  <Button className="col-span-2 min-h-12" onClick={() => setCopying(template)}>
+                  <Button className="col-span-2 min-h-11" onClick={() => setCopying(template)}>
                     Copy
                   </Button>
                 )}

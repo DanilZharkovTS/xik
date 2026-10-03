@@ -124,10 +124,10 @@ export function ReportsScreen(): ReactElement {
   const visibleTypes = EVENT_TYPES.filter((type) => types.includes(type))
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 md:space-y-5">
       <div>
-        <h1 className="text-3xl font-medium">Reports</h1>
-        <p className="mt-1 text-[var(--m)]">
+        <h1 className="text-2xl font-medium md:text-4xl">Reports</h1>
+        <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
           {isAdmin
             ? 'Work of your team by period, channel and product.'
             : 'Your work in this product by period and channel.'}

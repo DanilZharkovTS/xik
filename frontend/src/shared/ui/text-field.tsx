@@ -29,7 +29,7 @@ export function TextField({
       <input
         id={inputId}
         className={cn(
-          'min-h-11 w-full rounded-xl border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none',
+          'min-h-10 w-full rounded-xl md:min-h-11 border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none',
           'focus:border-[var(--t)]',
           className,
         )}

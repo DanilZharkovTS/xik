@@ -130,11 +130,11 @@ export function AdminProductsScreen(): ReactElement {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:py-10">
+    <div className="mx-auto w-full max-w-7xl space-y-3 px-4 py-3 md:space-y-6 md:py-10">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-medium md:text-4xl">Products</h1>
-          <p className="mt-1 text-[var(--m)]">
+          <h1 className="text-2xl font-medium md:text-4xl">Products</h1>
+          <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
             Products and agents. Each one is linked to a single Stripe product.
           </p>
         </div>
@@ -148,21 +148,21 @@ export function AdminProductsScreen(): ReactElement {
 
       <StateTabs value={state} onChange={setState} />
 
-      <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
+      <div className="grid grid-cols-[1fr_8.5rem] gap-2 md:grid-cols-[1fr_12rem] md:gap-3">
         <input
           type="search"
           aria-label="Search products"
           placeholder="Search by name or slug"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="min-h-11 w-full rounded-xl border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
+          className="min-h-10 w-full rounded-xl md:min-h-11 border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
         />
 
         <select
           aria-label="Type"
           value={kind}
           onChange={(e) => setKind(e.target.value as KindFilter)}
-          className="min-h-11 w-full rounded-xl border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
+          className="min-h-10 w-full rounded-xl md:min-h-11 border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
         >
           <option value="all">All types</option>
           <option value="product">Products</option>
@@ -212,7 +212,7 @@ export function AdminProductsScreen(): ReactElement {
       )}
 
       <div className="sticky bottom-0 -mx-4 border-t border-[var(--l)] bg-[var(--bg)] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 md:hidden">
-        <Button className="min-h-12 w-full" disabled={!token} onClick={openCreate}>
+        <Button className="min-h-11 w-full" disabled={!token} onClick={openCreate}>
           New product
         </Button>
       </div>

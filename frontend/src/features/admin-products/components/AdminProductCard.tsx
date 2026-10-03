@@ -50,7 +50,7 @@ export function AdminProductCard({
   return (
     <li
       className={cn(
-        'space-y-3 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-4',
+        'space-y-2 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-3 md:space-y-3 md:p-4',
         isArchived && 'opacity-70',
       )}
     >
@@ -86,8 +86,8 @@ export function AdminProductCard({
         </p>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
-        <Button className="w-full" disabled={isBusy} onClick={onEdit}>
+      <div className={cn("grid gap-2", isArchived ? "grid-cols-2" : "grid-cols-3")}>
+        <Button className="w-full px-2 text-sm md:text-base" disabled={isBusy} onClick={onEdit}>
           Edit
         </Button>
 
@@ -97,12 +97,12 @@ export function AdminProductCard({
           </Button>
         ) : (
           <>
-            <Button variant="secondary" className="w-full" disabled={isBusy} onClick={onSync}>
-              {product.isStripeLinked ? 'Sync Stripe' : 'Create in Stripe'}
+            <Button variant="secondary" className="w-full px-2 text-sm md:text-base" disabled={isBusy} onClick={onSync}>
+              {product.isStripeLinked ? 'Sync' : 'To Stripe'}
             </Button>
             <Button
               variant="secondary"
-              className="col-span-2 w-full"
+              className="w-full px-2 text-sm md:text-base"
               disabled={isBusy}
               onClick={onArchive}
             >

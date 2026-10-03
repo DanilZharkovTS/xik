@@ -68,7 +68,7 @@ export function CreateModeratorSheet({
 
           <p className="break-all text-sm text-[var(--m)]">{email}</p>
 
-          <Button className="min-h-12 w-full" onClick={close}>
+          <Button className="min-h-11 w-full" onClick={close}>
             Done
           </Button>
         </div>
@@ -98,7 +98,7 @@ export function CreateModeratorSheet({
 
           <Button
             type="submit"
-            className="min-h-12 w-full"
+            className="min-h-11 w-full"
             disabled={isSaving}
           >
             {isSaving ? 'Creating...' : 'Create moderator'}

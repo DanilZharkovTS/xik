@@ -223,7 +223,7 @@ function RegisterForm({
         onChange={(event) => setComment(event.target.value)}
       />
 
-      <Button type="submit" className="min-h-12 w-full text-lg" disabled={isSaving}>
+      <Button type="submit" className="min-h-11 w-full" disabled={isSaving}>
         {isSaving ? 'Registering...' : 'Register first contact'}
       </Button>
     </form>

@@ -28,7 +28,7 @@ export function ModeratorCard({
   return (
     <li
       className={cn(
-        'space-y-3 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-4',
+        'space-y-2 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-3 md:space-y-3 md:p-4',
         !isActive && 'opacity-70',
       )}
     >
@@ -73,7 +73,7 @@ export function ModeratorCard({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-2">
         <Button
           className={ACTION_CLASS}
           disabled={isBusy}

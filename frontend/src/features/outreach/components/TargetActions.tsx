@@ -71,7 +71,7 @@ export function TargetActions({
 
       <div className="grid gap-2 sm:grid-cols-2">
         {permissions.canRepeat && (
-          <Button className="min-h-12" onClick={() => setOpenSheet('repeat')}>
+          <Button className="min-h-11" onClick={() => setOpenSheet('repeat')}>
             Repeat contact
           </Button>
         )}
@@ -225,7 +225,7 @@ function ActivitySheet({
           onChange={(event) => setComment(event.target.value)}
         />
 
-        <Button type="submit" className="min-h-12 w-full text-lg" disabled={isSaving}>
+        <Button type="submit" className="min-h-11 w-full" disabled={isSaving}>
           {isSaving ? 'Saving...' : 'Save'}
         </Button>
       </form>
@@ -286,7 +286,7 @@ function DoNotContactSheet({
 
         <Button
           type="submit"
-          className="min-h-12 w-full border-red-500 bg-red-500 text-lg text-white"
+          className="min-h-11 w-full border-red-500 bg-red-500 text-white"
           disabled={isSaving}
         >
           {isSaving ? 'Saving...' : 'Mark as Do not contact'}

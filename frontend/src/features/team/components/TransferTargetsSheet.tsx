@@ -248,7 +248,7 @@ function TransferForm({
         </>
       )}
 
-      <Button type="submit" className="min-h-12 w-full text-lg" disabled={!canSubmit}>
+      <Button type="submit" className="min-h-11 w-full" disabled={!canSubmit}>
         {isSaving ? 'Transferring...' : `Transfer ${countLabel} target${count === 1 ? '' : 's'}`}
       </Button>
     </form>

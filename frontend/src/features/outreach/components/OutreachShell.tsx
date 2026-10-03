@@ -53,8 +53,8 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
   }, [token, setProducts, setError])
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-4 md:pb-10 md:pt-8">
-      <div className="mb-4 flex items-center justify-between gap-3">
+    <div className="mx-auto w-full max-w-5xl px-4 pb-20 pt-2 md:pb-10 md:pt-8">
+      <div className="mb-2 flex items-center md:mb-4 md:items-center justify-between gap-3">
         <ProductSwitcher />
 
         {/* На десктопі навігація зверху, на телефоні знизу. */}
@@ -122,7 +122,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
             href={href}
             aria-current={pathname === href ? 'page' : undefined}
             className={cn(
-              'flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-medium',
+              'flex min-h-12 flex-col items-center justify-center gap-0.5 text-xs font-medium',
               pathname === href ? 'text-[var(--t)]' : 'text-[var(--m)]',
             )}
           >

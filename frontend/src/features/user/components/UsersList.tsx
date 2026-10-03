@@ -42,10 +42,10 @@ export const UsersList = () => {
   }, [token, search])
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:py-10">
+    <div className="mx-auto w-full max-w-7xl space-y-3 px-4 py-3 md:space-y-6 md:py-10">
       <div>
-        <h1 className="text-3xl font-medium md:text-4xl">Users</h1>
-        <p className="mt-1 text-[var(--m)]">Everyone with an account and their role.</p>
+        <h1 className="text-2xl font-medium md:text-4xl">Users</h1>
+        <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">Everyone with an account and their role.</p>
       </div>
 
       <UserSearch search={search || ''} />

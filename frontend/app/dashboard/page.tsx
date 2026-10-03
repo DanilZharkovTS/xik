@@ -71,9 +71,9 @@ const Dashboard = () => {
   const canUseJournal = isAdmin || user?.role === 'moderator'
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 md:py-10">
+    <div className="mx-auto w-full max-w-5xl space-y-3 px-4 py-3 md:space-y-6 md:py-10">
       <div>
-        <h1 className="text-3xl font-medium">{isAdmin ? 'Admin dashboard' : 'Dashboard'}</h1>
+        <h1 className="text-2xl font-medium md:text-4xl">{isAdmin ? 'Admin dashboard' : 'Dashboard'}</h1>
         {user && (
           <p className="mt-1 break-all text-[var(--m)]">
             {user.name ? `${user.name} · ` : ''}

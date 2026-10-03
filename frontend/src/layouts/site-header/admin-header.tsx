@@ -48,7 +48,7 @@ export function AdminHeader() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--l)] bg-[var(--g)] backdrop-blur-xl">
-      <div className="mx-auto flex h-[52px] w-full max-w-7xl items-center gap-3 px-4 md:px-6">
+      <div className="mx-auto flex h-11 w-full max-w-7xl md:h-[52px] items-center gap-3 px-4 md:px-6">
         <Link
           href="/dashboard"
           className="text-[19px] font-[750] tracking-tight text-[var(--t)]"
@@ -77,7 +77,7 @@ export function AdminHeader() {
             type="button"
             onClick={logout}
             disabled={isLoggingOut}
-            className="min-h-9 rounded-full border border-[var(--l)] px-3.5 text-sm font-medium text-[var(--t)] hover:bg-[var(--s)] disabled:opacity-50"
+            className="min-h-8 rounded-full border border-[var(--l)] px-3.5 text-sm font-medium text-[var(--t)] hover:bg-[var(--s)] disabled:opacity-50"
           >
             {isLoggingOut ? '...' : 'Log out'}
           </button>
@@ -86,7 +86,7 @@ export function AdminHeader() {
 
       <nav
         aria-label="Main"
-        className="flex gap-1 overflow-x-auto border-t border-[var(--l)] px-4 py-1.5 md:hidden"
+        className="flex gap-1 overflow-x-auto border-t border-[var(--l)] px-3 py-0.5 [scrollbar-width:none] md:hidden"
       >
         {items.map((item) => (
           <HeaderLink key={item.href} item={item} pathname={pathname} />
@@ -104,7 +104,7 @@ function HeaderLink({ item, pathname }: { item: NavItem; pathname: string }) {
       href={item.href}
       aria-current={isActive ? 'page' : undefined}
       className={cn(
-        'inline-flex min-h-9 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-sm font-medium transition-colors',
+        'inline-flex min-h-8 shrink-0 items-center whitespace-nowrap rounded-full px-3 text-sm md:min-h-9 md:px-4 font-medium transition-colors',
         isActive
           ? 'bg-[var(--t)] text-[var(--bg)]'
           : 'text-[var(--m)] hover:text-[var(--t)]',

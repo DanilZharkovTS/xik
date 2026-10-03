@@ -113,7 +113,7 @@ export const AuthForm: React.FC = () => {
 
   return (
     <main className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col justify-center px-4 py-8 md:py-16">
-      <h1 className="text-3xl font-medium md:text-4xl">
+      <h1 className="text-2xl font-medium md:text-4xl">
         {isRegister ? 'Create account' : 'Welcome back'}
       </h1>
 
@@ -173,7 +173,7 @@ export const AuthForm: React.FC = () => {
           />
         )}
 
-        <Button type="submit" className="min-h-12 w-full" disabled={isLoading}>
+        <Button type="submit" className="min-h-11 w-full" disabled={isLoading}>
           {isLoading ? 'Please wait...' : isRegister ? 'Create account' : 'Sign in'}
         </Button>
       </form>

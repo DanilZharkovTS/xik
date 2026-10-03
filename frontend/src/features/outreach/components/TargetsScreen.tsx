@@ -103,10 +103,10 @@ export function TargetsScreen(): ReactElement {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 md:space-y-5">
       <div>
-        <h1 className="text-3xl font-medium">My targets</h1>
-        <p className="mt-1 text-[var(--m)]">
+        <h1 className="text-2xl font-medium md:text-4xl">My targets</h1>
+        <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
           People and companies you have written to in this product.
         </p>
       </div>

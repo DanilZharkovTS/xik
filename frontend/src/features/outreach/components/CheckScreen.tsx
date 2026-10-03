@@ -70,10 +70,10 @@ export function CheckScreen(): ReactElement {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 md:space-y-5">
       <div>
-        <h1 className="text-3xl font-medium">Check</h1>
-        <p className="mt-1 text-[var(--m)]">
+        <h1 className="text-2xl font-medium md:text-4xl">Check</h1>
+        <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
           Paste a Telegram username, email, LinkedIn, Facebook or website link to see
           whether anyone has already written to them.
         </p>
@@ -127,7 +127,7 @@ export function CheckScreen(): ReactElement {
 
         <Button
           type="submit"
-          className="min-h-12 w-full text-lg"
+          className="min-h-11 w-full"
           disabled={isChecking || !value.trim() || !productId}
         >
           {isChecking ? 'Checking...' : 'Check'}
