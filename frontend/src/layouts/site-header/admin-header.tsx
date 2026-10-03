@@ -87,6 +87,12 @@ export function AdminHeader() {
           </Link>
           <LanguageSwitch />
           <ThemeToggle />
+          <span
+            title={user?.email}
+            className="hidden max-w-[10rem] truncate text-sm text-[var(--m)] lg:inline"
+          >
+            {user?.name?.trim() || user?.email.split('@')[0]}
+          </span>
           <button
             type="button"
             onClick={logout}

@@ -18,6 +18,8 @@ export function ModernSiteHeader() {
 
   const user = useAuthStore((state) => state.user)
   // Клієнт магазину має свій кабінет, адмін і модератор мають робочу зону.
+  // Імʼя показуємо замість загального «Кабінет»: видно, під ким виконано вхід.
+  const displayName = user?.name?.trim() || user?.email.split('@')[0] || ''
   const accountHref = user?.role === 'user' ? '/account' : '/dashboard'
 
   const navLinks = [
@@ -62,9 +64,11 @@ export function ModernSiteHeader() {
             {user ? (
               <Link
                 href={accountHref}
-                className="rounded-full bg-[var(--t)] px-3.5 py-1.5 text-xs font-medium text-[var(--bg)] transition-opacity hover:opacity-90"
+                title={`${displayName} · ${user.email}`}
+                aria-label={`${t('site.account')}: ${displayName}`}
+                className="max-w-[9rem] truncate rounded-full bg-[var(--t)] px-3.5 py-1.5 text-xs font-medium text-[var(--bg)] transition-opacity hover:opacity-90"
               >
-                {t('site.account')}
+                {displayName}
               </Link>
             ) : (
               <Link
@@ -112,7 +116,7 @@ export function ModernSiteHeader() {
               onClick={closeMobile}
               className="py-3 transition-colors hover:text-[var(--b)]"
             >
-              {t('site.account')}
+              {t('site.account')} · {displayName}
             </Link>
           ) : (
             <Link
