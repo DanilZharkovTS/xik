@@ -7,11 +7,12 @@ import useAuthStore from '@/src/features/auth/store'
 import { ThemeToggle } from '@/src/features/theme/components/theme-toggle'
 import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
 import { splitLocale } from '@/src/shared/i18n/paths'
-import { useI18n, useLocalePath } from '@/src/shared/i18n/use-i18n'
+import { useI18n, useLocalePath, useUrlLocalePath } from '@/src/shared/i18n/use-i18n'
 
 export function ModernSiteHeader() {
   const { t } = useI18n()
   const lp = useLocalePath()
+  const up = useUrlLocalePath()
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
   const isHome = splitLocale(pathname).path === '/'
@@ -63,7 +64,7 @@ export function ModernSiteHeader() {
 
             {user ? (
               <Link
-                href={accountHref}
+                href={up(accountHref)}
                 title={`${displayName} · ${user.email}`}
                 aria-label={`${t('site.account')}: ${displayName}`}
                 className="max-w-[9rem] truncate rounded-full bg-[var(--t)] px-3.5 py-1.5 text-xs font-medium text-[var(--bg)] transition-opacity hover:opacity-90"
@@ -72,7 +73,7 @@ export function ModernSiteHeader() {
               </Link>
             ) : (
               <Link
-                href="/auth/login"
+                href={up('/auth/login')}
                 className="rounded-full border border-[var(--l)] px-3.5 py-1.5 text-xs font-medium text-[var(--t)] transition-colors hover:bg-[var(--s)]"
               >
                 {t('site.signIn')}
@@ -112,7 +113,7 @@ export function ModernSiteHeader() {
 
           {user ? (
             <Link
-              href={accountHref}
+              href={up(accountHref)}
               onClick={closeMobile}
               className="py-3 transition-colors hover:text-[var(--b)]"
             >
@@ -120,7 +121,7 @@ export function ModernSiteHeader() {
             </Link>
           ) : (
             <Link
-              href="/auth/login"
+              href={up('/auth/login')}
               onClick={closeMobile}
               className="py-3 transition-colors hover:text-[var(--b)]"
             >

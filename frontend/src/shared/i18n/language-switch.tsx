@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactElement } from 'react'
 
@@ -34,7 +33,8 @@ export function LanguageSwitch({ className }: { className?: string }): ReactElem
     >
       {locales.map((item) =>
         area === 'public' ? (
-          <Link
+          // Звичайне посилання: зміна мови це повне завантаження сторінки (чиста тема, lang, без перебудови layout на клієнті).
+          <a
             key={item}
             // Стаття в мові без перекладу: ведемо до списку блогу цією мовою.
             href={alternates ? localizedPath(alternates[item] ?? '/blog', item) : localizedPath(pathname, item)}
@@ -44,7 +44,7 @@ export function LanguageSwitch({ className }: { className?: string }): ReactElem
             className={cn(ITEM, locale === item ? ACTIVE : IDLE)}
           >
             {LABELS[item]}
-          </Link>
+          </a>
         ) : (
           <button
             key={item}

@@ -13,7 +13,7 @@ import { BookOpen, House, Newspaper, Package, UserCog, Users } from 'lucide-reac
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/src/shared/lib/cn'
 import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
-import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { useI18n, useUrlLocalePath } from '@/src/shared/i18n/use-i18n'
 import type { MessageKey } from '@/src/shared/i18n/messages'
 
 type NavItem = { href: string; labelKey: MessageKey; match: string; Icon: LucideIcon; adminOnly?: boolean; tabOnly?: boolean }
@@ -37,6 +37,7 @@ export function useWorkspaceNav(): NavItem[] {
 
 export function AdminHeader() {
   const { t } = useI18n()
+  const up = useUrlLocalePath()
   const pathname = usePathname()
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
@@ -51,7 +52,7 @@ export function AdminHeader() {
       setIsLoggingOut(true)
       await authService.logout()
       clearAuth()
-      router.push('/auth/login')
+      router.push(up('/auth/login'))
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {

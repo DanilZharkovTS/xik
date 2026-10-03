@@ -12,7 +12,7 @@ import { formatPrice, productHref } from '@/src/features/catalog/catalog-product
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
 import { LOCALES } from '@/src/shared/i18n/i18n-store'
 import type { Locale } from '@/src/shared/i18n/i18n-store'
-import { useI18n, useLocalePath } from '@/src/shared/i18n/use-i18n'
+import { useI18n, useLocalePath, useUrlLocalePath } from '@/src/shared/i18n/use-i18n'
 import { Button } from '@/src/shared/ui/button'
 import { Segmented } from '@/src/shared/ui/segmented'
 import { TextField } from '@/src/shared/ui/text-field'
@@ -178,6 +178,7 @@ export function AccountScreen(): ReactElement {
 
 function ProfileTab(): ReactElement {
   const { t, locale, setLocale } = useI18n()
+  const up = useUrlLocalePath()
   const router = useRouter()
   const token = useAuthStore((state) => state.accessToken)
   const user = useAuthStore((state) => state.user)
@@ -209,7 +210,7 @@ function ProfileTab(): ReactElement {
       setIsLoggingOut(true)
       await authService.logout()
       clearAuth()
-      router.push('/auth/login')
+      router.push(up('/auth/login'))
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {

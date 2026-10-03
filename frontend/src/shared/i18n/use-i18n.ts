@@ -4,7 +4,9 @@ import { useCallback, useContext } from 'react'
 
 import { useI18nStore } from './i18n-store'
 import { LocaleContext } from './locale-provider'
-import { withLocale } from './paths'
+import { usePathname } from 'next/navigation'
+
+import { splitLocale, withLocale } from './paths'
 import { translate } from './translate'
 import type { Params } from './translate'
 import type { MessageKey } from './messages'
@@ -27,6 +29,16 @@ export function useI18n() {
 // Посилання публічного сайту зберігають мову: href("/products") -> "/es/products".
 export function useLocalePath(): (href: string) => string {
   const { locale } = useI18n()
+
+  return useCallback((href: string) => withLocale(href, locale), [locale])
+}
+
+// Для переходів між розділами (вхід, кабінет, адмінка): лишає мову з адреси, а не з вибору користувача.
+// Перехід в іншу мову адреси змушує Next перебудувати кореневий layout на клієнті,
+// тож «/es/...» → «/account» без цього стрибав би між мовами адреси.
+export function useUrlLocalePath(): (href: string) => string {
+  const pathname = usePathname()
+  const { locale } = splitLocale(pathname)
 
   return useCallback((href: string) => withLocale(href, locale), [locale])
 }

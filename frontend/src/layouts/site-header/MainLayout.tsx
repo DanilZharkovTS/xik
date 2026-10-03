@@ -12,13 +12,14 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useI18nStore } from '@/src/shared/i18n/i18n-store'
 import { splitLocale } from '@/src/shared/i18n/paths'
-import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { useI18n, useUrlLocalePath } from '@/src/shared/i18n/use-i18n'
 import { DEFAULT_THEME, THEME_STORAGE_KEY } from '@/src/features/theme/theme-config'
 
 const MainContent = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
   const router = useRouter()
   const { t } = useI18n()
+  const up = useUrlLocalePath()
   const initLocale = useI18nStore((state) => state.initLocale)
 
   // Збережену мову підставляємо один раз після гідрації (для входу й кабінету).
@@ -60,30 +61,30 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
       path.startsWith('/account')
 
     if (!user && isPrivatePath) {
-      router.replace('/auth/login')
+      router.replace(up('/auth/login'))
       return
     }
 
     if (user && path.startsWith('/auth/')) {
-      router.replace(isStaff ? '/dashboard' : '/account')
+      router.replace(up(isStaff ? '/dashboard' : '/account'))
       return
     }
 
     // Клієнт магазину працює в кабінеті, адмін і модератор у робочій зоні.
     if (user && !isStaff && (path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/outreach'))) {
-      router.replace('/account')
+      router.replace(up('/account'))
       return
     }
 
     if (user && isStaff && path.startsWith('/account')) {
-      router.replace('/dashboard')
+      router.replace(up('/dashboard'))
       return
     }
 
     if (path.startsWith('/admin') && user?.role !== 'admin') {
-      router.replace('/dashboard')
+      router.replace(up('/dashboard'))
     }
-  }, [path, user, router, status])
+  }, [path, user, router, status, up])
 
   const isHome = path === '/'
 
