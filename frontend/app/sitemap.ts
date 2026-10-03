@@ -5,6 +5,9 @@ import { fetchCatalog } from '@/src/features/catalog/catalog-api'
 import { productHref } from '@/src/features/catalog/catalog-product'
 import { getItemsByType } from '@/src/features/catalog/data/catalog-items'
 
+// Каталог живе в БД: сторінка збирається на кожен запит, не під час білду.
+export const dynamic = 'force-dynamic'
+
 const STATIC_PATHS = ['/'] as const
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
