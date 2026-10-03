@@ -278,6 +278,7 @@ html[data-theme='dark'] .code-block {
   56%, 100% { opacity: 0; }
 }
 .logo-cursor {
+  color: var(--b);
   animation: logo-blink 1.1s steps(1, end) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
