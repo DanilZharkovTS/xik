@@ -130,6 +130,8 @@ model User {
   sessions UserSession[]
   savedProducts SavedProduct[]
   library UserLibrary[]
+  articles Article[]
+  mediaAssets MediaAsset[]
   memberships ProductMembership[] @relation("MembershipUser")
   ownedTargets OutreachTarget[]
   outreachTemplates OutreachTemplate[]
@@ -409,4 +411,111 @@ model OutreachTemplate {
 
   @@index([productId, status, channel])
   @@index([ownerUserId])
+}
+
+enum ContentLocale {
+  en
+  es
+  uk
+}
+
+enum ArticleStatus {
+  draft
+  published
+  archived
+}
+
+// Зображення для статей. Файл лежить у S3-сумісному сховищі, тут лише метадані.
+model MediaAsset {
+  id String @id @default(uuid())
+
+  key String @unique
+  url String
+  mime String @db.VarChar(40)
+  size Int
+  width Int
+  height Int
+
+  createdById String
+  createdAt DateTime @default(now())
+
+  createdBy User @relation(fields: [createdById], references: [id])
+  covers Article[]
+
+  @@index([createdAt])
+}
+
+// Назви рубрик і тегів: { en: "...", es?: "...", uk?: "..." }, англійська обовʼязкова.
+model ArticleCategory {
+  id String @id @default(uuid())
+
+  slug String @unique @db.VarChar(60)
+  names Json
+  sortOrder Int @default(0)
+
+  articles Article[]
+}
+
+model ArticleTag {
+  id String @id @default(uuid())
+
+  slug String @unique @db.VarChar(60)
+  names Json
+
+  articles Article[]
+}
+
+// Стаття видима на сайті, коли status = published і publishedAt <= now (майбутня дата = планування).
+// Вміст кожною мовою лежить у ArticleTranslation; англійська обовʼязкова.
+model Article {
+  id String @id @default(uuid())
+
+  status ArticleStatus @default(draft)
+  publishedAt DateTime?
+
+  coverAssetId String?
+  categoryId String?
+  authorId String
+
+  // Секретне посилання для перегляду чернетки без публікації.
+  previewToken String @unique @default(uuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cover MediaAsset? @relation(fields: [coverAssetId], references: [id], onDelete: SetNull)
+  category ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  author User @relation(fields: [authorId], references: [id])
+  tags ArticleTag[]
+  translations ArticleTranslation[]
+
+  @@index([status, publishedAt])
+}
+
+model ArticleTranslation {
+  id String @id @default(uuid())
+
+  articleId String
+  locale ContentLocale
+
+  slug String @db.VarChar(90)
+  title String @db.VarChar(120)
+  excerpt String @db.VarChar(300)
+  seoTitle String? @db.VarChar(70)
+  seoDescription String? @db.VarChar(170)
+  keywords String[]
+  coverAlt String? @db.VarChar(200)
+  // Масив блоків: text, heading, image, video, quote, cta, product.
+  blocks Json
+  readingMinutes Int @default(1)
+  // Завершений переклад (заголовок, анонс, хоча б один блок): лише такі віддаються публічно.
+  isReady Boolean @default(false)
+
+  updatedAt DateTime @updatedAt
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, locale])
+  @@unique([locale, slug])
+  @@index([locale, isReady])
 }

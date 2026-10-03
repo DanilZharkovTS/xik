@@ -16,6 +16,7 @@ backend/src/generated/prisma/
 
 # Docker & Database
 docker/postgres/data/
+docker/minio/data/
 postgres_data/
 
 # Environment files

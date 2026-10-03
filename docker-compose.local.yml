@@ -19,6 +19,38 @@ services:
       timeout: 5s
       retries: 5
 
+  # Локальне S3-сумісне сховище для зображень статей (у продакшні це S3, R2 тощо).
+  minio:
+    image: minio/minio
+    container_name: xik-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: xik
+      MINIO_ROOT_PASSWORD: xik-minio-secret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./docker/minio/data:/data
+    networks:
+      - app-network
+
+  # Одноразово створює відкритий для читання bucket.
+  minio-init:
+    image: minio/mc
+    container_name: xik-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 xik xik-minio-secret; do sleep 1; done;
+      mc mb -p local/xik-media;
+      mc anonymous set download local/xik-media;
+      exit 0"
+    networks:
+      - app-network
+
   notifications:
     container_name: xik-notifications
     build:
@@ -56,6 +88,12 @@ services:
       FRONTEND_INTERNAL_URL: "http://frontend:3000"
       REVALIDATE_SECRET: "local-dev-revalidate-secret"
       NOTIFICATIONS_SERVICE_URL: "http://notifications:3002"
+      S3_ENDPOINT: "http://minio:9000"
+      S3_BUCKET: "xik-media"
+      S3_ACCESS_KEY_ID: "xik"
+      S3_SECRET_ACCESS_KEY: "xik-minio-secret"
+      # Адреса файлів у браузері (не внутрішня адреса Docker-мережі).
+      S3_PUBLIC_URL: "http://localhost:9000/xik-media"
     volumes:
       - ./backend:/app
       - /app/node_modules
