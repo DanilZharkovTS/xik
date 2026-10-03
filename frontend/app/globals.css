@@ -271,17 +271,3 @@ html[data-theme='dark'] .code-block {
 .code-block .hljs-deletion { color: var(--code-comment); font-style: italic; }
 .code-block .hljs-emphasis { font-style: italic; }
 .code-block .hljs-strong { font-weight: 700; }
-
-/* Курсор у логотипі: блимає, якщо користувач не вимкнув анімації в системі. */
-@keyframes logo-blink {
-  0%, 55% { opacity: 1; }
-  56%, 100% { opacity: 0; }
-}
-.logo-cursor {
-  animation: logo-blink 1.1s steps(1, end) infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .logo-cursor {
-    animation: none;
-  }
-}
