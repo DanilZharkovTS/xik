@@ -12,7 +12,7 @@ import { Sheet } from '@/src/shared/ui/sheet'
 import { adminBlogService } from '../admin-blog.service'
 import type { Asset } from '../admin-blog.types'
 
-const MAX_BYTES = 8 * 1024 * 1024
+const MAX_BYTES = 25 * 1024 * 1024
 const TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 type ImageFieldProps = {

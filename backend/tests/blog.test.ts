@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 // Підроблене сховище: мережі до S3 у тестах немає.
 const store = vi.hoisted(() => ({ puts: [] as { key: string; mime: string; size: number }[] }))
 vi.mock('../src/modules/media/storage.js', () => ({
+  mediaDir: () => '/tmp/xik-test-media',
   storage: {
     put: async (key: string, body: Buffer, mime: string) => {
       store.puts.push({ key, mime, size: body.length })
@@ -11,6 +12,7 @@ vi.mock('../src/modules/media/storage.js', () => ({
   },
 }))
 
+import sharp from 'sharp'
 import { prisma } from '../src/shared/database/prisma.js'
 import { api, auth, createProduct, createUser, loginOk, resetDb } from './helpers.js'
 
@@ -450,14 +452,38 @@ describe('завантаження зображень', () => {
     expect(store.puts).toHaveLength(0)
   })
 
-  it('відхиляє завеликий файл', async () => {
+  it('відхиляє файл більший за 25 МБ', async () => {
     const t = await setup()
-    const big = Buffer.concat([PNG, Buffer.alloc(8 * 1024 * 1024 + 10)])
+    const big = Buffer.concat([PNG, Buffer.alloc(25 * 1024 * 1024 + 10)])
 
     const res = await upload(t.admin, big)
 
     expect(res.status).toBe(413)
     expect(store.puts).toHaveLength(0)
+  })
+
+  it('велике фото зменшується до 2400 px і стає меншим за розміром', async () => {
+    const t = await setup()
+    const noise = await sharp({
+      create: { width: 3600, height: 2400, channels: 3, background: '#888', noise: { type: 'gaussian', mean: 128, sigma: 60 } },
+    })
+      .jpeg({ quality: 100 })
+      .toBuffer()
+
+    const res = await upload(t.admin, noise, 'image/jpeg')
+
+    expect(res.status).toBe(201)
+    expect(res.body.asset).toMatchObject({ width: 2400, height: 1600, mime: 'image/jpeg' })
+    expect(res.body.asset.size).toBeLessThan(noise.length)
+    expect(store.puts[0].size).toBe(res.body.asset.size)
+  })
+
+  it('невелике зображення не збільшується й не псується', async () => {
+    const t = await setup()
+
+    const res = await upload(t.admin, PNG)
+
+    expect(res.body.asset).toMatchObject({ width: 1, height: 1 })
   })
 
   it('бібліотека: список завантажених, нові першими', async () => {

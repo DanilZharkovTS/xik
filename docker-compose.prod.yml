@@ -60,16 +60,14 @@ services:
       NOTIFICATIONS_SERVICE_SECRET: ${NOTIFICATIONS_SERVICE_SECRET}
       STRIPE_SECRET: ${STRIPE_SECRET}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
-      # Сховище зображень статей (будь-яке S3-сумісне). Без цих змінних завантаження вимкнене.
-      S3_BUCKET: ${S3_BUCKET:-}
-      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
-      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
-      S3_ENDPOINT: ${S3_ENDPOINT:-}
-      S3_REGION: ${S3_REGION:-}
-      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
+      # Зображення статей лежать на сервері (том ./docker/media); MEDIA_URL це адреса API в браузері.
+      MEDIA_DIR: /data/media
+      MEDIA_URL: ${MEDIA_URL:-http://localhost:5001/media}
       REPORT_TIMEZONE: ${REPORT_TIMEZONE:-Europe/Kyiv}
       OUTREACH_RATE_LIMIT: ${OUTREACH_RATE_LIMIT:-30}
       LOGIN_RATE_LIMIT: ${LOGIN_RATE_LIMIT:-10}
+    volumes:
+      - ./docker/media:/data/media
     depends_on:
       postgres:
         condition: service_healthy
