@@ -20,6 +20,8 @@ export interface ApiCatalogProduct {
   currency: string | null
   billingPeriod: 'week' | 'month' | 'year' | null
   isPurchasable: boolean
+  // Мови, на які продукт справді перекладено (англійська є завжди).
+  availableLocales: ('en' | 'es' | 'uk')[]
   updatedAt: string
 }
 
@@ -36,4 +38,5 @@ export interface ApiProductDetail extends ApiCatalogProduct {
   } | null
   protocols: string[]
   demoUrl: string | null
+  locale: 'en' | 'es' | 'uk'
 }

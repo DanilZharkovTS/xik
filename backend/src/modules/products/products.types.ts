@@ -76,6 +76,7 @@ export interface Product {
   protocols: string[]
   demoUrl: string | null
   sortOrder: number
+  translations: Prisma.JsonValue
 
   price: Prisma.Decimal
   currency: ProductCurrency

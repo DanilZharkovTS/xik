@@ -1,3 +1,4 @@
+import type { Locale } from '@/src/shared/i18n/i18n-store'
 import type { ApiCatalogProduct, ApiProductDetail, ProductKind } from './catalog.types'
 
 // У Docker сервер Next.js звертається до бекенду за внутрішньою адресою (http://backend:5001),
@@ -19,9 +20,11 @@ const cached = (extraTags: string[] = []): RequestInit => ({
 })
 
 // Блоки сайту не повинні падати разом із бекендом: без даних блок просто порожній.
-export async function fetchCatalog(kind?: ProductKind): Promise<ApiCatalogProduct[]> {
+export async function fetchCatalog(kind?: ProductKind, locale: Locale = 'en'): Promise<ApiCatalogProduct[]> {
   try {
-    const url = `${apiBase()}/products/catalog${kind ? `?kind=${kind}` : ''}`
+    const query = new URLSearchParams({ lang: locale })
+    if (kind) query.set('kind', kind)
+    const url = `${apiBase()}/products/catalog?${query}`
     const res = await fetch(url, cached())
 
     if (!res.ok) {
@@ -37,8 +40,11 @@ export async function fetchCatalog(kind?: ProductKind): Promise<ApiCatalogProduc
 }
 
 // null означає, що продукту немає (404). Збій бекенду кидає помилку, а не маскується під "не знайдено".
-export async function fetchProduct(slug: string): Promise<ApiProductDetail | null> {
-  const res = await fetch(`${apiBase()}/products/${encodeURIComponent(slug)}`, cached([`product:${slug}`]))
+export async function fetchProduct(slug: string, locale: Locale = 'en'): Promise<ApiProductDetail | null> {
+  const res = await fetch(
+    `${apiBase()}/products/${encodeURIComponent(slug)}?lang=${locale}`,
+    cached([`product:${slug}`]),
+  )
 
   if (res.status === 404) return null
 

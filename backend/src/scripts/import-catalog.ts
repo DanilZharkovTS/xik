@@ -22,6 +22,7 @@ const main = async () => {
 
   console.log(`Created: ${result.created.length}${result.created.length ? ` (${result.created.join(', ')})` : ''}`)
   console.log(`Skipped (already exist): ${result.skipped.length}`)
+  console.log(`Translations added to existing products: ${result.translated.length}`)
 
   if (result.failed.length > 0) {
     console.error(`Failed: ${result.failed.length}`)

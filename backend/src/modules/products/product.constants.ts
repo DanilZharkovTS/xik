@@ -43,3 +43,7 @@ export const PRODUCT_BILLING_PERIODS = [
 export const PRODUCT_KINDS = ['product', 'agent'] as const
 
 export const PRODUCT_STATUSES = ['production', 'active', 'beta', 'build'] as const
+
+// Мови контенту. Англійська обовʼязкова й живе в основних полях; es і uk лежать у translations.
+export const CONTENT_LOCALES = ['en', 'es', 'uk'] as const
+export const TRANSLATION_LOCALES = ['es', 'uk'] as const

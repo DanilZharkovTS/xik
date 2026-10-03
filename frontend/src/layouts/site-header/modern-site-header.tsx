@@ -5,19 +5,26 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import useAuthStore from '@/src/features/auth/store'
 import { ThemeToggle } from '@/src/features/theme/components/theme-toggle'
+import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
+import { splitLocale } from '@/src/shared/i18n/paths'
+import { useI18n, useLocalePath } from '@/src/shared/i18n/use-i18n'
 
 export function ModernSiteHeader() {
+  const { t } = useI18n()
+  const lp = useLocalePath()
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
-  const isHome = pathname === '/'
+  const isHome = splitLocale(pathname).path === '/'
 
   const user = useAuthStore((state) => state.user)
+  // Клієнт магазину має свій кабінет, адмін і модератор мають робочу зону.
+  const accountHref = user?.role === 'user' ? '/account' : '/dashboard'
 
   const navLinks = [
-    { label: 'Products', href: isHome ? '#products' : '/#products' },
-    { label: 'AI', href: isHome ? '#ai' : '/#ai' },
-    { label: 'Services', href: isHome ? '#services' : '/#services' },
-    { label: 'About', href: isHome ? '#about' : '/#about' },
+    { label: t('site.nav.products'), href: isHome ? '#products' : lp('/#products') },
+    { label: t('site.nav.ai'), href: isHome ? '#ai' : lp('/#ai') },
+    { label: t('site.nav.services'), href: isHome ? '#services' : lp('/#services') },
+    { label: t('site.nav.about'), href: isHome ? '#about' : lp('/#about') },
   ]
 
   const closeMobile = () => setMobileOpen(false)
@@ -27,14 +34,14 @@ export function ModernSiteHeader() {
       <header className="fixed inset-x-0 top-0 z-50 h-[52px] border-b border-[var(--l)] bg-[var(--g)] backdrop-blur-xl transition-colors">
         <div className="mx-auto flex h-full max-w-[1180px] items-center gap-5 px-6">
           <Link
-            href="/"
+            href={lp('/')}
             className="mr-auto text-[19px] font-[750] tracking-tight text-[var(--t)] transition-opacity hover:opacity-80"
           >
             XIK_
           </Link>
 
           {/* Desktop Navigation */}
-          <nav aria-label="Primary navigation" className="hidden items-center gap-7 text-[13px] font-medium text-[var(--m)] md:flex">
+          <nav aria-label={t('site.nav.primary')} className="hidden items-center gap-7 text-[13px] font-medium text-[var(--m)] md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
@@ -45,32 +52,25 @@ export function ModernSiteHeader() {
               </Link>
             ))}
 
-            {user && (
-              <Link
-                href="/dashboard"
-                className="transition-colors hover:text-[var(--t)]"
-              >
-                Dashboard
-              </Link>
-            )}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <LanguageSwitch />
             <ThemeToggle />
 
             {user ? (
               <Link
-                href="/dashboard"
+                href={accountHref}
                 className="rounded-full bg-[var(--t)] px-3.5 py-1.5 text-xs font-medium text-[var(--bg)] transition-opacity hover:opacity-90"
               >
-                Account
+                {t('site.account')}
               </Link>
             ) : (
               <Link
                 href="/auth/login"
                 className="rounded-full border border-[var(--l)] px-3.5 py-1.5 text-xs font-medium text-[var(--t)] transition-colors hover:bg-[var(--s)]"
               >
-                Sign In
+                {t('site.signIn')}
               </Link>
             )}
 
@@ -79,7 +79,7 @@ export function ModernSiteHeader() {
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--l)] text-[var(--t)] md:hidden"
-              aria-label="Toggle navigation"
+              aria-label={t('site.menu')}
             >
               {mobileOpen ? '✕' : '☰'}
             </button>
@@ -107,11 +107,11 @@ export function ModernSiteHeader() {
 
           {user ? (
             <Link
-              href="/dashboard"
+              href={accountHref}
               onClick={closeMobile}
               className="py-3 transition-colors hover:text-[var(--b)]"
             >
-              Dashboard
+              {t('site.account')}
             </Link>
           ) : (
             <Link
@@ -119,7 +119,7 @@ export function ModernSiteHeader() {
               onClick={closeMobile}
               className="py-3 transition-colors hover:text-[var(--b)]"
             >
-              Sign In
+              {t('site.signIn')}
             </Link>
           )}
         </div>

@@ -3,7 +3,41 @@ import type {
   Architecture,
   Capability,
   ProductInput,
+  ProductTranslation,
+  ProductTranslations,
+  TranslationLocale,
 } from './admin-products.types'
+
+// Мовні поля вводяться текстом, як і основні; порожнє поле означає "показати англійське".
+export interface TranslationForm {
+  name: string
+  shortDescription: string
+  description: string
+  tagline: string
+  categoryLabel: string
+  features: string
+  highlights: string
+  capabilities: string
+  runtime: string
+  deployment: string
+  latency: string
+}
+
+export const TRANSLATION_LOCALES: readonly TranslationLocale[] = ['es', 'uk']
+
+export const EMPTY_TRANSLATION: TranslationForm = {
+  name: '',
+  shortDescription: '',
+  description: '',
+  tagline: '',
+  categoryLabel: '',
+  features: '',
+  highlights: '',
+  capabilities: '',
+  runtime: '',
+  deployment: '',
+  latency: '',
+}
 
 // Форма працює з текстом: списки вводяться рядками, ціна рядком.
 export interface FormValues {
@@ -30,6 +64,7 @@ export interface FormValues {
   currency: ProductInput['currency']
   billingPeriod: ProductInput['billingPeriod']
   showPrice: boolean
+  translations: Record<TranslationLocale, TranslationForm>
 }
 
 export const EMPTY_FORM: FormValues = {
@@ -56,6 +91,7 @@ export const EMPTY_FORM: FormValues = {
   currency: 'USD',
   billingPeriod: 'month',
   showPrice: true,
+  translations: { es: EMPTY_TRANSLATION, uk: EMPTY_TRANSLATION },
 }
 
 const lines = (text: string): string[] =>
@@ -79,6 +115,71 @@ const parseCapabilities = (text: string): Capability[] =>
       ? { title: line, description: line }
       : { title: line.slice(0, index).trim(), description: line.slice(index + 1).trim() }
   })
+
+const capabilitiesText = (items: Capability[]): string =>
+  items.map((item) => `${item.title}: ${item.description}`).join('\n')
+
+const translationToForm = (value: ProductTranslation | undefined): TranslationForm => ({
+  name: value?.name ?? '',
+  shortDescription: value?.shortDescription ?? '',
+  description: value?.description ?? '',
+  tagline: value?.tagline ?? '',
+  categoryLabel: value?.categoryLabel ?? '',
+  features: (value?.features ?? []).join('\n'),
+  highlights: (value?.highlights ?? []).join('\n'),
+  capabilities: capabilitiesText(value?.capabilities ?? []),
+  runtime: value?.architecture?.runtime ?? '',
+  deployment: value?.architecture?.deployment ?? '',
+  latency: value?.architecture?.latency ?? '',
+})
+
+// Лишає тільки заповнені поля: порожні не зберігаються, і сайт бере для них англійський текст.
+const translationToInput = (form: TranslationForm): ProductTranslation => {
+  const result: ProductTranslation = {}
+  const text = (key: 'name' | 'shortDescription' | 'description' | 'tagline' | 'categoryLabel') => {
+    const value = form[key].trim()
+    if (value) result[key] = value
+  }
+
+  text('name')
+  text('shortDescription')
+  text('description')
+  text('tagline')
+  text('categoryLabel')
+
+  const features = lines(form.features)
+  if (features.length > 0) result.features = features
+  const highlights = lines(form.highlights)
+  if (highlights.length > 0) result.highlights = highlights
+  const capabilities = parseCapabilities(form.capabilities)
+  if (capabilities.length > 0) result.capabilities = capabilities
+
+  const architecture: NonNullable<ProductTranslation['architecture']> = {}
+  if (form.runtime.trim()) architecture.runtime = form.runtime.trim()
+  if (form.deployment.trim()) architecture.deployment = form.deployment.trim()
+  if (form.latency.trim()) architecture.latency = form.latency.trim()
+  if (Object.keys(architecture).length > 0) result.architecture = architecture
+
+  return result
+}
+
+const translationsToInput = (forms: Record<TranslationLocale, TranslationForm>): ProductTranslations => {
+  const result: ProductTranslations = {}
+
+  for (const locale of TRANSLATION_LOCALES) {
+    const value = translationToInput(forms[locale])
+    if (Object.keys(value).length > 0) result[locale] = value
+  }
+
+  return result
+}
+
+// Переклад показується на сайті, лише коли заповнені короткий опис і опис (так само рахує бекенд).
+export const isTranslationReady = (form: TranslationForm): boolean =>
+  form.shortDescription.trim() !== '' && form.description.trim() !== ''
+
+export const isTranslationStarted = (form: TranslationForm): boolean =>
+  Object.keys(translationToInput(form)).length > 0
 
 export const toForm = (product: AdminProduct): FormValues => ({
   name: product.name,
@@ -106,6 +207,10 @@ export const toForm = (product: AdminProduct): FormValues => ({
   currency: product.currency,
   billingPeriod: product.billingPeriod,
   showPrice: product.showPrice,
+  translations: {
+    es: translationToForm(product.translations?.es),
+    uk: translationToForm(product.translations?.uk),
+  },
 })
 
 export const toInput = (form: FormValues): ProductInput => {
@@ -140,5 +245,6 @@ export const toInput = (form: FormValues): ProductInput => {
     currency: form.currency,
     billingPeriod: form.billingPeriod,
     showPrice: form.showPrice,
+    translations: translationsToInput(form.translations),
   }
 }

@@ -196,6 +196,9 @@ model Product {
   demoUrl String?
   sortOrder Int @default(0)
 
+  // Переклади контенту: { es: {...}, uk: {...} }. Англійська лишається в колонках вище.
+  translations Json @default("{}")
+
   // Ціна є завжди (вона йде в Stripe); showPrice лише вирішує, чи показувати її на сторінці,
   // чи користувач побачить її тільки на оплаті.
   price Decimal

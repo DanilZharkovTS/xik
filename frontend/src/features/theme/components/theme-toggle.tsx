@@ -9,6 +9,7 @@ import {
   THEME_STORAGE_KEY,
 } from '../theme-config'
 import type { SiteTheme } from '../theme-config'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 const THEME_CHANGE_EVENT = 'xik-theme-change'
 
@@ -77,6 +78,8 @@ export function ThemeToggle(): ReactElement {
   )
   const isLightTheme = theme === 'light'
   const nextTheme = isLightTheme ? 'dark' : 'light'
+  const { t } = useI18n()
+  const label = t('site.theme', { theme: t(nextTheme === 'dark' ? 'site.theme.dark' : 'site.theme.light') })
 
   useEffect(() => {
     updateThemeColor(theme)
@@ -88,12 +91,12 @@ export function ThemeToggle(): ReactElement {
 
   return (
     <button
-      aria-label={`Switch to ${nextTheme} theme`}
+      aria-label={label}
       aria-pressed={isLightTheme}
       className="flex size-8 items-center justify-center rounded-full bg-[var(--s)] text-sm text-[var(--t)] transition-all hover:scale-105 active:scale-95"
       data-theme-toggle=""
       onClick={handleThemeChange}
-      title={`Switch to ${nextTheme} theme`}
+      title={label}
       type="button"
     >
       ◐

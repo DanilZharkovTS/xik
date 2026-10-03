@@ -22,7 +22,8 @@ export const productsController = {
     try {
       const result = await productsService.findProduct(
         req.validData.params.slug,
-        req.user
+        req.user,
+        req.validData.query?.lang
       )
       res.status(200).json(result.response)
     } catch (err) {

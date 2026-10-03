@@ -3,6 +3,9 @@ import { ArrowUpRight } from 'lucide-react'
 import type { ReactElement } from 'react'
 
 import { getAbsoluteUrl } from '@/src/config/site'
+import type { Locale } from '@/src/shared/i18n/i18n-store'
+import { localizedPath, withLocale } from '@/src/shared/i18n/paths'
+import { translate } from '@/src/shared/i18n/translate'
 import { JsonLd } from '@/src/shared/seo/json-ld'
 
 export type CatalogListEntry = {
@@ -14,7 +17,9 @@ export type CatalogListEntry = {
 }
 
 type CatalogListPageProps = {
+  // Адреса без префікса мови.
   readonly pathname: string
+  readonly locale: Locale
   readonly eyebrow: string
   readonly title: string
   readonly intro: string
@@ -27,6 +32,7 @@ type CatalogListPageProps = {
 // звичайних посилань для краулера й розмітка ItemList.
 export function CatalogListPage({
   pathname,
+  locale,
   eyebrow,
   title,
   intro,
@@ -43,7 +49,8 @@ export function CatalogListPage({
           '@type': 'CollectionPage',
           name: title,
           description: intro,
-          url: getAbsoluteUrl(pathname),
+          url: getAbsoluteUrl(localizedPath(pathname, locale)),
+          inLanguage: locale,
           mainEntity: {
             '@type': 'ItemList',
             numberOfItems: entries.length,
@@ -62,16 +69,16 @@ export function CatalogListPage({
           '@context': 'https://schema.org',
           '@type': 'BreadcrumbList',
           itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'XIK', item: getAbsoluteUrl('/') },
-            { '@type': 'ListItem', position: 2, name: title, item: getAbsoluteUrl(pathname) },
+            { '@type': 'ListItem', position: 1, name: 'XIK', item: getAbsoluteUrl(localizedPath('/', locale)) },
+            { '@type': 'ListItem', position: 2, name: title, item: getAbsoluteUrl(localizedPath(pathname, locale)) },
           ],
         }}
       />
 
       <section className="px-4 py-12 sm:px-6 md:py-20">
         <div className="mx-auto max-w-[1360px]">
-          <nav aria-label="Breadcrumb" className="mb-6 text-sm text-[var(--m)]">
-            <Link href="/" className="hover:text-[var(--t)]">
+          <nav aria-label={translate(locale, 'site.breadcrumb')} className="mb-6 text-sm text-[var(--m)]">
+            <Link href={withLocale('/', locale)} className="hover:text-[var(--t)]">
               XIK
             </Link>
             <span aria-hidden="true"> / </span>

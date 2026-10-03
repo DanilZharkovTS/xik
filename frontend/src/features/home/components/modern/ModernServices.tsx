@@ -4,9 +4,22 @@ import React from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 
+import { useI18n, useLocalePath } from '@/src/shared/i18n/use-i18n'
+import { getCatalogItem, localizeItem } from '@/src/features/catalog/data/catalog-items'
 import { MODERN_SERVICES, RESEARCH_PILLS } from '../../data/modern-home-data'
 
 export function ModernServices() {
+  const { t, locale } = useI18n()
+  const href = useLocalePath()
+
+  // Англійські тексти головної свої; для es і uk беремо переклад послуги.
+  const services = MODERN_SERVICES.map((service) => {
+    const item = locale === 'en' ? null : getCatalogItem(service.slug)
+    if (!item) return service
+    const localized = localizeItem(item, locale)
+    return { ...service, title: localized.title, description: localized.subtitle }
+  })
+
   return (
     <section id="services" className="scroll-mt-14 px-6 py-20 md:py-24">
       <div className="mx-auto max-w-[1360px]">
@@ -14,25 +27,25 @@ export function ModernServices() {
         <div className="mb-9 flex flex-col justify-between gap-4 md:flex-row md:items-end md:gap-8">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-[var(--m)]">
-              Services & Infrastructure
+              {t('home.services.eyebrow')}
             </div>
             <h2 className="mt-1.5 text-[clamp(34px,4vw,54px)] font-bold leading-[1] tracking-[-0.045em] text-[var(--t)]">
-              The systems underneath.
+              {t('home.services.title')}
             </h2>
           </div>
           <div className="max-w-[480px] text-base leading-relaxed text-[var(--m)]">
-            Reusable engineering infrastructure and capabilities shared across the XIK ecosystem.
+            {t('home.services.desc')}
           </div>
         </div>
 
         {/* Services 2-Column Divided Grid */}
         <div className="grid grid-cols-1 border-t border-[var(--l)] md:grid-cols-2">
-          {MODERN_SERVICES.map((service, index) => {
+          {services.map((service, index) => {
             const isOdd = index % 2 === 0
             return (
               <Link
                 key={service.slug}
-                href={service.href}
+                href={href(service.href)}
                 className={`group block border-b border-[var(--l)] py-7 transition-colors hover:bg-[var(--s)]/40 ${
                   isOdd
                     ? 'md:pr-11'
@@ -52,7 +65,7 @@ export function ModernServices() {
                 </p>
                 <div className="mt-3">
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--b)] group-hover:underline">
-                    View service architecture →
+                    {t('home.services.view')}
                   </span>
                 </div>
               </Link>
@@ -74,10 +87,10 @@ export function ModernServices() {
 
         <div className="mt-8 text-center">
           <Link
-            href="/services"
+            href={href('/services')}
             className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[var(--l)] px-5 text-sm font-semibold text-[var(--t)] transition-colors hover:border-[var(--t)]"
           >
-            View all services
+            {t('home.services.all')}
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>

@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import type { Prisma } from '../../generated/prisma/client.js'
 import { prisma } from '../../shared/database/prisma.js'
 import { productsRepo } from './products.repo.js'
 import { createProductSchema, type CreateProductDto } from './products.schema.js'
@@ -6,17 +7,20 @@ import { createProductSchema, type CreateProductDto } from './products.schema.js
 export interface ImportResult {
   created: string[]
   skipped: string[]
+  // Наявні продукти без перекладів, яким дописано переклади з каталогу.
+  translated: string[]
   failed: { slug: string; error: string }[]
 }
 
 // Ідемпотентний імпорт: наявні за slug продукти не чіпаємо (їх уже редагують в адмінці).
+// Єдиний виняток: продукту без жодного перекладу дописуються переклади з каталогу.
 // Зі Stripe кожен продукт створюється тим самим шляхом, що й в адмінці; без Stripe лишається
 // непривʼязаним, і його привʼязує кнопка "Sync with Stripe".
 export async function importCatalog(
   rawItems: unknown[],
   options: { useStripe: boolean }
 ): Promise<ImportResult> {
-  const result: ImportResult = { created: [], skipped: [], failed: [] }
+  const result: ImportResult = { created: [], skipped: [], translated: [], failed: [] }
 
   for (const raw of rawItems) {
     const slug = String((raw as { slug?: unknown })?.slug ?? '?')
@@ -30,8 +34,23 @@ export async function importCatalog(
 
       const data: CreateProductDto = parsed.data
 
-      if (await prisma.product.findUnique({ where: { slug: data.slug }, select: { id: true } })) {
-        result.skipped.push(data.slug)
+      const existing = await prisma.product.findUnique({
+        where: { slug: data.slug },
+        select: { id: true, translations: true },
+      })
+
+      if (existing) {
+        const hasOwn = Object.keys((existing.translations ?? {}) as object).length > 0
+
+        if (!hasOwn && Object.keys(data.translations).length > 0) {
+          await prisma.product.update({
+            where: { id: existing.id },
+            data: { translations: data.translations as Prisma.InputJsonValue },
+          })
+          result.translated.push(data.slug)
+        } else {
+          result.skipped.push(data.slug)
+        }
         continue
       }
 

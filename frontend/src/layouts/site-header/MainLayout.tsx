@@ -6,17 +6,21 @@ import { SiteHeader } from './site-header'
 import { AdminHeader, AdminTabBar } from './admin-header'
 import { ModernFooter } from '@/src/layouts/site-footer/modern-footer'
 import { Toaster } from 'sonner'
-import { siteConfig } from '@/src/config/site'
+import { siteConfig, siteText } from '@/src/config/site'
 import useAuthStore from '@/src/features/auth/store'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useI18nStore } from '@/src/shared/i18n/i18n-store'
+import { splitLocale } from '@/src/shared/i18n/paths'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 const MainContent = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
   const router = useRouter()
+  const { t } = useI18n()
   const initLocale = useI18nStore((state) => state.initLocale)
 
+  // Збережену мову підставляємо один раз після гідрації (для входу й кабінету).
   useEffect(() => {
     initLocale()
   }, [initLocale])
@@ -24,61 +28,54 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
   const user = useAuthStore((state) => state.user)
   const status = useAuthStore((state) => state.status)
 
+  // Адреса без префікса мови: /es/products і /products однаково "/products".
+  const { path } = splitLocale(pathname)
+
   useEffect(() => {
     if (!user && status === 'checking') return
 
-    // Захист на клієнті: бекенд усе одно перевіряє кожен запит, тож тут лише зручність.
-    // Гість не бачить робочих сторінок, а залогінений не лишається на формі входу.
-    const isWorkspacePath =
-      pathname.startsWith('/dashboard') ||
-      pathname.startsWith('/outreach') ||
-      pathname.startsWith('/admin')
+    const isStaff = user?.role === 'admin' || user?.role === 'moderator'
 
-    if (!user && isWorkspacePath) {
+    // Захист на клієнті: бекенд усе одно перевіряє кожен запит, тож тут лише зручність.
+    // Гість не бачить робочих сторінок і кабінету, а залогінений не лишається на формі входу.
+    const isPrivatePath =
+      path.startsWith('/dashboard') ||
+      path.startsWith('/outreach') ||
+      path.startsWith('/admin') ||
+      path.startsWith('/account')
+
+    if (!user && isPrivatePath) {
       router.replace('/auth/login')
       return
     }
 
-    if (user && pathname.startsWith('/auth/')) {
+    if (user && path.startsWith('/auth/')) {
+      router.replace(isStaff ? '/dashboard' : '/account')
+      return
+    }
+
+    // Клієнт магазину працює в кабінеті, адмін і модератор у робочій зоні.
+    if (user && !isStaff && (path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/outreach'))) {
+      router.replace('/account')
+      return
+    }
+
+    if (user && isStaff && path.startsWith('/account')) {
       router.replace('/dashboard')
       return
     }
 
-    if (pathname.startsWith('/admin') && user?.role !== 'admin') {
+    if (path.startsWith('/admin') && user?.role !== 'admin') {
       router.replace('/dashboard')
     }
+  }, [path, user, router, status])
 
-    // Журнал для модераторів і адмінів; покупець магазину туди не потрапляє.
-    if (
-      pathname.startsWith('/outreach') &&
-      user?.role !== 'admin' &&
-      user?.role !== 'moderator'
-    ) {
-      router.replace('/dashboard')
-    }
-  }, [pathname, user, router, status])
-
-  const isHome = pathname === '/'
-  const locale = useI18nStore((state) => state.locale)
+  const isHome = path === '/'
 
   // Робоча зона для залогіненого адміна/модератора: своя шапка, без меню й футера сайту.
   const isWorkspace =
     (user?.role === 'admin' || user?.role === 'moderator') &&
-    (pathname.startsWith('/admin') ||
-      pathname.startsWith('/outreach') ||
-      pathname.startsWith('/dashboard'))
-
-  // Мова документа: публічні сторінки завжди англійською (вміст не перекладається),
-  // інтерфейс робочої зони й входу слідує за вибраною мовою.
-  const isPrivateArea =
-    pathname.startsWith('/admin') ||
-    pathname.startsWith('/outreach') ||
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/auth')
-
-  useEffect(() => {
-    document.documentElement.lang = isPrivateArea ? locale : 'en'
-  }, [isPrivateArea, locale])
+    (path.startsWith('/admin') || path.startsWith('/outreach') || path.startsWith('/dashboard'))
 
   return (
     <>
@@ -86,7 +83,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
         className="fixed left-4 top-4 z-[100] -translate-y-24 rounded-full bg-[var(--t)] px-4 py-2 text-sm text-[var(--bg)] shadow-md transition-transform duration-200 focus-visible:translate-y-0"
         href="#main-content"
       >
-        Skip to content
+        {t('site.skip')}
       </a>
 
       {isWorkspace ? <AdminHeader /> : <SiteHeader />}
@@ -107,12 +104,13 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
 }
 
 export const MainLayout = ({ children }: { children: React.ReactNode }) => {
+  const { locale } = useI18n()
   const organizationStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: siteConfig.name,
     url: siteConfig.origin,
-    description: siteConfig.description,
+    description: siteText(locale).description,
     logo: `${siteConfig.origin}/icon.svg`,
   }
 

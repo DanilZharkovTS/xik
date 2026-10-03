@@ -1,16 +1,17 @@
+'use client'
+
 import Image from 'next/image'
-import type { Metadata } from 'next'
+
+import { useI18n, useLocalePath } from '@/src/shared/i18n/use-i18n'
 
 import { PageContainer } from '@/src/shared/ui/pixel/page-container'
 import { PixelButton } from '@/src/shared/ui/pixel/pixel-button'
 import { PixelHeading } from '@/src/shared/ui/pixel/pixel-heading'
 
-export const metadata: Metadata = {
-  title: 'Page Not Found',
-  description: 'The requested XIK page could not be found.',
-}
-
 export default function NotFound(): React.ReactElement {
+  const { t } = useI18n()
+  const href = useLocalePath()
+
   return (
     <PageContainer className="flex min-h-[calc(100dvh-var(--header-height))] items-center py-section">
       <section
@@ -21,7 +22,7 @@ export default function NotFound(): React.ReactElement {
           404
         </PixelHeading>
         <p className="mt-3 text-2xl uppercase tracking-pixel text-foreground-muted md:text-4xl">
-          Page Not Found
+          {t('notfound.title')}
         </p>
 
         <Image
@@ -35,10 +36,10 @@ export default function NotFound(): React.ReactElement {
 
         <PixelButton
           className="mt-8 min-w-48"
-          href="/"
+          href={href('/')}
           prefetch={false}
         >
-          Go Home
+          {t('notfound.home')}
         </PixelButton>
       </section>
     </PageContainer>
