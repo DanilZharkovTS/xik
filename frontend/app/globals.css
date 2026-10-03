@@ -272,13 +272,17 @@ html[data-theme='dark'] .code-block {
 .code-block .hljs-emphasis { font-style: italic; }
 .code-block .hljs-strong { font-weight: 700; }
 
-/* Курсор у логотипі XIK_: блимає, якщо користувач не вимкнув анімації в системі. */
+/* Курсор у логотипі XIK_: синій з легким неоном, блимає, якщо користувач не вимкнув анімації в системі. */
 @keyframes logo-blink {
   0%, 55% { opacity: 1; }
   56%, 100% { opacity: 0; }
 }
 .logo-cursor {
   color: var(--b);
+  /* Легке неонове сяйво: двома шарами, щоб курсор «світився», а не розпливався. */
+  text-shadow:
+    0 0 6px color-mix(in srgb, var(--b) 75%, transparent),
+    0 0 14px color-mix(in srgb, var(--b) 40%, transparent);
   animation: logo-blink 1.1s steps(1, end) infinite;
 }
 @media (prefers-reduced-motion: reduce) {
