@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import '../globals.css'
 import { notFound } from 'next/navigation'
+import Script from 'next/script'
 import { siteConfig, siteText } from '@/src/config/site'
 import { DEFAULT_LOCALE, LOCALES, isLocale } from '@/src/shared/i18n/i18n-store'
 import type { Locale } from '@/src/shared/i18n/i18n-store'
@@ -76,16 +77,13 @@ export default async function RootLayout({
       className="min-h-full"
       suppressHydrationWarning
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: themeInitializationScript,
-          }}
-          id="xik-theme-initializer"
-          suppressHydrationWarning
-        />
-      </head>
       <body className="flex min-h-dvh flex-col">
+        {/* Тема виставляється до першого малювання, щоб не було спалаху; next/script робить це без попередження React. */}
+        <Script
+          id="xik-theme-initializer"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeInitializationScript }}
+        />
         <LocaleProvider urlLocale={locale}>
           <MainLayout>{children}</MainLayout>
         </LocaleProvider>
