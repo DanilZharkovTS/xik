@@ -11,6 +11,7 @@ import { useOutreachStore } from '../outreach-store'
 import { CHANNELS, templateChannelLabel } from '../outreach.types'
 import type { Channel, Template, TemplateStatus } from '../outreach.types'
 import { useOutreachContext } from '../use-outreach-context'
+import { OptionalDetails } from './OptionalDetails'
 import { CopyTemplateSheet } from './CopyTemplateSheet'
 import { SelectField } from '@/src/shared/ui/select-field'
 import { TemplateEditorSheet } from './TemplateEditorSheet'
@@ -210,42 +211,73 @@ export function TemplatesScreen(): ReactElement {
                     {t('tpl.copy')}
                   </Button>
                 )}
-
                 {template.permissions.canEdit && (
-                  <Button variant="secondary" disabled={busyId === template.id} onClick={() => openEditor(template)}>
+                  <Button
+                    variant="secondary"
+                    className={template.status === 'active' ? 'col-span-2' : ''}
+                    disabled={busyId === template.id}
+                    onClick={() => openEditor(template)}
+                  >
                     {t('tpl.edit')}
                   </Button>
                 )}
-
-                {template.permissions.canDuplicate && (
-                  <Button variant="secondary" disabled={busyId === template.id} onClick={() => run(template, 'duplicate')}>
-                    {t('tpl.duplicate')}
-                  </Button>
-                )}
-
-                {template.permissions.canArchive && (
-                  <Button variant="secondary" disabled={busyId === template.id} onClick={() => run(template, 'archive')}>
-                    {t('tpl.archive')}
-                  </Button>
-                )}
-
                 {template.permissions.canRestore && (
-                  <Button variant="secondary" disabled={busyId === template.id} onClick={() => run(template, 'restore')}>
+                  <Button
+                    variant="secondary"
+                    className="col-span-2"
+                    disabled={busyId === template.id}
+                    onClick={() => run(template, 'restore')}
+                  >
                     {t('tpl.restore')}
                   </Button>
                 )}
-
-                {template.permissions.canDelete && (
-                  <Button
-                    variant="secondary"
-                    className="border-red-500/60 text-red-500 hover:border-red-500"
-                    disabled={busyId === template.id}
-                    onClick={() => remove(template)}
-                  >
-                    {t('tpl.delete')}
-                  </Button>
-                )}
               </div>
+
+              {/* Рідкісні й небезпечніші дії сховані, щоб не натиснути випадково. */}
+              {(template.permissions.canDuplicate ||
+                template.permissions.canArchive ||
+                template.permissions.canDelete) && (
+                <OptionalDetails summary={t('tpl.more')}>
+                  <div className="grid grid-cols-1 gap-2">
+                    {template.permissions.canDuplicate && (
+                      <Button
+                        variant="secondary"
+                        disabled={busyId === template.id}
+                        onClick={() => {
+                          if (window.confirm(t('tpl.confirmDuplicate', { title: template.title }))) {
+                            void run(template, 'duplicate')
+                          }
+                        }}
+                      >
+                        {t('tpl.duplicate')}
+                      </Button>
+                    )}
+                    {template.permissions.canArchive && (
+                      <Button
+                        variant="secondary"
+                        disabled={busyId === template.id}
+                        onClick={() => {
+                          if (window.confirm(t('tpl.confirmArchive', { title: template.title }))) {
+                            void run(template, 'archive')
+                          }
+                        }}
+                      >
+                        {t('tpl.archive')}
+                      </Button>
+                    )}
+                    {template.permissions.canDelete && (
+                      <Button
+                        variant="secondary"
+                        className="border-red-500/60 text-red-500 hover:border-red-500"
+                        disabled={busyId === template.id}
+                        onClick={() => remove(template)}
+                      >
+                        {t('tpl.delete')}
+                      </Button>
+                    )}
+                  </div>
+                </OptionalDetails>
+              )}
             </li>
           ))}
         </ul>
