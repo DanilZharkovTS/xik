@@ -14,7 +14,6 @@ import { cn } from '@/src/shared/lib/cn'
 type NavItem = { href: string; label: string; match: string; adminOnly?: boolean }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/dashboard', label: 'Dashboard', match: '/dashboard' },
   { href: '/outreach/check', label: 'Journal', match: '/outreach' },
   { href: '/admin/team', label: 'Team', match: '/admin/team', adminOnly: true },
   { href: '/admin/products', label: 'Products', match: '/admin/products', adminOnly: true },
@@ -84,9 +83,11 @@ export function AdminHeader() {
         </div>
       </div>
 
+      {/* У модератора один пункт, окремий рядок меню не потрібен. */}
       <nav
         aria-label="Main"
-        className="flex gap-1 overflow-x-auto border-t border-[var(--l)] px-3 py-0.5 [scrollbar-width:none] md:hidden"
+        hidden={items.length < 2}
+        className={`${items.length < 2 ? 'hidden' : 'flex'} gap-1 overflow-x-auto border-t border-[var(--l)] px-3 py-0.5 [scrollbar-width:none] md:!hidden`}
       >
         {items.map((item) => (
           <HeaderLink key={item.href} item={item} pathname={pathname} />

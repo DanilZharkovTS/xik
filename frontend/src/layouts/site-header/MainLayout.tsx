@@ -74,7 +74,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
 
       <main
         id="main-content"
-        className={`flex-1 ${isWorkspace ? 'pt-[52px] max-md:pt-[82px]' : !isHome ? 'pt-[52px]' : ''}`}
+        className={`flex-1 ${isWorkspace ? `pt-[52px] ${user?.role === 'admin' ? 'max-md:pt-[82px]' : 'max-md:pt-[45px]'}` : !isHome ? 'pt-[52px]' : ''}`}
         tabIndex={-1}
       >
         {children}
