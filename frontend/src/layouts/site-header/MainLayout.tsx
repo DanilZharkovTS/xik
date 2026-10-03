@@ -13,6 +13,7 @@ import { useEffect } from 'react'
 import { useI18nStore } from '@/src/shared/i18n/i18n-store'
 import { splitLocale } from '@/src/shared/i18n/paths'
 import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { DEFAULT_THEME, THEME_STORAGE_KEY } from '@/src/features/theme/theme-config'
 
 const MainContent = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
@@ -24,6 +25,20 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     initLocale()
   }, [initLocale])
+
+  // Скрипт теми виконується лише при повному завантаженні. Після м'якого переходу (зміна мови)
+  // <html> перебудовується без атрибута, тож тему повертаємо тут.
+  useEffect(() => {
+    const root = document.documentElement
+    if (root.dataset.theme) return
+
+    let theme: string = DEFAULT_THEME
+    try {
+      const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
+      if (stored === 'light' || stored === 'dark') theme = stored
+    } catch {}
+    root.dataset.theme = theme
+  })
 
   const user = useAuthStore((state) => state.user)
   const status = useAuthStore((state) => state.status)
