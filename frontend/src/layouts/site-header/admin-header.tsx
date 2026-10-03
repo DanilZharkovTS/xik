@@ -9,13 +9,15 @@ import { authService } from '@/src/features/auth/auth.service'
 import useAuthStore from '@/src/features/auth/store'
 import { ThemeToggle } from '@/src/features/theme/components/theme-toggle'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
-import { BookOpen, Package, UserCog, Users } from 'lucide-react'
+import { BookOpen, House, Package, UserCog, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/src/shared/lib/cn'
 
-type NavItem = { href: string; label: string; match: string; Icon: LucideIcon; adminOnly?: boolean }
+type NavItem = { href: string; label: string; match: string; Icon: LucideIcon; adminOnly?: boolean; tabOnly?: boolean }
 
 const NAV_ITEMS: NavItem[] = [
+  // Лише в нижній панелі на телефоні: на десктопі на дашборд веде лого.
+  { href: '/dashboard', label: 'Home', match: '/dashboard', Icon: House, tabOnly: true },
   { href: '/outreach/check', label: 'Journal', match: '/outreach', Icon: BookOpen },
   { href: '/admin/team', label: 'Team', match: '/admin/team', Icon: Users, adminOnly: true },
   { href: '/admin/products', label: 'Products', match: '/admin/products', Icon: Package, adminOnly: true },
@@ -37,7 +39,7 @@ export function AdminHeader() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const isAdmin = user?.role === 'admin'
-  const items = useWorkspaceNav()
+  const items = useWorkspaceNav().filter((item) => !item.tabOnly)
 
   const logout = async () => {
     try {
@@ -113,12 +115,10 @@ function HeaderLink({ item, pathname }: { item: NavItem; pathname: string }) {
   )
 }
 
-// Головне меню на телефоні внизу, як у мобільному застосунку. У модератора один пункт, тож панелі немає.
+// Головне меню на телефоні внизу, як у мобільному застосунку.
 export function AdminTabBar() {
   const pathname = usePathname()
   const items = useWorkspaceNav()
-
-  if (items.length < 2) return null
 
   return (
     <nav
