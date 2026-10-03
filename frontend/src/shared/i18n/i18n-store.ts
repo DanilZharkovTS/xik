@@ -12,10 +12,6 @@ type I18nState = {
   initLocale: () => void
 }
 
-const apply = (locale: Locale) => {
-  if (typeof document !== 'undefined') document.documentElement.lang = locale
-}
-
 // Стартова мова en, щоб сервер і клієнт рендерили однаково; збережену або мову браузера
 // підставляє initLocale вже після гідрації.
 export const useI18nStore = create<I18nState>((set) => ({
@@ -25,7 +21,6 @@ export const useI18nStore = create<I18nState>((set) => ({
     try {
       window.localStorage.setItem(STORAGE_KEY, locale)
     } catch {}
-    apply(locale)
     set({ locale })
   },
 
@@ -41,7 +36,6 @@ export const useI18nStore = create<I18nState>((set) => ({
       }
     } catch {}
 
-    apply(locale)
     set({ locale })
   },
 }))

@@ -59,6 +59,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
   }, [pathname, user, router, status])
 
   const isHome = pathname === '/'
+  const locale = useI18nStore((state) => state.locale)
 
   // Робоча зона для залогіненого адміна/модератора: своя шапка, без меню й футера сайту.
   const isWorkspace =
@@ -66,6 +67,18 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
     (pathname.startsWith('/admin') ||
       pathname.startsWith('/outreach') ||
       pathname.startsWith('/dashboard'))
+
+  // Мова документа: публічні сторінки завжди англійською (вміст не перекладається),
+  // інтерфейс робочої зони й входу слідує за вибраною мовою.
+  const isPrivateArea =
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/outreach') ||
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/auth')
+
+  useEffect(() => {
+    document.documentElement.lang = isPrivateArea ? locale : 'en'
+  }, [isPrivateArea, locale])
 
   return (
     <>
@@ -100,6 +113,7 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
     name: siteConfig.name,
     url: siteConfig.origin,
     description: siteConfig.description,
+    logo: `${siteConfig.origin}/icon.svg`,
   }
 
   return (

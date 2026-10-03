@@ -5,6 +5,8 @@ import { siteConfig } from '@/src/config/site'
 type CreatePageMetadataInput = {
   readonly absoluteTitle?: boolean
   readonly description: string
+  // Адреса картки для соцмереж; без неї береться спільна.
+  readonly image?: string
   readonly pathname: string
   readonly title: string
 }
@@ -12,6 +14,7 @@ type CreatePageMetadataInput = {
 export function createPageMetadata({
   absoluteTitle = false,
   description,
+  image = siteConfig.openGraphImage,
   pathname,
   title,
 }: CreatePageMetadataInput): Metadata {
@@ -34,10 +37,10 @@ export function createPageMetadata({
       description,
       images: [
         {
-          url: siteConfig.openGraphImage,
+          url: image,
           width: 1200,
           height: 630,
-          alt: siteConfig.openGraphImageAlt,
+          alt: title,
         },
       ],
     },
@@ -47,8 +50,8 @@ export function createPageMetadata({
       description,
       images: [
         {
-          url: siteConfig.openGraphImage,
-          alt: siteConfig.openGraphImageAlt,
+          url: image,
+          alt: title,
         },
       ],
     },

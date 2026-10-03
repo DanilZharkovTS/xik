@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 
-import { siteConfig } from '@/src/config/site'
+import { getAbsoluteUrl, siteConfig } from '@/src/config/site'
 import { Welcome } from '@/src/features/home/components/Welcome'
+import { JsonLd } from '@/src/shared/seo/json-ld'
 import { createPageMetadata } from '@/src/shared/seo/create-page-metadata'
 
 // Каталог живе в БД: сторінка збирається на кожен запит, не під час білду.
@@ -15,5 +16,20 @@ export const metadata: Metadata = createPageMetadata({
 })
 
 export default async function Home(): Promise<React.ReactElement> {
-  return <Welcome />
+  return (
+    <>
+      <JsonLd
+        id="website-structured-data"
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: siteConfig.name,
+          url: getAbsoluteUrl('/'),
+          description: siteConfig.description,
+          inLanguage: 'en',
+        }}
+      />
+      <Welcome />
+    </>
+  )
 }
