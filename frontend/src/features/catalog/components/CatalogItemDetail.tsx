@@ -16,6 +16,7 @@ import {
 import { useI18n, useLocalePath } from '@/src/shared/i18n/use-i18n'
 import type { CatalogItem } from '../data/catalog-items'
 import { PurchaseButton } from './PurchaseButton'
+import { SaveButton } from './SaveButton'
 
 export interface RelatedItem {
   href: string
@@ -315,6 +316,8 @@ export function CatalogItemDetail({ item, related = [], purchase }: CatalogItemD
               {/* Action Buttons */}
               <div className="mt-6 space-y-3">
                 {purchase && <PurchaseButton productId={purchase.productId} label={t('detail.subscribe')} />}
+
+                {purchase && <SaveButton productId={purchase.productId} />}
 
                 {item.demoUrl && (
                   <a

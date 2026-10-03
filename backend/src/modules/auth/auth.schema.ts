@@ -6,6 +6,8 @@ export const registerSchema = z
     name: z.string().min(1).max(50),
     password: z.string().min(8),
     confirmPassword: z.string(),
+    // Мова сайту, з якого зареєструвався користувач: нею підуть листи.
+    locale: z.enum(['en', 'es', 'uk']).default('en'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',

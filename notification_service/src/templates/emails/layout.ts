@@ -2,15 +2,19 @@ interface BaseEmailLayoutProps {
   title: string
   content: string
   footerNote?: string
+  lang?: string
+  sentBy?: string
 }
 
 export const baseEmailLayout = ({
   title,
   content,
   footerNote,
+  lang = 'en',
+  sentBy = 'This email was sent by XIK.',
 }: BaseEmailLayoutProps) => {
   return `<!DOCTYPE html>
-  <html lang="en">
+  <html lang="${lang}">
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -77,7 +81,7 @@ export const baseEmailLayout = ({
                     line-height: 1.5;
                     color: #a3a3a3;
                   ">
-                    This email was sent by XIK.${footerNote ? ` ${footerNote}` : ''}
+                    ${sentBy}${footerNote ? ` ${footerNote}` : ''}
                   </p>
                 </td>
               </tr>

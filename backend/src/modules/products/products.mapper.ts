@@ -1,6 +1,5 @@
+import type { ContentLocale } from './product.constants.js'
 import type { Product } from './products.types.js'
-
-type ContentLocale = 'en' | 'es' | 'uk'
 
 interface Translation {
   name?: string

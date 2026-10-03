@@ -18,6 +18,12 @@ model Test {
 }
 //enums
 
+enum UserLocale {
+  en
+  es
+  uk
+}
+
 enum UserRole {
   user
   admin
@@ -114,6 +120,8 @@ model User {
   name String @db.VarChar(50)
 
   role UserRole @default(user)
+  // Мова кабінету й листів; обирається в кабінеті або береться з мови сайту при реєстрації.
+  locale UserLocale @default(en)
 
   createdAt DateTime @default(now())
   deactivatedAt DateTime?

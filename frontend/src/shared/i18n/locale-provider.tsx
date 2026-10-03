@@ -35,5 +35,10 @@ export function LocaleProvider({
   const locale: Locale =
     area === 'public' ? urlLocale : area === 'workspace' && stored === 'es' ? 'en' : stored
 
+  // Кабінети живуть на адресах без префікса мови, тож lang документа доводиться вирівнювати вручну.
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
+
   return <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>
 }

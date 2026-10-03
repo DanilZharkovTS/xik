@@ -46,4 +46,5 @@ export const PRODUCT_STATUSES = ['production', 'active', 'beta', 'build'] as con
 
 // Мови контенту. Англійська обовʼязкова й живе в основних полях; es і uk лежать у translations.
 export const CONTENT_LOCALES = ['en', 'es', 'uk'] as const
+export type ContentLocale = (typeof CONTENT_LOCALES)[number]
 export const TRANSLATION_LOCALES = ['es', 'uk'] as const

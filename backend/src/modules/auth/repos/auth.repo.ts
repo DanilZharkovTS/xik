@@ -7,6 +7,7 @@ export const authRepo = {
       data: {
         email: data.email,
         name: data.name,
+        locale: data.locale,
         credentials: {
           create: {
             passwordHash: data.password,
