@@ -2,18 +2,26 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
+import { Search } from 'lucide-react'
 import { toast } from 'sonner'
 
 import useAuthStore from '@/src/features/auth/store'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
 import { cn } from '@/src/shared/lib/cn'
 import { Button } from '@/src/shared/ui/button'
+import { Segmented } from '@/src/shared/ui/segmented'
 import { adminProductsService } from '../admin-products.service'
 import type { AdminProduct, ListState, ProductKind } from '../admin-products.types'
 import { AdminProductCard } from './AdminProductCard'
 import { ProductFormSheet } from './ProductFormSheet'
 
 type KindFilter = ProductKind | 'all'
+
+const KIND_OPTIONS: { value: KindFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'product', label: 'Products' },
+  { value: 'agent', label: 'Agents' },
+]
 
 const STATE_TABS: { value: ListState; label: string }[] = [
   { value: 'active', label: 'Active' },
@@ -148,26 +156,29 @@ export function AdminProductsScreen(): ReactElement {
 
       <StateTabs value={state} onChange={setState} />
 
-      <div className="grid grid-cols-[1fr_8.5rem] gap-2 md:grid-cols-[1fr_12rem] md:gap-3">
-        <input
-          type="search"
-          aria-label="Search products"
-          placeholder="Search by name or slug"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="min-h-10 w-full rounded-xl md:min-h-11 border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
-        />
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+        <div className="relative flex-1">
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--m)]"
+          />
+          <input
+            type="search"
+            aria-label="Search products"
+            placeholder="Search by name or slug"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="min-h-10 w-full rounded-full border border-[var(--l)] bg-[var(--bg)] pl-10 pr-4 text-base outline-none focus:border-[var(--t)] md:min-h-11"
+          />
+        </div>
 
-        <select
-          aria-label="Type"
+        <Segmented
+          label="Type"
           value={kind}
-          onChange={(e) => setKind(e.target.value as KindFilter)}
-          className="min-h-10 w-full rounded-xl md:min-h-11 border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
-        >
-          <option value="all">All types</option>
-          <option value="product">Products</option>
-          <option value="agent">Agents</option>
-        </select>
+          onChange={setKind}
+          options={KIND_OPTIONS}
+          className="md:w-72"
+        />
       </div>
 
       {isLoading ? (

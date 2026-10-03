@@ -1,39 +1,38 @@
-import { useId } from 'react'
-import type { ComponentPropsWithoutRef, ReactElement } from 'react'
+import { Children, isValidElement } from 'react'
+import type { ChangeEvent, ReactElement, ReactNode } from 'react'
 
-import { cn } from '@/src/shared/lib/cn'
+import { Picker } from './picker'
+import type { PickerOption } from './picker'
 
-type SelectFieldProps = ComponentPropsWithoutRef<'select'> & {
+type SelectFieldProps = {
   label: string
+  value: string
+  onChange: (event: ChangeEvent<HTMLSelectElement>) => void
+  // Варіанти задаються як <option>, тож виклики лишаються такими самими, як зі звичайним select.
+  children: ReactNode
+  className?: string
+  hideLabel?: boolean
+  pill?: boolean
+  disabled?: boolean
 }
 
+const toOptions = (children: ReactNode): PickerOption[] =>
+  Children.toArray(children).flatMap((child) => {
+    if (!isValidElement<{ value?: string; children?: ReactNode }>(child)) return []
+    const text = Children.toArray(child.props.children).join('')
+    return [{ value: String(child.props.value ?? text), label: text }]
+  })
+
 export function SelectField({
-  label,
-  className,
-  id,
+  onChange,
   children,
   ...props
 }: SelectFieldProps): ReactElement {
-  const generatedId = useId()
-  const selectId = id ?? generatedId
-
   return (
-    <div className="space-y-1.5">
-      <label htmlFor={selectId} className="block text-sm text-[var(--m)]">
-        {label}
-      </label>
-
-      <select
-        id={selectId}
-        className={cn(
-          'min-h-10 w-full rounded-xl md:min-h-11 border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none',
-          'focus:border-[var(--t)]',
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </select>
-    </div>
+    <Picker
+      {...props}
+      options={toOptions(children)}
+      onChange={(value) => onChange({ target: { value } } as ChangeEvent<HTMLSelectElement>)}
+    />
   )
 }

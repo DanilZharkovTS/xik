@@ -6,6 +6,7 @@ import { isAxiosError } from 'axios'
 import { toast } from 'sonner'
 
 import { Button } from '@/src/shared/ui/button'
+import { SelectField } from '@/src/shared/ui/select-field'
 import { TextField } from '@/src/shared/ui/text-field'
 import { outreachService } from '../outreach.service'
 import { CHANNELS, CHANNEL_LABELS } from '../outreach.types'
@@ -99,24 +100,20 @@ export function CheckScreen(): ReactElement {
             Paste
           </Button>
 
-          <div>
-            <label htmlFor="channel" className="sr-only">
-              Channel
-            </label>
-            <select
-              id="channel"
-              value={channel}
-              onChange={(event) => setChannel(event.target.value as Channel | '')}
-              className="min-h-11 w-full rounded-full border border-[var(--l)] bg-[var(--bg)] px-4 text-base outline-none focus:border-[var(--t)]"
-            >
-              <option value="">Auto-detect</option>
-              {CHANNELS.map((item) => (
-                <option key={item} value={item}>
-                  {CHANNEL_LABELS[item]}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SelectField
+            label="Channel"
+            hideLabel
+            pill
+            value={channel}
+            onChange={(event) => setChannel(event.target.value as Channel | '')}
+          >
+            <option value="">Auto-detect</option>
+            {CHANNELS.map((item) => (
+              <option key={item} value={item}>
+                {CHANNEL_LABELS[item]}
+              </option>
+            ))}
+          </SelectField>
         </div>
 
         {needsChannel && (

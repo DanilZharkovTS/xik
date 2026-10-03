@@ -1,9 +1,11 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { useState } from 'react'
 
 import { UserRole, UserRoleSelectProps } from '../user.types'
 import { userService } from '../user.service'
 import useAuthStore from '../../auth/store'
 import { toast } from 'sonner'
+
+import { Picker } from '@/src/shared/ui/picker'
 
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
 
@@ -13,6 +15,11 @@ const ROLE_LABELS: Record<UserRole, string> = {
   user: 'User',
 }
 
+const ROLE_OPTIONS = (Object.keys(ROLE_LABELS) as UserRole[]).map((role) => ({
+  value: role,
+  label: ROLE_LABELS[role],
+}))
+
 export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
   const token = useAuthStore((state) => state.accessToken)
   const currentUserId = useAuthStore((state) => state.user?.id)
@@ -21,10 +28,8 @@ export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
 
   const isCurrentUser = currentUserId === user.id
 
-  const onChangeRole = async (e: ChangeEvent<HTMLSelectElement>) => {
+  const onChangeRole = async (newRole: UserRole) => {
     if (!token || isCurrentUser) return
-
-    const newRole = e.target.value as UserRole
 
     setSelectedRole(newRole)
 
@@ -46,15 +51,12 @@ export const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ user }) => {
   }
 
   return (
-    <select
-      aria-label={`Role for ${user.name}`}
+    <Picker
+      label={`Role for ${user.name}`}
+      hideLabel
       value={selectedRole}
-      onChange={onChangeRole}
-      className="min-h-11 w-full rounded-xl border border-[var(--l)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--t)]"
-    >
-      <option value="admin">{ROLE_LABELS.admin}</option>
-      <option value="moderator">{ROLE_LABELS.moderator}</option>
-      <option value="user">{ROLE_LABELS.user}</option>
-    </select>
+      onChange={(role) => onChangeRole(role as UserRole)}
+      options={ROLE_OPTIONS}
+    />
   )
 }

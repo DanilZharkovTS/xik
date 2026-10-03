@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import type { ReactElement, ReactNode } from 'react'
 import { X } from 'lucide-react'
 
@@ -16,6 +17,10 @@ type SheetProps = {
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])'
 
+// Відкриті вікна по порядку відкриття: Escape і Tab належать лише верхньому
+// (шторка вибору поверх форми не закриває форму).
+const openSheets: symbol[] = []
+
 // На телефоні виїжджає знизу (дотягується великим пальцем), на десктопі стає модальним вікном.
 // Поки відкрите: фокус усередині й не виходить за межі, Escape закриває, фон не прокручується,
 // після закриття фокус повертається на елемент, що відкрив вікно.
@@ -27,6 +32,7 @@ export function Sheet({
   size = 'md',
 }: SheetProps): ReactElement | null {
   const titleId = useId()
+  const sheetKey = useRef(Symbol('sheet'))
   const panelRef = useRef<HTMLDivElement>(null)
   // onClose змінюється при кожному рендері батька; ефект не має перезапускатися й красти фокус.
   const onCloseRef = useRef(onClose)
@@ -38,12 +44,16 @@ export function Sheet({
   useEffect(() => {
     if (!isOpen) return
 
+    const key = sheetKey.current
+    openSheets.push(key)
     const previouslyFocused = document.activeElement as HTMLElement | null
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     panelRef.current?.focus()
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (openSheets[openSheets.length - 1] !== key) return
+
       if (event.key === 'Escape') {
         onCloseRef.current()
         return
@@ -77,6 +87,7 @@ export function Sheet({
 
     return () => {
       document.removeEventListener('keydown', onKeyDown)
+      openSheets.splice(openSheets.indexOf(key), 1)
       document.body.style.overflow = previousOverflow
       previouslyFocused?.focus()
     }
@@ -84,7 +95,8 @@ export function Sheet({
 
   if (!isOpen) return null
 
-  return (
+  // Портал у body: transform батьківського вікна ламає position: fixed вкладеної шторки.
+  return createPortal(
     <div className="fixed inset-0 z-[110]">
       <button
         type="button"
@@ -119,6 +131,7 @@ export function Sheet({
 
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
