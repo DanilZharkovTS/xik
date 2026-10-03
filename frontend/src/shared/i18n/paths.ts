@@ -9,10 +9,12 @@ const startsWithSegment = (path: string, prefix: string): boolean =>
   path === prefix || path.startsWith(`${prefix}/`)
 
 // "/es/products/x" -> { locale: 'es', path: '/products/x' }; без префікса locale англійська.
+// Префікс /en теж знімається: сервер бачить внутрішню адресу після rewrite (/en/auth/login),
+// а браузер публічну (/auth/login), і розділ сайту має визначатися однаково.
 export function splitLocale(pathname: string): { locale: Locale; path: string } {
   const [, first, ...rest] = pathname.split('/')
 
-  if (isLocale(first) && first !== DEFAULT_LOCALE) {
+  if (isLocale(first)) {
     return { locale: first, path: `/${rest.join('/')}`.replace(/\/$/, '') || '/' }
   }
 

@@ -9,7 +9,7 @@ import { authService } from '@/src/features/auth/auth.service'
 import useAuthStore from '@/src/features/auth/store'
 import { ThemeToggle } from '@/src/features/theme/components/theme-toggle'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
-import { BookOpen, House, Package, UserCog, Users } from 'lucide-react'
+import { BookOpen, House, Newspaper, Package, UserCog, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/src/shared/lib/cn'
 import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
@@ -24,6 +24,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/outreach/check', labelKey: 'nav.journal', match: '/outreach', Icon: BookOpen },
   { href: '/admin/team', labelKey: 'nav.team', match: '/admin/team', Icon: Users, adminOnly: true },
   { href: '/admin/products', labelKey: 'nav.products', match: '/admin/products', Icon: Package, adminOnly: true },
+  { href: '/admin/blog', labelKey: 'nav.blog', match: '/admin/blog', Icon: Newspaper, adminOnly: true },
   { href: '/admin/users', labelKey: 'nav.users', match: '/admin/users', Icon: UserCog, adminOnly: true },
 ]
 

@@ -1,7 +1,7 @@
 import type { Locale } from '@/src/shared/i18n/i18n-store'
 import { translate } from '@/src/shared/i18n/translate'
 import type { CatalogItem } from './data/catalog-items'
-import type { ApiCatalogProduct, ApiProductDetail, ProductKind, ProductStatus } from './catalog.types'
+import type { ApiCatalogProduct, ApiProductDetail, ProductStatus } from './catalog.types'
 
 export const statusLabel = (status: ProductStatus, locale: Locale = 'en'): string =>
   translate(locale, `catalog.status.${status}`)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import type { ReactElement } from 'react'
 import { Link2, Share2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -13,11 +13,12 @@ const BUTTON =
 // Звичайні посилання на форми шерингу: без сторонніх скриптів і трекерів.
 export function ShareButtons({ url, title }: { url: string; title: string }): ReactElement {
   const { t } = useI18n()
-  const [canNativeShare, setCanNativeShare] = useState(false)
-
-  useEffect(() => {
-    setCanNativeShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function')
-  }, [])
+  // Web Share є лише в браузері (на сервері false), тож розбіжності гідрації немає.
+  const canNativeShare = useSyncExternalStore(
+    () => () => undefined,
+    () => typeof navigator.share === 'function',
+    () => false,
+  )
 
   const encodedUrl = encodeURIComponent(url)
   const encodedText = encodeURIComponent(title)

@@ -97,6 +97,10 @@ Then sign in, open **Dashboard → Team**, create moderators and give them produ
 
 ---
 
+## 🌍 Languages and blog
+
+The public site and the customer account run in English, Spanish and Ukrainian (admin UI: English and Ukrainian), and there is a blog with a block editor. See [docs/multilingual-and-blog.md](docs/multilingual-and-blog.md), including the S3 image storage settings.
+
 ## 🚀 2. Production Deployment (Docker)
 
 The production configuration is optimized for security, performance, and minimal image size:
