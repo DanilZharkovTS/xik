@@ -784,6 +784,36 @@ describe('імпорт статичного каталогу', () => {
     expect(new Set(catalog.map((i) => i.slug)).size).toBe(catalog.length)
   })
 
+  it('кожен продукт каталогу має готові переклади es і uk', async () => {
+    const { availableLocales } = await import('../src/modules/products/products.mapper.js')
+
+    for (const item of catalog) {
+      const translations = (item as { translations?: Record<string, { shortDescription?: string; description?: string }> }).translations ?? {}
+      for (const lang of ['es', 'uk']) {
+        expect(translations[lang]?.shortDescription && translations[lang]?.description, `${item.slug}:${lang}`).toBeTruthy()
+      }
+    }
+    expect(availableLocales).toBeTypeOf('function')
+  })
+
+  it('дописує переклади наявному продукту без перекладів і більше нічого не змінює', async () => {
+    const withoutTranslations = catalog.map(({ translations: _t, ...rest }: Record<string, unknown>) => rest)
+    await importCatalog(withoutTranslations, { useStripe: false })
+    await prisma.product.update({ where: { slug: 'keyho' }, data: { name: 'Edited in admin' } })
+
+    const result = await importCatalog(catalog, { useStripe: false })
+
+    expect(result.created).toEqual([])
+    expect(result.translated).toHaveLength(15)
+    const keyho = await prisma.product.findUniqueOrThrow({ where: { slug: 'keyho' } })
+    expect(keyho.name).toBe('Edited in admin')
+    expect(Object.keys(keyho.translations as object)).toEqual(['es', 'uk'])
+
+    const again = await importCatalog(catalog, { useStripe: false })
+    expect(again.translated).toEqual([])
+    expect(again.skipped).toHaveLength(15)
+  })
+
   it('зі Stripe: кожен продукт привʼязаний 1 до 1, ціни збережені, повторний запуск нічого не створює', async () => {
     const result = await importCatalog(catalog, { useStripe: true })
 
@@ -847,5 +877,158 @@ describe('імпорт статичного каталогу', () => {
     expect(products[0].slug).toBe('keyho')
     expect(products.find((p: { slug: string }) => p.slug === 'keyho').price).toBe('29')
     expect(agents.every((a: { price: string | null }) => a.price === null)).toBe(true)
+  })
+})
+
+describe('сповіщення фронтенда про зміну каталогу', () => {
+  const fetchSpy = () => vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}'))
+  const revalidateCalls = (spy: ReturnType<typeof fetchSpy>) =>
+    spy.mock.calls.filter(([url]) => String(url).endsWith('/api/revalidate'))
+
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 20))
+
+  it('після створення, оновлення, архіву, відновлення й синхронізації просить скинути кеш', async () => {
+    vi.stubEnv('REVALIDATE_SECRET', 'secret-1')
+    vi.stubEnv('FRONTEND_INTERNAL_URL', 'http://frontend:3000')
+    const spy = fetchSpy()
+    const { tokens } = await setup()
+
+    const id = (await create(tokens.admin)).body.product.id
+    await patch(tokens.admin, id, { tagline: 'New tagline' })
+    await api().delete(`/api/products/${id}`).set(auth(tokens.admin))
+    await action(tokens.admin, id, 'restore')
+    await action(tokens.admin, id, 'stripe-sync')
+    await flush()
+
+    const calls = revalidateCalls(spy)
+    expect(calls).toHaveLength(5)
+    expect(String(calls[0][0])).toBe('http://frontend:3000/api/revalidate')
+    expect((calls[0][1] as RequestInit).headers).toMatchObject({ 'x-revalidate-secret': 'secret-1' })
+
+    spy.mockRestore()
+    vi.unstubAllEnvs()
+  })
+
+  it('без REVALIDATE_SECRET нічого не надсилає', async () => {
+    vi.stubEnv('REVALIDATE_SECRET', '')
+    const spy = fetchSpy()
+    const { tokens } = await setup()
+
+    await create(tokens.admin)
+    await flush()
+
+    expect(revalidateCalls(spy)).toHaveLength(0)
+    spy.mockRestore()
+    vi.unstubAllEnvs()
+  })
+
+  it('збій сповіщення не ламає запит адміна', async () => {
+    vi.stubEnv('REVALIDATE_SECRET', 'secret-1')
+    vi.stubEnv('FRONTEND_INTERNAL_URL', 'http://frontend:3000')
+    const spy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('connection refused'))
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const { tokens } = await setup()
+
+    const res = await create(tokens.admin)
+    await flush()
+
+    expect(res.status).toBe(201)
+    expect(warn).toHaveBeenCalled()
+    spy.mockRestore()
+    warn.mockRestore()
+    vi.unstubAllEnvs()
+  })
+
+  it('каталог віддає updatedAt для sitemap', async () => {
+    const { tokens } = await setup()
+    await create(tokens.admin)
+
+    const [product] = (await api().get('/api/products/catalog')).body.products
+    expect(Number.isNaN(Date.parse(product.updatedAt))).toBe(false)
+  })
+})
+
+describe('переклади (en/es/uk)', () => {
+  const ES = {
+    name: 'Keyho ES',
+    shortDescription: 'Plataforma de operaciones inmobiliarias.',
+    description: 'Descripción larga de la plataforma.',
+    features: ['Gestión de tareas'],
+  }
+
+  it('зберігає переклади і віддає їх за ?lang= з переліком доступних мов', async () => {
+    const { tokens } = await setup()
+    await create(tokens.admin, { translations: { es: ES } }).expect(201)
+
+    const es = (await api().get('/api/products/keyho').query({ lang: 'es' })).body.product
+    const en = (await api().get('/api/products/keyho')).body.product
+
+    expect(es).toMatchObject({ name: 'Keyho ES', locale: 'es', availableLocales: ['en', 'es'] })
+    expect(es.features).toEqual(['Gestión de tareas'])
+    expect(en).toMatchObject({ name: 'Keyho', locale: 'en' })
+  })
+
+  it('мова без перекладу повертає англійський вміст', async () => {
+    const { tokens } = await setup()
+    await create(tokens.admin, { translations: { es: ES } }).expect(201)
+
+    const uk = (await api().get('/api/products/keyho').query({ lang: 'uk' })).body.product
+
+    expect(uk.name).toBe('Keyho')
+    expect(uk.availableLocales).not.toContain('uk')
+  })
+
+  it('частковий переклад без опису не вважається доступним', async () => {
+    const { tokens } = await setup()
+    await create(tokens.admin, { translations: { uk: { name: 'Кейхо' } } }).expect(201)
+
+    const uk = (await api().get('/api/products/keyho').query({ lang: 'uk' })).body.product
+
+    expect(uk.availableLocales).toEqual(['en'])
+  })
+
+  it('каталог теж локалізується', async () => {
+    const { tokens } = await setup()
+    await create(tokens.admin, { translations: { es: ES } }).expect(201)
+
+    const catalog = (await api().get('/api/products/catalog').query({ lang: 'es' })).body.products
+
+    expect(catalog[0].name).toBe('Keyho ES')
+  })
+
+  it('оновлення перекладів через PATCH', async () => {
+    const { tokens } = await setup()
+    const created = (await create(tokens.admin)).body.product
+
+    await patch(tokens.admin, created.id, { translations: { es: ES } }).expect(200)
+
+    const es = (await api().get('/api/products/keyho').query({ lang: 'es' })).body.product
+    expect(es.name).toBe('Keyho ES')
+  })
+
+  it('відхиляє невідому мову, зайві поля й задовгі значення', async () => {
+    const { tokens } = await setup()
+
+    await create(tokens.admin, { translations: { fr: ES } }).expect(400)
+    await create(tokens.admin, { translations: { es: { ...ES, price: 1 } } }).expect(400)
+    await create(tokens.admin, { translations: { es: { name: 'x'.repeat(61) } } }).expect(400)
+  })
+
+  it('checkout передає мову у Stripe і локалізовані адреси повернення', async () => {
+    const { tokens } = await setup()
+    const product = (await create(tokens.admin)).body.product
+
+    await api().post('/api/billing/checkout').set(auth(tokens.buyer)).send({ productId: product.id, locale: 'es' }).expect(200)
+    await api().post('/api/billing/checkout').set(auth(tokens.buyer)).send({ productId: product.id, locale: 'uk' }).expect(200)
+    await api().post('/api/billing/checkout').set(auth(tokens.buyer)).send({ productId: product.id }).expect(200)
+
+    const [es, uk, en] = fake.state.checkout
+    expect(es.locale).toBe('es')
+    expect(es.success_url).toMatch(/\/es\/success$/)
+    expect(uk.locale).toBe('auto')
+    expect(uk.success_url).toMatch(/\/uk\/success$/)
+    expect(en.locale).toBe('en')
+    expect(en.success_url).toMatch(/[^/]\/success$/)
+    expect(en.success_url).not.toMatch(/\/(es|uk)\//)
   })
 })

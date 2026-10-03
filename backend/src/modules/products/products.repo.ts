@@ -34,6 +34,9 @@ const writableFields = (data: Partial<CreateProductDto>) => ({
   ...(data.currency !== undefined && { currency: data.currency }),
   ...(data.billingPeriod !== undefined && { billingPeriod: data.billingPeriod }),
   ...(data.showPrice !== undefined && { showPrice: data.showPrice }),
+  ...(data.translations !== undefined && {
+    translations: data.translations as Prisma.InputJsonValue,
+  }),
 })
 
 export const productsRepo = {

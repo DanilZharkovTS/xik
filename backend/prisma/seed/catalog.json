@@ -65,7 +65,89 @@
     "price": 29,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": true
+    "showPrice": true,
+    "translations": {
+      "es": {
+        "shortDescription": "Plataforma de operaciones inmobiliarias que conecta propietarios, gestores y trabajadores.",
+        "description": "KEYHO es una plataforma operativa integrada para carteras de inmuebles con múltiples unidades. Conecta a propietarios, administradores, contratistas en campo y personal operativo en un panel unificado y sincronizado para asignar tareas, verificar estados y auditar el trabajo.",
+        "tagline": "Agiliza los flujos de trabajo inmobiliarios sin latencia operativa.",
+        "categoryLabel": "PropTech · Operaciones",
+        "features": [
+          "Despacho y asignación de tareas",
+          "Seguimiento de viviendas y activos",
+          "Pasarela de comunicación con trabajadores",
+          "Registros financieros y de servicio auditables"
+        ],
+        "highlights": [
+          "Espacio de trabajo multiinquilino",
+          "Cola de tareas en tiempo real",
+          "Sincronización <40 ms"
+        ],
+        "capabilities": [
+          {
+            "title": "Despacho y asignación de tareas",
+            "description": "Asigna automáticamente tareas de mantenimiento y operativas según disponibilidad, cercanía y especialidad del trabajador."
+          },
+          {
+            "title": "Seguimiento de viviendas y activos",
+            "description": "Historial completo por unidad, control de inventario e informes de estado con registros fotográficos."
+          },
+          {
+            "title": "Pasarela de comunicación con trabajadores",
+            "description": "Mensajería directa y envío de notificaciones desde el móvil, sin instalar aplicaciones de terceros."
+          },
+          {
+            "title": "Registros financieros y de servicio auditables",
+            "description": "Registros operativos inmutables, listos para exportar a contabilidad y facturar con transparencia al propietario."
+          }
+        ],
+        "architecture": {
+          "runtime": "Docker Compose / Kubernetes",
+          "deployment": "Autoalojado o nube gestionada",
+          "latency": "Sincronización <40 ms"
+        }
+      },
+      "uk": {
+        "shortDescription": "Платформа керування нерухомістю, що повʼязує власників, менеджерів і працівників.",
+        "description": "KEYHO це інтегрована операційна платформа для портфелів нерухомості з багатьма обʼєктами. Вона обʼєднує власників, управителів, підрядників на місці та операційний персонал в єдиній синхронізованій панелі для розподілу завдань, перевірки статусів і аудиту робіт.",
+        "tagline": "Прискорюйте процеси з нерухомістю без операційних затримок.",
+        "categoryLabel": "PropTech · Операції",
+        "features": [
+          "Розподіл і призначення завдань",
+          "Облік квартир і активів",
+          "Шлюз звʼязку з працівниками",
+          "Аудитовані фінансові та сервісні журнали"
+        ],
+        "highlights": [
+          "Мультитенантний робочий простір",
+          "Черга завдань у реальному часі",
+          "Синхронізація <40 мс"
+        ],
+        "capabilities": [
+          {
+            "title": "Розподіл і призначення завдань",
+            "description": "Автоматично розподіляє завдання з обслуговування й операції за доступністю, близькістю та спеціалізацією працівника."
+          },
+          {
+            "title": "Облік квартир і активів",
+            "description": "Повна історія кожного обʼєкта, облік інвентарю та звіти про стан із фотожурналами."
+          },
+          {
+            "title": "Шлюз звʼязку з працівниками",
+            "description": "Прямі повідомлення й сповіщення з мобільного без встановлення сторонніх застосунків."
+          },
+          {
+            "title": "Аудитовані фінансові та сервісні журнали",
+            "description": "Незмінні операційні записи, готові до експорту в бухгалтерію та прозорого виставлення рахунків власникам."
+          }
+        ],
+        "architecture": {
+          "runtime": "Docker Compose / Kubernetes",
+          "deployment": "Власний хостинг або керована хмара",
+          "latency": "Синхронізація <40 мс"
+        }
+      }
+    }
   },
   {
     "slug": "telemetry-hub",
@@ -132,7 +214,89 @@
     "price": 49,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": true
+    "showPrice": true,
+    "translations": {
+      "es": {
+        "shortDescription": "Métricas, logs, trazas y alertas unificados para entornos con Docker Compose.",
+        "description": "TELEMETRY HUB es una plataforma de observabilidad todo en uno, pensada para arquitecturas Docker Compose autoalojadas e independientes. Reúne la recogida de métricas, el flujo de logs estructurados, la agregación de trazas y reglas de alerta inteligentes en un único stack ligero.",
+        "tagline": "Convierte el ruido de contenedores distribuidos en claridad operativa accionable.",
+        "categoryLabel": "Observabilidad · Infraestructura",
+        "features": [
+          "Flujo de logs ligero",
+          "Gráficas de métricas multiservicio",
+          "Alertas inteligentes de anomalías",
+          "Propagación de trazas"
+        ],
+        "highlights": [
+          "Configuración cero",
+          "PromQL y LogQL unificados",
+          "Ingesta en menos de un segundo"
+        ],
+        "capabilities": [
+          {
+            "title": "Flujo de logs ligero",
+            "description": "Ingesta instantánea de stdout/stderr de contenedores con búsqueda de texto completo, filtros regex e índice de etiquetas."
+          },
+          {
+            "title": "Gráficas de métricas multiservicio",
+            "description": "Recoge automáticamente endpoints de Prometheus y recursos del host (CPU, RAM, IOPS, red) sin agentes pesados."
+          },
+          {
+            "title": "Alertas inteligentes de anomalías",
+            "description": "Alertas por umbral y velocidad de cambio, enviadas a Telegram, Discord, Slack o webhooks propios."
+          },
+          {
+            "title": "Propagación de trazas",
+            "description": "Correlaciona las peticiones de los usuarios entre microservicios con propagación distribuida del contexto OpenTelemetry."
+          }
+        ],
+        "architecture": {
+          "runtime": "Suite de contenedores en un único Docker Compose",
+          "deployment": "Nodo edge o servidor dedicado",
+          "latency": "Consulta <15 ms"
+        }
+      },
+      "uk": {
+        "shortDescription": "Єдині метрики, логи, трейси та сповіщення для середовищ на Docker Compose.",
+        "description": "TELEMETRY HUB це комплексна платформа observability, створена для власних і незалежних архітектур на Docker Compose. Вона обʼєднує збір метрик, потік структурованих логів, агрегацію трейсів і розумні правила сповіщень в одному легкому стеку.",
+        "tagline": "Перетворюйте шум розподілених контейнерів на зрозумілу операційну картину.",
+        "categoryLabel": "Observability · Інфраструктура",
+        "features": [
+          "Легкий потік логів",
+          "Графіки метрик для багатьох сервісів",
+          "Розумні сповіщення про аномалії",
+          "Передача контексту трейсів"
+        ],
+        "highlights": [
+          "Налаштування без конфігурації",
+          "Єдині PromQL і LogQL",
+          "Приймання за частки секунди"
+        ],
+        "capabilities": [
+          {
+            "title": "Легкий потік логів",
+            "description": "Миттєве приймання stdout/stderr контейнерів із повнотекстовим пошуком, фільтрами regex та індексом тегів."
+          },
+          {
+            "title": "Графіки метрик для багатьох сервісів",
+            "description": "Автоматично збирає ендпоінти Prometheus і ресурси хоста (CPU, RAM, IOPS, мережа) без важких агентів."
+          },
+          {
+            "title": "Розумні сповіщення про аномалії",
+            "description": "Сповіщення за порогами й швидкістю змін у Telegram, Discord, Slack або власні вебхуки."
+          },
+          {
+            "title": "Передача контексту трейсів",
+            "description": "Звʼязує запити користувачів між мікросервісами через розподілену передачу контексту OpenTelemetry."
+          }
+        ],
+        "architecture": {
+          "runtime": "Набір контейнерів в одному Docker Compose",
+          "deployment": "Edge-вузол або виділений сервер",
+          "latency": "Запит <15 мс"
+        }
+      }
+    }
   },
   {
     "slug": "job-follow",
@@ -200,7 +364,89 @@
     "price": 19,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": true
+    "showPrice": true,
+    "translations": {
+      "es": {
+        "shortDescription": "Monitorización automática de leads, noticias y detección de ofertas de empleo de TI.",
+        "description": "JOB FOLLOW vigila en tiempo real canales de Telegram, bolsas de empleo, foros de comunidades y medios de noticias. Usa clasificadores de lenguaje natural a medida para extraer leads de alto valor, vacantes técnicas y señales de mercado, y los entrega al instante en feeds personalizados.",
+        "tagline": "Inteligencia continua a partir de canales de comunicación de alta velocidad.",
+        "categoryLabel": "Inteligencia de mercado · Automatización",
+        "features": [
+          "Ingesta de canales de Telegram",
+          "Puntuación contextual de leads",
+          "Emparejamiento estructurado con currículums",
+          "Envío a varios destinos"
+        ],
+        "highlights": [
+          "Rastreo de canales 24/7",
+          "Clasificación con PLN",
+          "Alertas instantáneas en Telegram"
+        ],
+        "capabilities": [
+          {
+            "title": "Ingesta de canales de Telegram",
+            "description": "Conecta varias cuentas de escucha para extraer mensajes de grupos técnicos públicos y restringidos."
+          },
+          {
+            "title": "Puntuación contextual de leads",
+            "description": "Aplica clasificadores neuronales para descartar el spam y priorizar ofertas de empleo o leads de negocio relevantes."
+          },
+          {
+            "title": "Emparejamiento estructurado con currículums",
+            "description": "Contrasta los requisitos de la vacante con los perfiles de desarrolladores para calcular una puntuación de ajuste precisa."
+          },
+          {
+            "title": "Envío a varios destinos",
+            "description": "Dirige las oportunidades puntuadas a bots personales de Telegram, tableros de Notion o endpoints webhook."
+          }
+        ],
+        "architecture": {
+          "runtime": "Flota de workers en contenedores",
+          "deployment": "VPS en la nube con pools de proxies",
+          "latency": "<1 s de la detección a la alerta"
+        }
+      },
+      "uk": {
+        "shortDescription": "Автоматичний моніторинг лідів, новин та пошук IT-вакансій.",
+        "description": "JOB FOLLOW у реальному часі відстежує канали Telegram, дошки вакансій, форуми спільнот і новинні ресурси. Власні класифікатори природної мови виділяють цінні ліди, технічні вакансії та ринкові сигнали й миттєво доставляють їх у налаштовані стрічки.",
+        "tagline": "Постійна розвідка з високошвидкісних каналів комунікації.",
+        "categoryLabel": "Ринкова аналітика · Автоматизація",
+        "features": [
+          "Збір із каналів Telegram",
+          "Контекстна оцінка лідів",
+          "Структуроване зіставлення з резюме",
+          "Доставка в кілька напрямів"
+        ],
+        "highlights": [
+          "Скрапінг каналів 24/7",
+          "NLP-класифікація",
+          "Миттєві сповіщення в Telegram"
+        ],
+        "capabilities": [
+          {
+            "title": "Збір із каналів Telegram",
+            "description": "Підключає кілька акаунтів-слухачів для отримання повідомлень із публічних і закритих технічних груп."
+          },
+          {
+            "title": "Контекстна оцінка лідів",
+            "description": "Нейронні класифікатори відсіюють спам і виділяють релевантні вакансії чи бізнес-ліди."
+          },
+          {
+            "title": "Структуроване зіставлення з резюме",
+            "description": "Звіряє вимоги вакансії з профілями розробників і розраховує точний бал відповідності."
+          },
+          {
+            "title": "Доставка в кілька напрямів",
+            "description": "Спрямовує оцінені можливості до особистих Telegram-ботів, дошок Notion або вебхуків."
+          }
+        ],
+        "architecture": {
+          "runtime": "Флот воркерів у контейнерах",
+          "deployment": "Хмарний VPS із пулами проксі",
+          "latency": "<1 с від виявлення до сповіщення"
+        }
+      }
+    }
   },
   {
     "slug": "chpokai",
@@ -266,7 +512,89 @@
     "price": 29,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Plataforma autorizada de seguridad, pentesting y pruebas de aceptación para agentes de IA.",
+        "description": "CHPOKAI ejecuta evaluaciones de seguridad conductuales controladas y reproducibles sobre sistemas web, API y agentes de IA. Detecta inyecciones de prompts, evasiones de lógica de negocio, fugas de autenticación y fallos de API, y genera informes auditables con pruebas de explotación.",
+        "tagline": "Verificación adversarial autónoma con evidencia legible por máquinas.",
+        "categoryLabel": "Producto de IA · Seguridad y pruebas",
+        "features": [
+          "Simulación autónoma de ataques",
+          "Pruebas de ejecución en sandbox",
+          "Pruebas de regresión de barreras de seguridad",
+          "Informes de auditoría legibles por máquinas"
+        ],
+        "highlights": [
+          "Simulación adversarial",
+          "Sondeo de inyección de prompts",
+          "Registros de auditoría de cumplimiento"
+        ],
+        "capabilities": [
+          {
+            "title": "Simulación autónoma de ataques",
+            "description": "Genera vectores de explotación no destructivos que prueban el OWASP Top 10 para LLM y las API web."
+          },
+          {
+            "title": "Pruebas de ejecución en sandbox",
+            "description": "Aísla los hallazgos con trazas de reproducción paso a paso y cargas de red verificables."
+          },
+          {
+            "title": "Pruebas de regresión de barreras de seguridad",
+            "description": "Comprueba de forma continua que los prompts de sistema y los filtros de seguridad mantienen su integridad tras cada actualización del modelo."
+          },
+          {
+            "title": "Informes de auditoría legibles por máquinas",
+            "description": "Exporta registros formales de vulnerabilidades en JSON, Markdown y SARIF para integrarlos en CI/CD."
+          }
+        ],
+        "architecture": {
+          "runtime": "Contenedores efímeros aislados",
+          "deployment": "VPC segura",
+          "latency": "Telemetría en tiempo real"
+        }
+      },
+      "uk": {
+        "shortDescription": "Авторизована платформа безпеки, пентестів і приймальних тестів для AI-агентів.",
+        "description": "CHPOKAI виконує контрольовані, відтворювані поведінкові оцінки безпеки вебсистем, API та AI-агентів. Виявляє ін’єкції в промптах, обхід бізнес-логіки, витоки автентифікації та вади API й формує аудитовані звіти з доказами експлуатації.",
+        "tagline": "Автономна змагальна перевірка з машиночитними доказами.",
+        "categoryLabel": "AI-продукт · Безпека й тестування",
+        "features": [
+          "Автономна симуляція атак",
+          "Докази виконання в пісочниці",
+          "Регресійне тестування запобіжників",
+          "Машиночитні звіти аудиту"
+        ],
+        "highlights": [
+          "Змагальна симуляція",
+          "Перевірка ін’єкцій у промптах",
+          "Журнали аудиту відповідності"
+        ],
+        "capabilities": [
+          {
+            "title": "Автономна симуляція атак",
+            "description": "Генерує неруйнівні вектори експлуатації для перевірки за OWASP Top 10 для LLM і вебAPI."
+          },
+          {
+            "title": "Докази виконання в пісочниці",
+            "description": "Ізолює знахідки покроковими слідами відтворення та перевірюваними мережевими навантаженнями."
+          },
+          {
+            "title": "Регресійне тестування запобіжників",
+            "description": "Постійно перевіряє, що системні промпти й фільтри безпеки зберігають цілісність після оновлень моделей."
+          },
+          {
+            "title": "Машиночитні звіти аудиту",
+            "description": "Експортує формальні журнали вразливостей у JSON, Markdown і SARIF для інтеграції в CI/CD."
+          }
+        ],
+        "architecture": {
+          "runtime": "Ізольовані ефемерні контейнери",
+          "deployment": "Захищена VPC",
+          "latency": "Телеметрія в реальному часі"
+        }
+      }
+    }
   },
   {
     "slug": "activity-simulator",
@@ -331,7 +659,91 @@
     "price": 19,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Aplicación de escritorio nativa que orquesta comportamientos realistas de ratón, teclado y escenarios.",
+        "description": "Activity Simulator es una aplicación de escritorio nativa y multiplataforma (macOS, Windows, Linux) que orquesta flujos de trabajo con curvas de ratón de Bézier naturales, cadencia de escritura aleatoria y gestión adaptativa de ventanas. Creada para pruebas de estrés, generación de actividad realista y ejecución autónoma de escenarios.",
+        "tagline": "Automatización de escritorio natural, con dinámica realista y enlaces nativos con el sistema.",
+        "categoryLabel": "IA de escritorio · Automatización",
+        "features": [
+          "Curvas naturales de puntero Bézier",
+          "Cadencia de escritura estocástica",
+          "Flujo de aplicaciones con varias ventanas",
+          "Perfiles y escenarios predefinidos"
+        ],
+        "highlights": [
+          "Aplicación de escritorio nativa (macOS/Win/Linux)",
+          "Movimiento de nivel humano",
+          "Curvas no deterministas",
+          "Perfiles predefinidos"
+        ],
+        "capabilities": [
+          {
+            "title": "Curvas naturales de puntero Bézier",
+            "description": "Simula aceleración, desaceleración y microcorrecciones realistas del cursor."
+          },
+          {
+            "title": "Cadencia de escritura estocástica",
+            "description": "Velocidad de escritura dinámica con fatiga simulada, pausas y corrección de erratas."
+          },
+          {
+            "title": "Flujo de aplicaciones con varias ventanas",
+            "description": "Gestiona con inteligencia pestañas del navegador, editores de código y foco del terminal en sesiones largas."
+          },
+          {
+            "title": "Perfiles y escenarios predefinidos",
+            "description": "Guarda perfiles de desarrollador, investigador u operador con patrones de horario diarios distintos."
+          }
+        ],
+        "architecture": {
+          "runtime": "Binario nativo (macOS / Windows / Linux)",
+          "deployment": "Ejecución local en el escritorio",
+          "latency": "Envío de entrada <1 ms"
+        }
+      },
+      "uk": {
+        "shortDescription": "Нативний десктопний застосунок, що відтворює реалістичну поведінку миші, клавіатури та сценаріїв.",
+        "description": "Activity Simulator це нативний кросплатформний десктопний застосунок (macOS, Windows, Linux), що керує робочими процесами за допомогою природних кривих Безьє для миші, випадкового ритму друку та адаптивного керування вікнами. Створений для стрес-тестів, генерації реалістичної активності й автономного виконання сценаріїв.",
+        "tagline": "Природна автоматизація робочого столу з реалістичною динамікою та нативними хуками ОС.",
+        "categoryLabel": "Desktop AI · Автоматизація",
+        "features": [
+          "Природні криві Безьє для курсора",
+          "Стохастичний ритм друку",
+          "Потік між кількома вікнами",
+          "Профілі та готові сценарії"
+        ],
+        "highlights": [
+          "Нативний десктопний застосунок (macOS/Win/Linux)",
+          "Рух на рівні людини",
+          "Недетерміновані криві",
+          "Готові профілі"
+        ],
+        "capabilities": [
+          {
+            "title": "Природні криві Безьє для курсора",
+            "description": "Імітує реалістичне прискорення, гальмування та мікрокорекції руху курсора."
+          },
+          {
+            "title": "Стохастичний ритм друку",
+            "description": "Динамічна швидкість введення з імітацією втоми, пауз і виправлення помилок."
+          },
+          {
+            "title": "Потік між кількома вікнами",
+            "description": "Розумно керує вкладками браузера, редакторами коду й фокусом термінала під час довгих сесій."
+          },
+          {
+            "title": "Профілі та готові сценарії",
+            "description": "Зберігайте профілі розробника, дослідника чи оператора з різними денними графіками."
+          }
+        ],
+        "architecture": {
+          "runtime": "Нативний бінарний файл (macOS / Windows / Linux)",
+          "deployment": "Локальне виконання на робочому столі",
+          "latency": "Відправка вводу <1 мс"
+        }
+      }
+    }
   },
   {
     "slug": "build-runner",
@@ -397,7 +809,91 @@
     "price": 19,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Copiloto de escritorio multiplataforma en tiempo real para entrevistas e ingeniería.",
+        "description": "BUILD RUNNER es una aplicación de escritorio nativa y multiplataforma (macOS y Windows) que escucha conversaciones de audio y analiza el contexto de la pantalla a la vez. Funciona como una superposición HUD flotante y discreta que ofrece sugerencias de arquitectura, pistas de sintaxis en vivo y desgloses algorítmicos en tiempo real.",
+        "tagline": "Copiloto de escritorio multimodal en tiempo real que combina voz, contexto de pantalla y un HUD discreto.",
+        "categoryLabel": "IA de escritorio · Copiloto",
+        "features": [
+          "Análisis de audio en tiempo real",
+          "OCR del contexto de pantalla en vivo",
+          "Síntesis de respuestas según el rol",
+          "HUD flotante discreto"
+        ],
+        "highlights": [
+          "Aplicación de escritorio nativa (macOS y Win)",
+          "Superposición HUD flotante discreta",
+          "Transcripción de audio <300 ms",
+          "Enrutamiento de modelos BYOK"
+        ],
+        "capabilities": [
+          {
+            "title": "Análisis de audio en tiempo real",
+            "description": "Transcripción continua de voz de alta precisión, con diarización de hablantes y supresión de ruido."
+          },
+          {
+            "title": "OCR del contexto de pantalla en vivo",
+            "description": "Lee al vuelo enunciados de problemas técnicos, ventanas de código del IDE y diagramas de arquitectura."
+          },
+          {
+            "title": "Síntesis de respuestas según el rol",
+            "description": "Adapta los consejos a niveles de ingeniería sénior, evitando lo genérico en favor de la precisión arquitectónica."
+          },
+          {
+            "title": "HUD flotante discreto",
+            "description": "Superposición transparente y a través de la cual se puede hacer clic, diseñada para distraer lo mínimo posible."
+          }
+        ],
+        "architecture": {
+          "runtime": "Proceso de escritorio nativo",
+          "deployment": "Escritorio del cliente con puente a IA en la nube",
+          "latency": "<400 ms de la voz a la pista"
+        }
+      },
+      "uk": {
+        "shortDescription": "Кросплатформний десктопний копілот для співбесід та інженерії в реальному часі.",
+        "description": "BUILD RUNNER це нативний кросплатформний десктопний застосунок (macOS і Windows), що одночасно слухає аудіорозмови й аналізує контекст екрана. Працює як непомітний плаваючий HUD-оверлей, який у реальному часі дає архітектурні підказки, синтаксичні підказки та розбір алгоритмів.",
+        "tagline": "Мультимодальний десктопний копілот у реальному часі: голос, контекст екрана та непомітний HUD.",
+        "categoryLabel": "Desktop AI · Копілот",
+        "features": [
+          "Розбір аудіопотоку в реальному часі",
+          "OCR контексту екрана наживо",
+          "Відповіді з урахуванням ролі",
+          "Непомітний плаваючий HUD"
+        ],
+        "highlights": [
+          "Нативний десктопний застосунок (macOS і Win)",
+          "Непомітний плаваючий HUD-оверлей",
+          "Транскрипція аудіо <300 мс",
+          "Маршрутизація моделей BYOK"
+        ],
+        "capabilities": [
+          {
+            "title": "Розбір аудіопотоку в реальному часі",
+            "description": "Точна безперервна транскрипція мовлення з розпізнаванням мовців і шумозаглушенням."
+          },
+          {
+            "title": "OCR контексту екрана наживо",
+            "description": "Зчитує умови технічних задач, вікна коду в IDE та архітектурні діаграми на льоту."
+          },
+          {
+            "title": "Відповіді з урахуванням ролі",
+            "description": "Підлаштовує поради під рівень senior-інженера: архітектурна точність замість шаблонних відповідей."
+          },
+          {
+            "title": "Непомітний плаваючий HUD",
+            "description": "Прозорий оверлей, крізь який можна клікати, створений для мінімального візуального відволікання."
+          }
+        ],
+        "architecture": {
+          "runtime": "Нативний десктопний процес",
+          "deployment": "Клієнтський десктоп із мостом до хмарного AI",
+          "latency": "<400 мс від голосу до підказки"
+        }
+      }
+    }
   },
   {
     "slug": "key-service",
@@ -462,7 +958,89 @@
     "price": 29,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Infraestructura de licencias, verificación vinculada al dispositivo y derechos de uso.",
+        "description": "Key Service es un backend de licencias de alto rendimiento en Go/PostgreSQL. Gestiona la activación criptográfica de productos, el hash de huellas de hardware, la validación periódica de derechos de uso y la administración auditada del ciclo de vida en todas las aplicaciones del estudio.",
+        "tagline": "Licencias vinculadas al hardware y control de derechos de uso para productos de software.",
+        "categoryLabel": "Licencias e identidad",
+        "features": [
+          "Huella vinculada al dispositivo",
+          "Claves de licencia criptográficas",
+          "Puertas de derechos por funcionalidad",
+          "Control de auditoría y revocación"
+        ],
+        "highlights": [
+          "Ed25519 criptográfico",
+          "Verificación sin conexión",
+          "Verificación <3 ms"
+        ],
+        "capabilities": [
+          {
+            "title": "Huella vinculada al dispositivo",
+            "description": "Calcula el hash de los identificadores de CPU, placa base y disco para crear una identidad de dispositivo a prueba de manipulaciones."
+          },
+          {
+            "title": "Claves de licencia criptográficas",
+            "description": "Emite tokens de licencia firmados con Ed25519, verificables tanto en línea como en entornos aislados de la red."
+          },
+          {
+            "title": "Puertas de derechos por funcionalidad",
+            "description": "Interruptores granulares booleanos, enteros y por caducidad para cada licencia emitida."
+          },
+          {
+            "title": "Control de auditoría y revocación",
+            "description": "Revoca, revincula o suspende licencias al instante, con un registro administrativo inmutable."
+          }
+        ],
+        "architecture": {
+          "runtime": "Contenedor Docker ligero",
+          "deployment": "Kubernetes de alta disponibilidad / VPS",
+          "latency": "Verificación <3 ms"
+        }
+      },
+      "uk": {
+        "shortDescription": "Інфраструктура ліцензування, перевірки привʼязки до пристрою та прав доступу.",
+        "description": "Key Service це високопродуктивний бекенд ліцензування на Go/PostgreSQL. Він виконує криптографічну активацію продуктів, хешування апаратних відбитків, періодичну перевірку прав доступу та аудитоване адміністрування життєвого циклу для всіх застосунків студії.",
+        "tagline": "Ліцензування з привʼязкою до апаратури та керування правами доступу для програмних продуктів.",
+        "categoryLabel": "Ліцензування й ідентифікація",
+        "features": [
+          "Відбиток, привʼязаний до пристрою",
+          "Криптографічні ліцензійні ключі",
+          "Шлюзи прав на функції",
+          "Аудит і контроль відкликання"
+        ],
+        "highlights": [
+          "Криптографія Ed25519",
+          "Перевірка офлайн",
+          "Перевірка <3 мс"
+        ],
+        "capabilities": [
+          {
+            "title": "Відбиток, привʼязаний до пристрою",
+            "description": "Хешує ідентифікатори CPU, материнської плати й диска, створюючи стійку до підробки ідентичність пристрою."
+          },
+          {
+            "title": "Криптографічні ліцензійні ключі",
+            "description": "Видає ліцензійні токени з підписом Ed25519, які перевіряються онлайн і в ізольованих від мережі середовищах."
+          },
+          {
+            "title": "Шлюзи прав на функції",
+            "description": "Детальні логічні, цілочисельні й часові перемикачі функцій для кожної виданої ліцензії."
+          },
+          {
+            "title": "Аудит і контроль відкликання",
+            "description": "Миттєво відкликайте, перепривʼязуйте чи призупиняйте ліцензії з незмінним адміністративним журналом."
+          }
+        ],
+        "architecture": {
+          "runtime": "Легкий Docker-контейнер",
+          "deployment": "Kubernetes високої доступності / VPS",
+          "latency": "Перевірка <3 мс"
+        }
+      }
+    }
   },
   {
     "slug": "ai-execution-advisor",
@@ -526,7 +1104,89 @@
     "price": 29,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Analiza cargas de trabajo de IA, coste de ejecución y calidad en operaciones LLM de organizaciones.",
+        "description": "Observa las cargas de trabajo de IA de una organización entre proveedores (OpenAI, Anthropic, Google, pesos abiertos locales). Analiza la eficiencia de tokens, las tasas de acierto de caché y el exceso de longitud de los prompts, y ofrece recomendaciones de experimentos A/B con salvaguardas para reducir costes sin perder calidad.",
+        "tagline": "Optimización de coste, latencia y calidad basada en evidencia para la IA empresarial.",
+        "categoryLabel": "Producto de IA · Operaciones LLM",
+        "features": [
+          "Inspección de costes entre proveedores",
+          "Compresión y caché de prompts",
+          "Evaluación de calidad A/B",
+          "Política de respaldo adaptativa"
+        ],
+        "highlights": [
+          "Analítica de coste de tokens",
+          "Optimización de aciertos de caché",
+          "Enrutamiento de respaldo automático"
+        ],
+        "capabilities": [
+          {
+            "title": "Inspección de costes entre proveedores",
+            "description": "Seguimiento granular del gasto por inquilino, modelo y funcionalidad, hasta el token individual."
+          },
+          {
+            "title": "Compresión y caché de prompts",
+            "description": "Detecta bloques de contexto repetitivos y aplica reglas de caché de prefijos para reducir hasta un 60 % la factura de LLM."
+          },
+          {
+            "title": "Evaluación de calidad A/B",
+            "description": "Experimentos comparativos con salvaguardas que miden modelos más pequeños y baratos frente a los de gama alta."
+          },
+          {
+            "title": "Política de respaldo adaptativa",
+            "description": "Redirige automáticamente las peticiones fallidas o limitadas a proveedores de reserva sin molestar al usuario."
+          }
+        ],
+        "architecture": {
+          "runtime": "Proxy en el borde de la nube",
+          "deployment": "Sustitución directa de la URL base de la API",
+          "latency": "<2 ms de sobrecarga del proxy"
+        }
+      },
+      "uk": {
+        "shortDescription": "Аналізує AI-навантаження, вартість виконання та якість у LLM-операціях організації.",
+        "description": "Спостерігає за AI-навантаженнями організації в різних провайдерів (OpenAI, Anthropic, Google, локальні відкриті ваги). Аналізує ефективність токенів, частку влучань у кеш і надмірну довжину промптів та дає безпечні рекомендації A/B-експериментів, щоб знизити витрати без втрати якості.",
+        "tagline": "Оптимізація вартості, затримки та якості на основі доказів для корпоративного AI.",
+        "categoryLabel": "AI-продукт · LLM-операції",
+        "features": [
+          "Перевірка вартості між провайдерами",
+          "Стиснення промптів і кешування",
+          "A/B-оцінка якості",
+          "Адаптивна політика резервування"
+        ],
+        "highlights": [
+          "Аналітика вартості токенів",
+          "Оптимізація влучань у кеш",
+          "Автоматична резервна маршрутизація"
+        ],
+        "capabilities": [
+          {
+            "title": "Перевірка вартості між провайдерами",
+            "description": "Детальний облік витрат за орендарем, моделлю та функцією аж до окремого токена."
+          },
+          {
+            "title": "Стиснення промптів і кешування",
+            "description": "Виявляє повторювані блоки контексту й застосовує правила кешування префіксів, скорочуючи рахунки за LLM до 60%."
+          },
+          {
+            "title": "A/B-оцінка якості",
+            "description": "Безпечні порівняльні експерименти, що зіставляють менші й дешевші моделі з флагманськими."
+          },
+          {
+            "title": "Адаптивна політика резервування",
+            "description": "Автоматично перенаправляє невдалі чи обмежені запити до резервних провайдерів без впливу на користувача."
+          }
+        ],
+        "architecture": {
+          "runtime": "Хмарний проксі на краю",
+          "deployment": "Пряма заміна базового URL API",
+          "latency": "<2 мс накладних витрат проксі"
+        }
+      }
+    }
   },
   {
     "slug": "agent-platform",
@@ -593,7 +1253,89 @@
     "price": 19,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Plano de control multiinquilino para agentes, conversaciones, herramientas y delegaciones.",
+        "description": "Un plano de control multiinquilino y escalable para orquestar agentes autónomos, memorias persistentes, registros de herramientas, cuotas de ejecución y delegación entre agentes en canales web, Telegram, voz y medios.",
+        "tagline": "El sistema operativo unificado para agentes empresariales autónomos.",
+        "categoryLabel": "Plataforma de IA · Multiagente",
+        "features": [
+          "Delegación jerárquica de agentes",
+          "Ejecución de herramientas en sandbox",
+          "Gestión de memoria contextual",
+          "Cuotas y políticas por inquilino"
+        ],
+        "highlights": [
+          "Delegación multiagente",
+          "Registro de herramientas en sandbox",
+          "Almacén de memoria persistente"
+        ],
+        "capabilities": [
+          {
+            "title": "Delegación jerárquica de agentes",
+            "description": "Los agentes supervisores dividen objetivos complejos en grafos de tareas y los delegan en subagentes especializados."
+          },
+          {
+            "title": "Ejecución de herramientas en sandbox",
+            "description": "Ejecuta Python, Bash, búsqueda web y consultas a bases de datos en microVM seguras y efímeras."
+          },
+          {
+            "title": "Gestión de memoria contextual",
+            "description": "Ventana de contexto deslizante a corto plazo combinada con embeddings vectoriales a largo plazo y un grafo de hechos del usuario."
+          },
+          {
+            "title": "Cuotas y políticas por inquilino",
+            "description": "Límites de frecuencia finos, topes de presupuesto y políticas estrictas de autorización de herramientas por espacio de trabajo."
+          }
+        ],
+        "architecture": {
+          "runtime": "Clúster distribuido",
+          "deployment": "Autoalojado o en la nube",
+          "latency": "Despacho <100 ms"
+        }
+      },
+      "uk": {
+        "shortDescription": "Мультитенантна панель керування агентами, розмовами, інструментами й делегуванням.",
+        "description": "Масштабована мультитенантна панель керування для оркестрації автономних агентів, постійної памʼяті, реєстрів інструментів, квот виконання та делегування між агентами в вебі, Telegram, голосових і медіаконвеєрах.",
+        "tagline": "Єдина операційна система для автономних корпоративних агентів.",
+        "categoryLabel": "AI-платформа · Мультиагентність",
+        "features": [
+          "Ієрархічне делегування агентів",
+          "Виконання інструментів у пісочниці",
+          "Керування контекстною памʼяттю",
+          "Квоти й політики орендарів"
+        ],
+        "highlights": [
+          "Мультиагентне делегування",
+          "Реєстр інструментів у пісочниці",
+          "Постійне сховище памʼяті"
+        ],
+        "capabilities": [
+          {
+            "title": "Ієрархічне делегування агентів",
+            "description": "Агенти-супервізори розбивають складні цілі на графи завдань і делегують їх спеціалізованим субагентам."
+          },
+          {
+            "title": "Виконання інструментів у пісочниці",
+            "description": "Запускає Python, Bash, вебпошук і запити до БД в короткоживучих захищених мікро-ВМ."
+          },
+          {
+            "title": "Керування контекстною памʼяттю",
+            "description": "Короткострокове ковзне вікно контексту разом із довгостроковими векторними вкладеннями та графом фактів про користувача."
+          },
+          {
+            "title": "Квоти й політики орендарів",
+            "description": "Детальні ліміти запитів, стелі бюджету та суворі політики авторизації інструментів для кожного робочого простору."
+          }
+        ],
+        "architecture": {
+          "runtime": "Розподілений кластер",
+          "deployment": "Власний хостинг або хмара",
+          "latency": "Диспетчеризація <100 мс"
+        }
+      }
+    }
   },
   {
     "slug": "voice-ai",
@@ -658,7 +1400,89 @@
     "price": 19,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Agentes conversacionales bidireccionales en tiempo real para voz y telefonía.",
+        "description": "Motor de voz conversacional en tiempo real que combina streaming WebRTC, detección acústica de actividad de voz (VAD), reconocimiento neuronal de voz en streaming, generación con LLM y síntesis de voz de latencia ultrabaja.",
+        "tagline": "Inteligencia de voz conversacional en menos de un segundo, con gestión natural de las interrupciones.",
+        "categoryLabel": "IA de voz · Tiempo real",
+        "features": [
+          "Canal de voz bilingüe",
+          "Barge-in sin retardo",
+          "Conectores de telefonía y WebRTC",
+          "Personas de voz a medida"
+        ],
+        "highlights": [
+          "Menos de 500 ms de extremo a extremo",
+          "Interrupción nativa (barge-in)",
+          "Puente SIP / telefonía"
+        ],
+        "capabilities": [
+          {
+            "title": "Canal de voz bilingüe",
+            "description": "Transcripción y síntesis impecables en ucraniano e inglés, con modulación de acento nativa."
+          },
+          {
+            "title": "Barge-in sin retardo",
+            "description": "Las interrupciones del usuario se reconocen al instante y silencian con suavidad la reproducción en menos de 80 ms."
+          },
+          {
+            "title": "Conectores de telefonía y WebRTC",
+            "description": "Conecta directamente con Asterisk, Twilio, WebRTC del navegador o troncales SIP."
+          },
+          {
+            "title": "Personas de voz a medida",
+            "description": "Entrena y configura características vocales, ritmo, emoción y tono técnico propios."
+          }
+        ],
+        "architecture": {
+          "runtime": "Nodo con aceleración por GPU",
+          "deployment": "Edge regional de baja latencia",
+          "latency": "Respuesta <450 ms"
+        }
+      },
+      "uk": {
+        "shortDescription": "Двосторонні розмовні агенти реального часу для голосу й телефонії.",
+        "description": "Голосовий розмовний рушій реального часу, що поєднує потокову передачу WebRTC, акустичне виявлення голосової активності (VAD), потокове нейронне розпізнавання мовлення, генерацію LLM і синтез голосу з наднизькою затримкою.",
+        "tagline": "Голосовий розмовний інтелект із відповіддю за частки секунди та природною обробкою переривань.",
+        "categoryLabel": "Voice AI · Реальний час",
+        "features": [
+          "Двомовний мовленнєвий конвеєр",
+          "Barge-in без затримки",
+          "Конектори телефонії та WebRTC",
+          "Власні голосові персони"
+        ],
+        "highlights": [
+          "Менше 500 мс наскрізно",
+          "Нативне переривання (barge-in)",
+          "SIP / телефонний міст"
+        ],
+        "capabilities": [
+          {
+            "title": "Двомовний мовленнєвий конвеєр",
+            "description": "Бездоганна транскрипція й синтез українською та англійською з нативною модуляцією акценту."
+          },
+          {
+            "title": "Barge-in без затримки",
+            "description": "Переривання користувача розпізнаються миттєво, плавно приглушуючи відтворення протягом 80 мс."
+          },
+          {
+            "title": "Конектори телефонії та WebRTC",
+            "description": "Підключення напряму до Asterisk, Twilio, WebRTC у браузері або SIP-транків."
+          },
+          {
+            "title": "Власні голосові персони",
+            "description": "Навчайте й налаштовуйте характеристики голосу, темп, емоційність і технічний тон."
+          }
+        ],
+        "architecture": {
+          "runtime": "Вузол із GPU-прискоренням",
+          "deployment": "Регіональний edge з низькою затримкою",
+          "latency": "Відповідь <450 мс"
+        }
+      }
+    }
   },
   {
     "slug": "video-ai",
@@ -722,7 +1546,89 @@
     "price": 19,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Edición de vídeo generativa, presentaciones sintéticas y experiencias con avatares.",
+        "description": "Canal generativo de vídeo para producir demos de producto, presentaciones con avatares sintéticos y contenido de vídeo corto automatizado a partir de guiones en markdown y documentación estructurada.",
+        "tagline": "Automatiza la generación de contenido visual a partir de texto estructurado y prompts.",
+        "categoryLabel": "IA generativa · Vídeo",
+        "features": [
+          "Compilación de guion a vídeo",
+          "Inyección dinámica de recursos",
+          "Renderizado en varias resoluciones",
+          "Masterización completa de la banda sonora"
+        ],
+        "highlights": [
+          "Montaje automático de B-roll",
+          "Avatares sintéticos",
+          "Tipografía cinética"
+        ],
+        "capabilities": [
+          {
+            "title": "Compilación de guion a vídeo",
+            "description": "Convierte guías técnicas en markdown en vídeos de recorrido narrados y con ritmo visual."
+          },
+          {
+            "title": "Inyección dinámica de recursos",
+            "description": "Inserta automáticamente fragmentos de código, capturas de la interfaz del producto y resaltados animados de diagramas."
+          },
+          {
+            "title": "Renderizado en varias resoluciones",
+            "description": "Exportación simultánea para presentaciones de escritorio 16:9 y reels verticales 9:16 para redes sociales."
+          },
+          {
+            "title": "Masterización completa de la banda sonora",
+            "description": "Ducking automático del audio de fondo, efectos de sonido y equilibrio para una voz clara."
+          }
+        ],
+        "architecture": {
+          "runtime": "Flota de renderizado en la nube",
+          "deployment": "AWS ECS / nodos GPU",
+          "latency": "Renderizado 2x tiempo real"
+        }
+      },
+      "uk": {
+        "shortDescription": "Генеративний відеомонтаж, синтетичні презентації та досвід з аватарами.",
+        "description": "Генеративний відеоконвеєр для створення демо продуктів, презентацій із синтетичними аватарами та автоматизованого короткого відеоконтенту зі структурованих markdown-сценаріїв і документації.",
+        "tagline": "Автоматизуйте створення візуального контенту зі структурованого тексту й промптів.",
+        "categoryLabel": "Генеративний AI · Відео",
+        "features": [
+          "Збирання відео зі сценарію",
+          "Динамічне додавання ресурсів",
+          "Рендеринг у кількох роздільностях",
+          "Повне мастерування звукової доріжки"
+        ],
+        "highlights": [
+          "Автоматичне зшивання B-roll",
+          "Синтетичні аватари",
+          "Кінетична типографіка"
+        ],
+        "capabilities": [
+          {
+            "title": "Збирання відео зі сценарію",
+            "description": "Перетворює технічні посібники в markdown на відео-огляди з озвученням і візуальним темпом."
+          },
+          {
+            "title": "Динамічне додавання ресурсів",
+            "description": "Автоматично вставляє фрагменти коду, кадри інтерфейсу продукту й анімовані акценти діаграм."
+          },
+          {
+            "title": "Рендеринг у кількох роздільностях",
+            "description": "Одночасний експорт для десктопних презентацій 16:9 і вертикальних соціальних роликів 9:16."
+          },
+          {
+            "title": "Повне мастерування звукової доріжки",
+            "description": "Автоматичне приглушення фонового аудіо, звукові ефекти та вирівнювання чіткості голосу."
+          }
+        ],
+        "architecture": {
+          "runtime": "Хмарний флот рендерингу",
+          "deployment": "AWS ECS / GPU-вузли",
+          "latency": "Рендеринг 2x реального часу"
+        }
+      }
+    }
   },
   {
     "slug": "rag",
@@ -787,7 +1693,89 @@
     "price": 19,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Motor de recuperación con respuestas estrictamente fundamentadas para bases de conocimiento aisladas por inquilino.",
+        "description": "Sistema de conocimiento RAG que combina recuperación vectorial híbrida dispersa-densa, reordenación y citas estrictas de procedencia. Diseñado para ingerir manuales en PDF, documentación, código fuente y bases de conocimiento y ofrecer respuestas estrictamente fundamentadas.",
+        "tagline": "Inteligencia documental sin alucinaciones y con atribución verificable de las fuentes.",
+        "categoryLabel": "IA de conocimiento · Recuperación",
+        "features": [
+          "Ingesta de documentos en varios formatos",
+          "Fragmentación sensible al contexto",
+          "Procedencia y citas estrictas",
+          "Particionado de conocimiento aislado por inquilino"
+        ],
+        "highlights": [
+          "BM25 + vectores densos híbridos",
+          "Integración con Cohere Rerank",
+          "100 % de citas de fuentes"
+        ],
+        "capabilities": [
+          {
+            "title": "Ingesta de documentos en varios formatos",
+            "description": "Extrae texto semántico limpio de PDF, Markdown, Notion, repositorios de GitHub y volcados de bases de datos."
+          },
+          {
+            "title": "Fragmentación sensible al contexto",
+            "description": "Fragmentación jerárquica que conserva encabezados, tablas y relaciones padre-hijo entre documentos."
+          },
+          {
+            "title": "Procedencia y citas estrictas",
+            "description": "Cada afirmación de la respuesta generada incluye notas clicables que apuntan a las páginas exactas de la fuente."
+          },
+          {
+            "title": "Particionado de conocimiento aislado por inquilino",
+            "description": "Límites de seguridad estrictos que garantizan que el conocimiento de una organización nunca se filtre entre espacios de trabajo."
+          }
+        ],
+        "architecture": {
+          "runtime": "Clúster de Kubernetes",
+          "deployment": "VPC privada",
+          "latency": "Recuperación <200 ms"
+        }
+      },
+      "uk": {
+        "shortDescription": "Рушій пошуку з відповідями суворо за джерелами для ізольованих баз знань орендарів.",
+        "description": "Система знань RAG, що поєднує гібридний розріджено-щільний векторний пошук, переранжування та сувору атрибуцію джерел. Розроблена для прийому PDF-посібників, документації, вихідного коду й баз знань та формування відповідей суворо за джерелами.",
+        "tagline": "Інтелект документів без галюцинацій та з перевірюваними посиланнями на джерела.",
+        "categoryLabel": "Knowledge AI · Пошук",
+        "features": [
+          "Приймання документів у різних форматах",
+          "Розбиття з урахуванням контексту",
+          "Сувора атрибуція та цитування",
+          "Ізоляція знань між орендарями"
+        ],
+        "highlights": [
+          "Гібрид BM25 + щільні вектори",
+          "Інтеграція Cohere Rerank",
+          "100% цитування джерел"
+        ],
+        "capabilities": [
+          {
+            "title": "Приймання документів у різних форматах",
+            "description": "Витягує чистий семантичний текст з PDF, Markdown, Notion, репозиторіїв GitHub і дампів баз даних."
+          },
+          {
+            "title": "Розбиття з урахуванням контексту",
+            "description": "Ієрархічне розбиття зі збереженням заголовків, таблиць і звʼязків батьківських та дочірніх документів."
+          },
+          {
+            "title": "Сувора атрибуція та цитування",
+            "description": "Кожне твердження у відповіді має клікабельні виноски на точні сторінки джерел."
+          },
+          {
+            "title": "Ізоляція знань між орендарями",
+            "description": "Суворі межі безпеки гарантують, що знання організації не потраплять до інших робочих просторів."
+          }
+        ],
+        "architecture": {
+          "runtime": "Кластер Kubernetes",
+          "deployment": "Приватна VPC",
+          "latency": "Пошук <200 мс"
+        }
+      }
+    }
   },
   {
     "slug": "telegram-ai",
@@ -853,7 +1841,89 @@
     "price": 19,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Monitorización autónoma de Telegram, clasificación de leads y flujos de alertas.",
+        "description": "Flota de agentes autónomos que vigila grupos, canales y foros de Telegram seleccionados. Extrae intención de compra, consultas técnicas de alto valor, opiniones de clientes y señales de mercado de última hora sin consultas manuales.",
+        "tagline": "Extracción de señales a gran velocidad de miles de comunidades de Telegram.",
+        "categoryLabel": "IA de monitorización · Telegram",
+        "features": [
+          "Intercepción de chats en vivo",
+          "Puntuación rápida de intención y sentimiento",
+          "Envío instantáneo y webhooks",
+          "Iniciador de conversación automático"
+        ],
+        "highlights": [
+          "Demonio MTProto en tiempo real",
+          "Clasificación de intención",
+          "Alertas privadas instantáneas"
+        ],
+        "capabilities": [
+          {
+            "title": "Intercepción de chats en vivo",
+            "description": "Escucha cientos de conversaciones de comunidades a la vez mediante demonios de escucha distribuidos."
+          },
+          {
+            "title": "Puntuación rápida de intención y sentimiento",
+            "description": "Filtra ruido, emojis y spam, y destaca solo las consultas de alto valor con intención comercial."
+          },
+          {
+            "title": "Envío instantáneo y webhooks",
+            "description": "Reenvía los leads accionables directamente a las cuentas de Telegram de los gestores o a sistemas CRM en menos de 2 segundos."
+          },
+          {
+            "title": "Iniciador de conversación automático",
+            "description": "Puede redactar respuestas introductorias contextuales basadas en el conocimiento de la empresa para su rápida aprobación humana."
+          }
+        ],
+        "architecture": {
+          "runtime": "Flota distribuida de demonios en VPS",
+          "deployment": "Docker Swarm autoalojado",
+          "latency": "Latencia <1,5 s"
+        }
+      },
+      "uk": {
+        "shortDescription": "Автономний моніторинг Telegram, класифікація лідів і процеси сповіщень.",
+        "description": "Флот автономних агентів, що відстежує цільові групи, канали й форуми Telegram. Витягує намір купівлі, цінні технічні запити, відгуки клієнтів та ринкові сигнали без ручного опитування.",
+        "tagline": "Швидке виділення сигналів із тисяч спільнот Telegram.",
+        "categoryLabel": "Monitoring AI · Telegram",
+        "features": [
+          "Перехоплення чатів наживо",
+          "Швидка оцінка наміру й тональності",
+          "Миттєва доставка й вебхуки",
+          "Автоматичний початок розмови"
+        ],
+        "highlights": [
+          "Демон MTProto в реальному часі",
+          "Класифікація намірів",
+          "Миттєві приватні сповіщення"
+        ],
+        "capabilities": [
+          {
+            "title": "Перехоплення чатів наживо",
+            "description": "Одночасно слухає сотні обговорень у спільнотах за допомогою розподілених демонів-слухачів."
+          },
+          {
+            "title": "Швидка оцінка наміру й тональності",
+            "description": "Відсіює шум, емодзі й спам, виділяючи лише цінні запити з комерційним наміром."
+          },
+          {
+            "title": "Миттєва доставка й вебхуки",
+            "description": "Пересилає придатні ліди в акаунти Telegram менеджерів або CRM-системи протягом 2 секунд."
+          },
+          {
+            "title": "Автоматичний початок розмови",
+            "description": "Може підготувати контекстну вступну відповідь на основі знань компанії для швидкого схвалення людиною."
+          }
+        ],
+        "architecture": {
+          "runtime": "Розподілений флот демонів на VPS",
+          "deployment": "Власний Docker Swarm",
+          "latency": "Затримка <1,5 с"
+        }
+      }
+    }
   },
   {
     "slug": "web-widget-ai",
@@ -921,7 +1991,91 @@
     "price": 19,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Widget de chat web inteligente e incrustable, con respuestas en streaming, base en la documentación y captación de leads.",
+        "description": "WEB WIDGET AI es un widget de chat web ligero (<25 KB), personalizable e incrustable, impulsado por LLM en streaming y RAG vectorial. Se integra sin fricción en cualquier sitio o aplicación web moderna, responde a los visitantes basándose estrictamente en la documentación de tu producto, recoge leads verificados y traspasa las conversaciones complejas a operadores humanos.",
+        "tagline": "Atención al cliente instantánea y cualificación automática de leads, integradas en cualquier sitio web.",
+        "categoryLabel": "IA web · Widget conversacional",
+        "features": [
+          "Incrustación con una sola línea de script",
+          "Base de conocimiento estricta",
+          "Cualificación automática de leads",
+          "Marca y tema personalizables"
+        ],
+        "highlights": [
+          "Paquete incrustable <25 KB",
+          "Streaming de tokens en tiempo real",
+          "Respuestas estrictamente de la documentación",
+          "Cualificación automática de leads"
+        ],
+        "capabilities": [
+          {
+            "title": "Incrustación con una sola línea de script",
+            "description": "Se añade a cualquier sitio con una sola etiqueta script: WordPress, Webflow, Shopify, React, Next.js o HTML estático."
+          },
+          {
+            "title": "Base de conocimiento estricta",
+            "description": "Responde a los visitantes usando solo documentación, tablas de precios y FAQ verificadas, sin alucinaciones."
+          },
+          {
+            "title": "Cualificación automática de leads",
+            "description": "Identifica a los visitantes con intención alta, recoge correos y teléfonos verificados y envía los leads al CRM o a Telegram."
+          },
+          {
+            "title": "Marca y tema personalizables",
+            "description": "Colores, burbuja de lanzamiento, saludos de bienvenida, avatares y tono de voz totalmente personalizables."
+          }
+        ],
+        "architecture": {
+          "runtime": "CDN edge y flota de servidores distribuida",
+          "deployment": "Nube gestionada / Docker on-premise",
+          "latency": "<80 ms hasta el primer token (TTFT)"
+        }
+      },
+      "uk": {
+        "shortDescription": "Вбудований розумний чат-віджет для сайтів зі стримінговими відповідями, привʼязкою до документації та збором лідів.",
+        "description": "WEB WIDGET AI це легкий (<25 КБ) настроюваний вбудований вебчат-віджет на основі потокових LLM і векторного RAG. Він легко інтегрується в будь-який сучасний сайт чи вебзастосунок, відповідає відвідувачам суворо за документацією вашого продукту, збирає перевірені ліди й передає складні розмови операторам.",
+        "tagline": "Миттєва підтримка клієнтів і автоматична кваліфікація лідів, вбудовані в будь-який сайт.",
+        "categoryLabel": "Web AI · Розмовний віджет",
+        "features": [
+          "Вбудовування одним рядком скрипта",
+          "Сувора привʼязка до знань",
+          "Автоматична кваліфікація лідів",
+          "Власний бренд і тема"
+        ],
+        "highlights": [
+          "Вбудований пакет <25 КБ",
+          "Потокова передача токенів у реальному часі",
+          "Відповіді суворо за документацією",
+          "Автоматична кваліфікація лідів"
+        ],
+        "capabilities": [
+          {
+            "title": "Вбудовування одним рядком скрипта",
+            "description": "Додається на будь-який сайт одним тегом script: WordPress, Webflow, Shopify, React, Next.js або статичний HTML."
+          },
+          {
+            "title": "Сувора привʼязка до знань",
+            "description": "Відповідає відвідувачам лише за перевіреною документацією, прайсами та FAQ без галюцинацій."
+          },
+          {
+            "title": "Автоматична кваліфікація лідів",
+            "description": "Виявляє зацікавлених відвідувачів, збирає перевірені email і телефони та спрямовує ліди в CRM або Telegram."
+          },
+          {
+            "title": "Власний бренд і тема",
+            "description": "Повністю настроювані кольори, кнопка запуску, вітання, аватари та тон спілкування."
+          }
+        ],
+        "architecture": {
+          "runtime": "Edge CDN і розподілений флот серверів",
+          "deployment": "Керована хмара / on-premise Docker",
+          "latency": "<80 мс до першого токена (TTFT)"
+        }
+      }
+    }
   },
   {
     "slug": "telegram-bot-ai",
@@ -989,6 +2143,90 @@
     "price": 19,
     "currency": "USD",
     "billingPeriod": "month",
-    "showPrice": false
+    "showPrice": false,
+    "translations": {
+      "es": {
+        "shortDescription": "Asistente conversacional interactivo para grupos, canales y chats privados de Telegram, con ejecución de herramientas.",
+        "description": "TELEGRAM CHATBOT AI es un bot conversacional de nivel productivo creado para Telegram. Atiende consultas de clientes por mensaje directo, modera y ayuda en grupos de comunidad, entiende notas de voz y documentos adjuntos, y ejecuta acciones personalizadas del backend (consulta de pedidos, tickets de soporte, reservas) mediante llamadas seguras a funciones.",
+        "tagline": "Inteligencia conversacional y automatización de flujos de nivel empresarial, directamente en Telegram.",
+        "categoryLabel": "IA para Telegram · Bot conversacional",
+        "features": [
+          "Moderación de grupos y soporte a la comunidad",
+          "Comprensión de notas de voz y documentos",
+          "Memoria contextual de varios turnos",
+          "Integraciones personalizadas con herramientas y API"
+        ],
+        "highlights": [
+          "Modos de grupo y mensaje directo",
+          "Comprensión de voz e imagen",
+          "Contexto persistente del usuario",
+          "Llamadas a funciones y herramientas"
+        ],
+        "capabilities": [
+          {
+            "title": "Moderación de grupos y soporte a la comunidad",
+            "description": "Responde a las preguntas de los miembros en los grupos, detecta spam y contesta en el chat o por mensaje privado."
+          },
+          {
+            "title": "Comprensión de notas de voz y documentos",
+            "description": "Transcribe los mensajes de voz con Whisper y analiza PDF y fotos con visión multimodal."
+          },
+          {
+            "title": "Memoria contextual de varios turnos",
+            "description": "Mantiene una memoria de sesión a largo plazo de cada usuario: interacciones pasadas, preferencias e identificadores de cuenta."
+          },
+          {
+            "title": "Integraciones personalizadas con herramientas y API",
+            "description": "Ejecuta consultas al backend, búsqueda de pedidos, citas y actualizaciones de CRM mediante botones y comandos del chat."
+          }
+        ],
+        "architecture": {
+          "runtime": "Clúster VPS resiliente de alta disponibilidad",
+          "deployment": "Docker Swarm / Kubernetes",
+          "latency": "Respuesta <350 ms"
+        }
+      },
+      "uk": {
+        "shortDescription": "Інтерактивний розмовний асистент для груп, каналів і приватних чатів Telegram з виконанням інструментів.",
+        "description": "TELEGRAM CHATBOT AI це розмовний бот промислового рівня для Telegram. Відповідає на запити клієнтів у особистих повідомленнях, модерує й допомагає в групах спільнот, розуміє голосові повідомлення та завантажені документи й виконує власні дії бекенда (пошук замовлень, тікети підтримки, бронювання) через безпечні виклики функцій.",
+        "tagline": "Корпоративний розмовний інтелект і автоматизація процесів просто в Telegram.",
+        "categoryLabel": "Telegram AI · Розмовний бот",
+        "features": [
+          "Модерація груп і підтримка спільноти",
+          "Розуміння голосових і документів",
+          "Контекстна памʼять багатьох ходів",
+          "Власні інтеграції інструментів і API"
+        ],
+        "highlights": [
+          "Режими груп і особистих повідомлень",
+          "Розуміння голосу й зображень",
+          "Постійний контекст користувача",
+          "Виклики функцій та інструменти"
+        ],
+        "capabilities": [
+          {
+            "title": "Модерація груп і підтримка спільноти",
+            "description": "Відповідає на питання учасників у групах, виявляє спам і відповідає в чаті або в особистих повідомленнях."
+          },
+          {
+            "title": "Розуміння голосових і документів",
+            "description": "Транскрибує голосові повідомлення через Whisper і аналізує PDF та фото за допомогою мультимодального зору."
+          },
+          {
+            "title": "Контекстна памʼять багатьох ходів",
+            "description": "Зберігає довгострокову памʼять сесії кожного користувача: попередні звернення, вподобання й ідентифікатори акаунтів."
+          },
+          {
+            "title": "Власні інтеграції інструментів і API",
+            "description": "Виконує запити до бекенда, пошук замовлень, запис на прийом і оновлення CRM через кнопки та команди чату."
+          }
+        ],
+        "architecture": {
+          "runtime": "Стійкий кластер VPS високої доступності",
+          "deployment": "Docker Swarm / Kubernetes",
+          "latency": "Відповідь <350 мс"
+        }
+      }
+    }
   }
 ]

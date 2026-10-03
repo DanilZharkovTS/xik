@@ -9,11 +9,11 @@ import { authService } from '@/src/features/auth/auth.service'
 import useAuthStore from '@/src/features/auth/store'
 import { ThemeToggle } from '@/src/features/theme/components/theme-toggle'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
-import { BookOpen, House, Package, UserCog, Users } from 'lucide-react'
+import { BookOpen, House, Newspaper, Package, UserCog, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/src/shared/lib/cn'
 import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
-import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { useI18n, useUrlLocalePath } from '@/src/shared/i18n/use-i18n'
 import type { MessageKey } from '@/src/shared/i18n/messages'
 
 type NavItem = { href: string; labelKey: MessageKey; match: string; Icon: LucideIcon; adminOnly?: boolean; tabOnly?: boolean }
@@ -24,6 +24,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/outreach/check', labelKey: 'nav.journal', match: '/outreach', Icon: BookOpen },
   { href: '/admin/team', labelKey: 'nav.team', match: '/admin/team', Icon: Users, adminOnly: true },
   { href: '/admin/products', labelKey: 'nav.products', match: '/admin/products', Icon: Package, adminOnly: true },
+  { href: '/admin/blog', labelKey: 'nav.blog', match: '/admin/blog', Icon: Newspaper, adminOnly: true },
   { href: '/admin/users', labelKey: 'nav.users', match: '/admin/users', Icon: UserCog, adminOnly: true },
 ]
 
@@ -36,6 +37,7 @@ export function useWorkspaceNav(): NavItem[] {
 
 export function AdminHeader() {
   const { t } = useI18n()
+  const up = useUrlLocalePath()
   const pathname = usePathname()
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
@@ -50,7 +52,7 @@ export function AdminHeader() {
       setIsLoggingOut(true)
       await authService.logout()
       clearAuth()
-      router.push('/auth/login')
+      router.push(up('/auth/login'))
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {
@@ -63,9 +65,9 @@ export function AdminHeader() {
       <div className="mx-auto flex h-11 w-full max-w-7xl md:h-[52px] items-center gap-3 px-4 md:px-6">
         <Link
           href="/dashboard"
-          className="text-[19px] font-[750] tracking-tight text-[var(--t)]"
+          className="shrink-0 whitespace-nowrap text-[19px] font-[750] tracking-tight text-[var(--t)]"
         >
-          XIK_
+          XIK<span aria-hidden="true" className="logo-cursor">_</span>
           <span className="ml-2 text-xs font-medium text-[var(--m)]">
             {isAdmin ? t('nav.admin') : t('nav.journal')}
           </span>
@@ -86,6 +88,12 @@ export function AdminHeader() {
           </Link>
           <LanguageSwitch />
           <ThemeToggle />
+          <span
+            title={user?.email}
+            className="hidden max-w-[10rem] truncate text-sm text-[var(--m)] lg:inline"
+          >
+            {user?.name?.trim() || user?.email.split('@')[0]}
+          </span>
           <button
             type="button"
             onClick={logout}

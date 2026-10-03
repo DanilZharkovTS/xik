@@ -11,6 +11,8 @@ export interface AuthState {
     email: string
     name?: string
     role: UserRole
+    // Мова з профілю (кабінет, листи); старі сесії можуть її не мати.
+    locale?: 'en' | 'es' | 'uk'
     sessionId: string
   } | null
   form: {
@@ -35,6 +37,8 @@ export interface SetAuthData {
     email: string
     name?: string
     role: UserRole
+    // Мова з профілю (кабінет, листи); старі сесії можуть її не мати.
+    locale?: 'en' | 'es' | 'uk'
     sessionId: string
   } | null
 }

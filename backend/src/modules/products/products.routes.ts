@@ -11,6 +11,7 @@ import {
   catalogQuerySchema,
   createProductSchema,
   findProductsSchema,
+  langQuerySchema,
   updateProductSchema,
 } from './products.schema.js'
 import { productsController } from './products.controller.js'
@@ -67,6 +68,7 @@ router.get(
   '/:slug',
   authMiddleware.verifyOptionalAccess,
   validateParamsString('slug'),
+  validateQuery(langQuerySchema),
   productsController.findProduct
 )
 

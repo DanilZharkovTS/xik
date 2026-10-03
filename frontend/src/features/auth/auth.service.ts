@@ -2,9 +2,7 @@ import { LoginDto, RegisterDto } from './auth.schema'
 import { api } from '@/src/shared/api/axios'
 
 export const authService = {
-  register: async (data: RegisterDto) => {
-    console.log(data)
-
+  register: async (data: RegisterDto & { locale?: string }) => {
     const res = await api.post('/auth/register', data)
     return res
   },

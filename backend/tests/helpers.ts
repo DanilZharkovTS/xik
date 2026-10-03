@@ -7,7 +7,7 @@ export const api = () => request(app)
 
 export const resetDb = async () => {
   await prisma.$executeRawUnsafe(
-    `TRUNCATE "OutreachEvent", "OutreachIdentifier", "OutreachTarget", "AuditEvent", "ProductMembership", "RefreshToken", "UserSession", "UserCredentials", "SavedProduct", "UserLibrary", "Product", "User" RESTART IDENTITY CASCADE`
+    `TRUNCATE "OutreachEvent", "OutreachIdentifier", "OutreachTarget", "AuditEvent", "ProductMembership", "RefreshToken", "UserSession", "UserCredentials", "SavedProduct", "UserLibrary", "Product", "ArticleTranslation", "Article", "ArticleTag", "ArticleCategory", "MediaAsset", "User" RESTART IDENTITY CASCADE`
   )
 }
 

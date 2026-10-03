@@ -25,6 +25,22 @@ export interface Architecture {
   latency: string
 }
 
+// Переклад не обовʼязковий і може бути частковим: що не заповнено, сайт показує англійською.
+export interface ProductTranslation {
+  name?: string
+  shortDescription?: string
+  description?: string
+  tagline?: string
+  categoryLabel?: string
+  features?: string[]
+  highlights?: string[]
+  capabilities?: Capability[]
+  architecture?: { runtime?: string; deployment?: string; latency?: string }
+}
+
+export type TranslationLocale = 'es' | 'uk'
+export type ProductTranslations = Partial<Record<TranslationLocale, ProductTranslation>>
+
 export interface AdminProduct {
   id: string
   slug: string
@@ -47,6 +63,7 @@ export interface AdminProduct {
   currency: Currency
   billingPeriod: BillingPeriod
   showPrice: boolean
+  translations: ProductTranslations
   stripeProductId: string | null
   stripePriceId: string | null
   isStripeLinked: boolean
@@ -77,6 +94,7 @@ export type ProductInput = {
   currency: Currency
   billingPeriod: BillingPeriod
   showPrice: boolean
+  translations: ProductTranslations
 }
 
 export type ListState = 'active' | 'archived'

@@ -1,3 +1,6 @@
+import type { Locale } from '@/src/shared/i18n/i18n-store'
+import { SERVICE_TRANSLATIONS } from './service-translations'
+
 export type CatalogItemType = 'product' | 'agent' | 'service'
 
 export interface CatalogCapability {
@@ -372,4 +375,35 @@ export function getAllCatalogItems(): CatalogItem[] {
 
 export function getItemsByType(type: CatalogItemType): CatalogItem[] {
   return Object.values(CATALOG_ITEMS).filter((item) => item.type === type)
+}
+
+// Послуга потрібною мовою; поля без перекладу лишаються англійськими.
+export function localizeItem(item: CatalogItem, locale: Locale): CatalogItem {
+  if (locale === 'en') return item
+
+  const translated = SERVICE_TRANSLATIONS[item.slug]?.[locale]
+  if (!translated) return item
+
+  return {
+    ...item,
+    typeLabel: translated.typeLabel,
+    title: translated.title,
+    subtitle: translated.subtitle,
+    category: translated.category,
+    statusLabel: translated.statusLabel,
+    tagline: translated.tagline,
+    description: translated.description,
+    highlights: translated.highlights,
+    capabilities: translated.capabilities,
+    architecture: {
+      ...item.architecture,
+      runtime: translated.runtime,
+      deployment: translated.deployment,
+      latency: translated.latency,
+    },
+  }
+}
+
+export function hasTranslation(slug: string, locale: Locale): boolean {
+  return locale === 'en' || Boolean(SERVICE_TRANSLATIONS[slug]?.[locale])
 }

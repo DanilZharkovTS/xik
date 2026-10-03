@@ -7,14 +7,23 @@ import { toast } from 'sonner'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
 import { Button } from '@/src/shared/ui/button'
 import { SelectField } from '@/src/shared/ui/select-field'
+import { Segmented } from '@/src/shared/ui/segmented'
 import { Sheet } from '@/src/shared/ui/sheet'
 import { TextareaField } from '@/src/shared/ui/textarea-field'
 import { TextField } from '@/src/shared/ui/text-field'
 import { adminProductsService } from '../admin-products.service'
 import { CATEGORIES, CURRENCIES } from '../admin-products.types'
-import type { AdminProduct, Category } from '../admin-products.types'
-import { EMPTY_FORM, slugify, toForm, toInput } from '../product-form'
-import type { FormValues } from '../product-form'
+import type { AdminProduct, Category, TranslationLocale } from '../admin-products.types'
+import {
+  EMPTY_FORM,
+  TRANSLATION_LOCALES,
+  isTranslationReady,
+  isTranslationStarted,
+  slugify,
+  toForm,
+  toInput,
+} from '../product-form'
+import type { FormValues, TranslationForm } from '../product-form'
 import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type ProductFormSheetProps = {
@@ -27,6 +36,9 @@ type ProductFormSheetProps = {
 }
 
 const TEXTAREA = "min-h-24"
+
+type ContentLang = 'en' | TranslationLocale
+type ContentKey = keyof TranslationForm
 
 function Group({ title, children }: { title: string; children: ReactNode }): ReactElement {
   return (
@@ -66,9 +78,32 @@ function ProductForm({
   const [form, setForm] = useState<FormValues>(product ? toForm(product) : EMPTY_FORM)
   const [slugTouched, setSlugTouched] = useState(product !== null)
   const [isSaving, setIsSaving] = useState(false)
+  const [lang, setLang] = useState<ContentLang>('en')
 
   const set = <K extends keyof FormValues>(key: K, value: FormValues[K]) =>
     setForm((current) => ({ ...current, [key]: value }))
+
+  // Мовні поля: англійські лежать у корені форми, переклади у form.translations[мова].
+  const getText = (key: ContentKey): string =>
+    lang === 'en' ? form[key] : form.translations[lang][key]
+
+  const setText = (key: ContentKey, value: string) => {
+    if (lang === 'en') {
+      set(key, value)
+      if (key === 'name' && !slugTouched) set('slug', slugify(value))
+      return
+    }
+
+    setForm((current) => ({
+      ...current,
+      translations: {
+        ...current.translations,
+        [lang]: { ...current.translations[lang], [key]: value },
+      },
+    }))
+  }
+
+  const isEnglish = lang === 'en'
 
   const toggleCategory = (category: Category) =>
     set(
@@ -84,6 +119,14 @@ function ProductForm({
     if (form.categories.length === 0) {
       toast.error(t('products.form.pickCategory'))
       return
+    }
+
+    // Почате, але неповне. Бекенд його збереже, та на сайті воно не зʼявиться: попереджаємо про це.
+    const incomplete = TRANSLATION_LOCALES.filter(
+      (code) => isTranslationStarted(form.translations[code]) && !isTranslationReady(form.translations[code]),
+    )
+    if (incomplete.length > 0) {
+      toast.warning(t('products.form.tr.incompleteWarn', { langs: incomplete.map((code) => code.toUpperCase()).join(', ') }))
     }
 
     try {
@@ -111,16 +154,6 @@ function ProductForm({
   return (
     <form onSubmit={submit} className="space-y-4">
       <Group title={t('products.form.basics')}>
-        <TextField
-          label={t('products.form.name')}
-          required
-          maxLength={60}
-          value={form.name}
-          onChange={(e) => {
-            set('name', e.target.value)
-            if (!slugTouched) set('slug', slugify(e.target.value))
-          }}
-        />
         <TextField
           label={t('products.form.slug')}
           required
@@ -151,21 +184,6 @@ function ProductForm({
             <option value="build">{t('products.form.status.build')}</option>
           </SelectField>
         </div>
-        <TextField
-          label={t('products.form.short')}
-          required
-          maxLength={160}
-          value={form.shortDescription}
-          onChange={(e) => set('shortDescription', e.target.value)}
-        />
-        <TextareaField
-          label={t('products.form.description')}
-          required
-          maxLength={2000}
-          className={TEXTAREA}
-          value={form.description}
-          onChange={(e) => set('description', e.target.value)}
-        />
       </Group>
 
       <Group title={t('products.form.priceGroup')}>
@@ -250,36 +268,117 @@ function ProductForm({
       </Group>
 
       <Group title={t('products.form.content')}>
+        <Segmented<ContentLang>
+          label={t('products.form.contentLang')}
+          value={lang}
+          onChange={setLang}
+          options={[
+            { value: 'en', label: 'EN' },
+            ...TRANSLATION_LOCALES.map((code) => ({
+              value: code,
+              label: `${code.toUpperCase()}${isTranslationReady(form.translations[code]) ? ' ✓' : isTranslationStarted(form.translations[code]) ? ' …' : ''}`,
+            })),
+          ]}
+        />
+        <p className="text-sm text-[var(--m)]">
+          {isEnglish
+            ? t('products.form.lang.en')
+            : `${t(`products.form.lang.${lang}` as 'products.form.lang.es')} · ${
+                isTranslationReady(form.translations[lang])
+                  ? t('products.form.tr.ready')
+                  : isTranslationStarted(form.translations[lang])
+                    ? t('products.form.tr.partial')
+                    : ''
+              }`}
+          {!isEnglish && <span className="block">{t('products.form.tr.hint')}</span>}
+        </p>
+
         <TextField
+          key={`name-${lang}`}
+          label={t('products.form.name')}
+          required={isEnglish}
+          maxLength={60}
+          value={getText('name')}
+          onChange={(e) => setText('name', e.target.value)}
+        />
+        <TextField
+          key={`short-${lang}`}
+          label={t('products.form.short')}
+          required={isEnglish}
+          maxLength={160}
+          value={getText('shortDescription')}
+          onChange={(e) => setText('shortDescription', e.target.value)}
+        />
+        <TextareaField
+          key={`description-${lang}`}
+          label={t('products.form.description')}
+          required={isEnglish}
+          maxLength={2000}
+          className={TEXTAREA}
+          value={getText('description')}
+          onChange={(e) => setText('description', e.target.value)}
+        />
+        <TextField
+          key={`tagline-${lang}`}
           label={t('products.form.tagline')}
           maxLength={200}
-          value={form.tagline}
-          onChange={(e) => set('tagline', e.target.value)}
+          value={getText('tagline')}
+          onChange={(e) => setText('tagline', e.target.value)}
         />
         <TextField
+          key={`categoryLabel-${lang}`}
           label={t('products.form.categoryLabel')}
           maxLength={80}
-          value={form.categoryLabel}
-          onChange={(e) => set('categoryLabel', e.target.value)}
+          value={getText('categoryLabel')}
+          onChange={(e) => setText('categoryLabel', e.target.value)}
         />
         <TextareaField
+          key={`features-${lang}`}
           label={t('products.form.features')}
-          required
+          required={isEnglish}
           className={TEXTAREA}
-          value={form.features}
-          onChange={(e) => set('features', e.target.value)}
+          value={getText('features')}
+          onChange={(e) => setText('features', e.target.value)}
         />
         <TextareaField
+          key={`highlights-${lang}`}
           label={t('products.form.highlights')}
           className={TEXTAREA}
-          value={form.highlights}
-          onChange={(e) => set('highlights', e.target.value)}
+          value={getText('highlights')}
+          onChange={(e) => setText('highlights', e.target.value)}
         />
         <TextareaField
+          key={`capabilities-${lang}`}
           label={t('products.form.capabilities')}
           className={TEXTAREA}
-          value={form.capabilities}
-          onChange={(e) => set('capabilities', e.target.value)}
+          value={getText('capabilities')}
+          onChange={(e) => setText('capabilities', e.target.value)}
+        />
+        <TextField
+          key={`runtime-${lang}`}
+          label={t('products.form.runtime')}
+          value={getText('runtime')}
+          onChange={(e) => setText('runtime', e.target.value)}
+        />
+        <TextField
+          key={`deployment-${lang}`}
+          label={t('products.form.deployment')}
+          value={getText('deployment')}
+          onChange={(e) => setText('deployment', e.target.value)}
+        />
+        <TextField
+          key={`latency-${lang}`}
+          label={t('products.form.latency')}
+          value={getText('latency')}
+          onChange={(e) => setText('latency', e.target.value)}
+        />
+      </Group>
+
+      <Group title={t('products.form.technical')}>
+        <TextField
+          label={t('products.form.stack')}
+          value={form.stack}
+          onChange={(e) => set('stack', e.target.value)}
         />
         <TextField
           label={t('products.form.protocols')}
@@ -301,29 +400,6 @@ function ProductForm({
           max="9999"
           value={form.sortOrder}
           onChange={(e) => set('sortOrder', e.target.value)}
-        />
-      </Group>
-
-      <Group title={t('products.form.architecture')}>
-        <TextField
-          label={t('products.form.stack')}
-          value={form.stack}
-          onChange={(e) => set('stack', e.target.value)}
-        />
-        <TextField
-          label={t('products.form.runtime')}
-          value={form.runtime}
-          onChange={(e) => set('runtime', e.target.value)}
-        />
-        <TextField
-          label={t('products.form.deployment')}
-          value={form.deployment}
-          onChange={(e) => set('deployment', e.target.value)}
-        />
-        <TextField
-          label={t('products.form.latency')}
-          value={form.latency}
-          onChange={(e) => set('latency', e.target.value)}
         />
       </Group>
 

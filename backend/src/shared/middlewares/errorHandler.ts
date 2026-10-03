@@ -21,6 +21,17 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  const bodyError = (err as { type?: string } | null)?.type
+
+  // Помилки розбору тіла запиту (body-parser) це помилки клієнта, а не збій сервера.
+  if (bodyError === 'entity.too.large') {
+    return res.status(413).json({ code: 'PAYLOAD_TOO_LARGE', message: 'Request body is too large' })
+  }
+
+  if (bodyError === 'entity.parse.failed') {
+    return res.status(400).json({ code: 'BAD_REQUEST', message: 'Invalid request body' })
+  }
+
   console.error(redact(err))
   
   if (isApiError(err)) {

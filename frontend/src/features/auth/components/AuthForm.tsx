@@ -15,12 +15,14 @@ import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
 import { Button } from '@/src/shared/ui/button'
 import { AuthInput } from './AuthInput'
 import Link from 'next/link'
-import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { useI18n, useUrlLocalePath } from '@/src/shared/i18n/use-i18n'
+import { splitLocale } from '@/src/shared/i18n/paths'
 
 type FormErrors = Partial<Record<string, string>>
 
 export const AuthForm: React.FC = () => {
-  const { t } = useI18n()
+  const { t, locale, setLocale } = useI18n()
+  const up = useUrlLocalePath()
   const pathname = usePathname()
   const router = useRouter()
 
@@ -31,7 +33,7 @@ export const AuthForm: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
 
-  const isRegister = pathname === '/auth/register'
+  const isRegister = splitLocale(pathname).path === '/auth/register'
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -78,9 +80,9 @@ export const AuthForm: React.FC = () => {
     try {
       setIsLoading(true)
 
-      await authService.register(form)
+      await authService.register({ ...form, locale })
 
-      router.push('/auth/login')
+      router.push(up('/auth/login'))
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {
@@ -108,7 +110,10 @@ export const AuthForm: React.FC = () => {
         user: res.user,
       })
 
-      router.push('/dashboard')
+      // Мова з профілю стає мовою інтерфейсу; персонал в адмінці знає лише en і uk.
+      if (res.user?.locale) setLocale(res.user.locale)
+
+      router.push(up(res.user?.role === 'user' ? '/account' : '/dashboard'))
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {
@@ -186,7 +191,7 @@ export const AuthForm: React.FC = () => {
       </form>
 
       <Link
-        href={isRegister ? '/auth/login' : '/auth/register'}
+        href={up(isRegister ? '/auth/login' : '/auth/register')}
         className="mt-4 inline-flex min-h-11 items-center justify-center text-[var(--m)] hover:text-[var(--t)]"
       >
         {isRegister ? t('auth.haveAccount') : t('auth.noAccount')}

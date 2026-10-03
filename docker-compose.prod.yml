@@ -51,15 +51,23 @@ services:
       PORT: 5001
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres_secure_password@postgres:5432/xik_db}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      # Скидання кешу каталогу на фронтенді після змін продукту (вимкнено без секрету)
+      FRONTEND_INTERNAL_URL: ${FRONTEND_INTERNAL_URL:-http://frontend:3000}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:-}
       JWT_SECRET: ${JWT_SECRET}
       SUBSCRIPTION_SERVICE_KEY: ${SUBSCRIPTION_SERVICE_KEY}
       NOTIFICATIONS_SERVICE_URL: ${NOTIFICATIONS_SERVICE_URL:-http://notifications:3002}
       NOTIFICATIONS_SERVICE_SECRET: ${NOTIFICATIONS_SERVICE_SECRET}
       STRIPE_SECRET: ${STRIPE_SECRET}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      # Зображення статей лежать на сервері (том ./docker/media); MEDIA_URL це адреса API в браузері.
+      MEDIA_DIR: /data/media
+      MEDIA_URL: ${MEDIA_URL:-http://localhost:5001/media}
       REPORT_TIMEZONE: ${REPORT_TIMEZONE:-Europe/Kyiv}
       OUTREACH_RATE_LIMIT: ${OUTREACH_RATE_LIMIT:-30}
       LOGIN_RATE_LIMIT: ${LOGIN_RATE_LIMIT:-10}
+    volumes:
+      - ./docker/media:/data/media
     depends_on:
       postgres:
         condition: service_healthy
@@ -76,6 +84,7 @@ services:
       target: prod
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5001}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://xik.app}
     restart: always
     ports:
       - "3000:3000"
@@ -84,6 +93,7 @@ services:
       PORT: 3000
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5001}
       API_INTERNAL_URL: ${API_INTERNAL_URL:-http://backend:5001}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:-}
     depends_on:
       - backend
     networks:

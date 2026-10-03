@@ -1,90 +1,42 @@
 import { ImageResponse } from 'next/og'
 
-export const alt = 'XIK — AI Tools With Pixel Soul'
+export const alt = 'XIK — AI Products, Agents & Engineering Services'
 export const size = {
   width: 1200,
   height: 630,
 }
 export const contentType = 'image/png'
 
+// Загальна картка для соцмереж: той самий знак, що й у іконці вкладки (X і синій курсор).
 export default function OpenGraphImage(): ImageResponse {
   return new ImageResponse(
     (
       <div
         style={{
-          alignItems: 'stretch',
-          background: '#050505',
-          border: '16px solid #f5f5f5',
-          color: '#f5f5f5',
+          background: 'linear-gradient(135deg, #22232b 0%, #050507 70%)',
+          color: '#f5f5f7',
           display: 'flex',
           flexDirection: 'column',
-          fontFamily: 'monospace',
+          fontFamily: 'sans-serif',
           height: '100%',
           justifyContent: 'space-between',
-          padding: '64px',
+          padding: '72px 80px',
           width: '100%',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            fontSize: 32,
-            justifyContent: 'space-between',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-          }}
-        >
-          <span>Independent AI products</span>
-          <span>xik.app</span>
+        <div style={{ alignItems: 'center', display: 'flex', gap: 14 }}>
+          <div style={{ background: '#2997ff', borderRadius: 4, display: 'flex', height: 10, width: 36 }} />
+          <span style={{ color: '#a1a1a6', fontSize: 30, letterSpacing: '0.04em' }}>xik.app</span>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 20,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 180,
-              fontWeight: 700,
-              letterSpacing: '0.08em',
-              lineHeight: 0.8,
-            }}
-          >
-            XIK
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ alignItems: 'flex-end', display: 'flex' }}>
+            <span style={{ fontSize: 210, fontWeight: 800, letterSpacing: '-0.06em', lineHeight: 0.9 }}>XIK</span>
+            <div style={{ background: '#2997ff', borderRadius: 10, display: 'flex', height: 26, marginBottom: 14, marginLeft: 14, width: 120 }} />
+          </div>
+          <span style={{ color: '#a1a1a6', fontSize: 46, marginTop: 28 }}>
+            Product & AI Lab: building things that should exist.
           </span>
-          <span
-            style={{
-              borderTop: '8px solid #f5f5f5',
-              fontSize: 54,
-              letterSpacing: '0.08em',
-              paddingTop: 24,
-              textTransform: 'uppercase',
-            }}
-          >
-            AI tools with pixel soul
-          </span>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            gap: 16,
-          }}
-        >
-          {[0, 1, 2, 3, 4, 5].map((pixel) => (
-            <span
-              key={pixel}
-              style={{
-                background: pixel % 2 === 0 ? '#f5f5f5' : '#525252',
-                display: 'flex',
-                height: 20,
-                width: 20,
-              }}
-            />
-          ))}
         </div>
       </div>
     ),

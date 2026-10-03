@@ -5,6 +5,7 @@ import cors from 'cors'
 import appRoutes from './app.routes.js'
 import { errorHandler } from './shared/middlewares/errorHandler.js'
 import { billingMiddlewares } from './modules/billing/billing.middlewares.js'
+import { mediaDir } from './modules/media/storage.js'
 import { billingController } from './modules/billing/billing.controller.js'
 
 dotenv.config()
@@ -19,6 +20,21 @@ app.use(
 )
 
 app.post('/billing/webhook', express.raw({ type: 'application/json' }), billingMiddlewares.validateWebhookSignature, billingController.stripeWebhook)
+
+// Зображення статей лежать на сервері; назви файлів незмінні (містять випадковий id), тож кеш довгий.
+app.use(
+  '/media',
+  express.static(mediaDir(), {
+    index: false,
+    dotfiles: 'deny',
+    immutable: true,
+    maxAge: '1y',
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff')
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+    },
+  })
+)
 
 app.use(express.json())
 

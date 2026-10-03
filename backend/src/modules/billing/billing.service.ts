@@ -21,10 +21,14 @@ export const billingService = {
       throw ApiError(409, 'NOT_PURCHASABLE', 'This product cannot be purchased yet')
     }
 
-    const url = await stripeService.getStripeCheckoutUrl(product, {
-      userId: user.id,
-      productId: product.id,
-    })
+    const url = await stripeService.getStripeCheckoutUrl(
+      product,
+      {
+        userId: user.id,
+        productId: product.id,
+      },
+      data.locale
+    )
 
     return { response: { url } }
   },

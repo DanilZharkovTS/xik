@@ -68,7 +68,7 @@ export const productsService = {
     }
   },
 
-  findProduct: async (slug: string, user?: TokenPayload) => {
+  findProduct: async (slug: string, user?: TokenPayload, lang: 'en' | 'es' | 'uk' = 'en') => {
     const product = (await productsRepo.findProductBySlug(slug, user?.id)) as
       | (Product & { savedBy?: unknown[] })
       | null
@@ -79,13 +79,13 @@ export const productsService = {
 
     const isSaved = user ? (product.savedBy?.length ?? 0) > 0 : false
 
-    return { response: { product: toPublicDto(product, isSaved) } }
+    return { response: { product: toPublicDto(product, isSaved, lang) } }
   },
   // Картки для блоків сайту: продукти й агенти це один список, kind лише фільтр.
   listCatalog: async (query: CatalogQueryDto) => {
     const products = (await productsRepo.listCatalog(query.kind)) as Product[]
 
-    return { response: { products: products.map(toCatalogDto) } }
+    return { response: { products: products.map((product) => toCatalogDto(product, query.lang)) } }
   },
   findProducts: async (data: FindProductsDto, user?: TokenPayload) => {
     const products = (await productsRepo.findProducts(

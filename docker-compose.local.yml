@@ -53,10 +53,16 @@ services:
       PORT: 5001
       DATABASE_URL: "postgresql://postgres:1234@postgres:5432/xik_db"
       FRONTEND_URL: "http://localhost:3000"
+      FRONTEND_INTERNAL_URL: "http://frontend:3000"
+      REVALIDATE_SECRET: "local-dev-revalidate-secret"
       NOTIFICATIONS_SERVICE_URL: "http://notifications:3002"
+      # Зображення статей зберігаються на сервері (./docker/media), файли віддає сам бекенд.
+      MEDIA_DIR: "/data/media"
+      MEDIA_URL: "http://localhost:5001/media"
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - ./docker/media:/data/media
     depends_on:
       postgres:
         condition: service_healthy
@@ -80,6 +86,7 @@ services:
       NEXT_PUBLIC_API_URL: "http://localhost:5001"
       # Сервер Next.js ходить у бекенд за внутрішньою адресою Docker-мережі.
       API_INTERNAL_URL: "http://backend:5001"
+      REVALIDATE_SECRET: "local-dev-revalidate-secret"
     volumes:
       - ./frontend:/app
       - /app/node_modules

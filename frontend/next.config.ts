@@ -1,32 +1,52 @@
 import type { NextConfig } from "next";
 
+// Розділи сайту, що живуть під [locale]. Англійська без префікса: /products показується з /en/products.
+const LOCALIZED_ROOTS = [
+  'products',
+  'ai',
+  'services',
+  'agents',
+  'success',
+  'auth',
+  'admin',
+  'outreach',
+  'dashboard',
+  'account',
+  'blog',
+]
+
 const nextConfig: NextConfig = {
+  experimental: {
+    globalNotFound: true,
+  },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: '/', destination: '/en' },
+        ...LOCALIZED_ROOTS.map((root) => ({
+          source: `/${root}/:path*`,
+          destination: `/en/${root}/:path*`,
+        })),
+        ...LOCALIZED_ROOTS.map((root) => ({ source: `/${root}`, destination: `/en/${root}` })),
+      ],
+      afterFiles: [],
+      fallback: [],
+    }
+  },
   async redirects() {
     return [
+      // Англійська без префікса: /en/... веде на канонічну адресу.
+      { source: '/en', destination: '/', permanent: true },
+      { source: '/en/:path*', destination: '/:path*', permanent: true },
       {
         source: '/about',
         destination: '/#about',
         permanent: false,
       },
       {
-        source: '/products',
-        destination: '/#products',
-        permanent: false,
-      },
-      {
-        source: '/services',
-        destination: '/#services',
-        permanent: false,
-      },
-      {
-        source: '/ai',
-        destination: '/#ai',
-        permanent: false,
-      },
-      {
         source: '/agents',
-        destination: '/#ai',
-        permanent: false,
+        destination: '/ai',
+        permanent: true,
       },
       // Moved items redirects
       {

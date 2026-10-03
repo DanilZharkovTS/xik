@@ -5,6 +5,7 @@ import {
   PRODUCT_CURRENCIES,
   PRODUCT_KINDS,
   PRODUCT_STATUSES,
+  CONTENT_LOCALES,
 } from './product.constants.js'
 
 export const findProductsSchema = z.object({
@@ -16,6 +17,11 @@ export const findProductsSchema = z.object({
 
 export const catalogQuerySchema = z.object({
   kind: z.enum(PRODUCT_KINDS).optional(),
+  lang: z.enum(CONTENT_LOCALES).default('en'),
+})
+
+export const langQuerySchema = z.object({
+  lang: z.enum(CONTENT_LOCALES).default('en'),
 })
 
 export const adminListSchema = z.object({
@@ -37,6 +43,34 @@ const architecture = z.object({
   deployment: z.string().trim().max(120),
   latency: z.string().trim().max(60),
 })
+
+// Переклад не обовʼязковий і може бути частковим: що не заповнено, на сайті показується англійською.
+const translation = z
+  .object({
+    name: z.string().trim().max(60).optional(),
+    shortDescription: z.string().trim().max(160).optional(),
+    description: z.string().trim().max(2000).optional(),
+    tagline: z.string().trim().max(200).optional(),
+    categoryLabel: z.string().trim().max(80).optional(),
+    features: z.array(z.string().trim().min(1).max(120)).max(20).optional(),
+    highlights: z.array(z.string().trim().min(1).max(80)).max(8).optional(),
+    capabilities: z.array(capability).max(12).optional(),
+    architecture: z
+      .object({
+        runtime: z.string().trim().max(120).optional(),
+        deployment: z.string().trim().max(120).optional(),
+        latency: z.string().trim().max(60).optional(),
+      })
+      .optional(),
+  })
+  .strict()
+
+export const translationsSchema = z
+  .object({
+    es: translation.optional(),
+    uk: translation.optional(),
+  })
+  .strict()
 
 export const createProductSchema = z.object({
   slug: z
@@ -87,6 +121,7 @@ export const createProductSchema = z.object({
     'Billing period missing or invalid'
   ),
   showPrice: z.boolean().default(true),
+  translations: translationsSchema.default({}),
 })
 
 // Часткове оновлення: значення за замовчуванням тут не застосовуються.
@@ -101,11 +136,14 @@ export const updateProductSchema = createProductSchema
     protocols: z.array(z.string().trim().min(1).max(40)).max(12).optional(),
     sortOrder: z.number().int().min(0).max(9999).optional(),
     showPrice: z.boolean().optional(),
+    translations: translationsSchema.optional(),
   })
 
 //dto
 
 export type FindProductsDto = z.infer<typeof findProductsSchema>
+export type LangQueryDto = z.infer<typeof langQuerySchema>
+export type ProductTranslationsDto = z.infer<typeof translationsSchema>
 export type CatalogQueryDto = z.infer<typeof catalogQuerySchema>
 export type AdminListDto = z.infer<typeof adminListSchema>
 export type CreateProductDto = z.infer<typeof createProductSchema>
