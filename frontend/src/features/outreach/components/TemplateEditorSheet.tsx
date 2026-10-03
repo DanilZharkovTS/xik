@@ -167,6 +167,7 @@ function EditorForm({
         label="Text"
         value={body}
         maxLength={5000}
+        className="min-h-40"
         required
         onChange={(event) => setBody(event.target.value)}
       />

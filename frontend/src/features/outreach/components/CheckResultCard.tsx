@@ -6,7 +6,9 @@ import { toast } from 'sonner'
 
 import { cn } from '@/src/shared/lib/cn'
 import { Button } from '@/src/shared/ui/button'
+import { TextareaField } from '@/src/shared/ui/textarea-field'
 import { TextField } from '@/src/shared/ui/text-field'
+import { OptionalDetails } from './OptionalDetails'
 import { formatDateTime, formatRelative } from '../format-date'
 import { outreachService } from '../outreach.service'
 import type {
@@ -191,12 +193,14 @@ function RegisterForm({
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <TextField
-        label="Name (optional)"
-        value={displayName}
-        maxLength={100}
+      <TextareaField
+        label="Comment (optional)"
+        value={comment}
+        rows={3}
+        maxLength={1000}
+        placeholder="What did you write, how did it go?"
         autoComplete="off"
-        onChange={(event) => setDisplayName(event.target.value)}
+        onChange={(event) => setComment(event.target.value)}
       />
       <TemplateSelect
         token={token}
@@ -205,23 +209,25 @@ function RegisterForm({
         value={templateId}
         onChange={setTemplateId}
       />
-      <TextField
-        label="Proof link (optional)"
-        type="url"
-        inputMode="url"
-        value={url}
-        autoComplete="off"
-        autoCapitalize="off"
-        placeholder="https://..."
-        onChange={(event) => setUrl(event.target.value)}
-      />
-      <TextField
-        label="Comment (optional)"
-        value={comment}
-        maxLength={1000}
-        autoComplete="off"
-        onChange={(event) => setComment(event.target.value)}
-      />
+      <OptionalDetails summary="Name and proof link">
+        <TextField
+          label="Name (optional)"
+          value={displayName}
+          maxLength={100}
+          autoComplete="off"
+          onChange={(event) => setDisplayName(event.target.value)}
+        />
+        <TextField
+          label="Proof link (optional)"
+          type="url"
+          inputMode="url"
+          value={url}
+          autoComplete="off"
+          autoCapitalize="off"
+          placeholder="https://..."
+          onChange={(event) => setUrl(event.target.value)}
+        />
+      </OptionalDetails>
 
       <Button type="submit" className="min-h-11 w-full" disabled={isSaving}>
         {isSaving ? 'Registering...' : 'Register first contact'}

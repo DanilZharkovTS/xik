@@ -25,7 +25,7 @@ type ProductFormSheetProps = {
   onSaved: () => Promise<void>
 }
 
-const TEXTAREA = 'min-h-24'
+const TEXTAREA = "min-h-24"
 
 function Group({ title, children }: { title: string; children: ReactNode }): ReactElement {
   return (

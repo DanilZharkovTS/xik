@@ -7,7 +7,9 @@ import { toast } from 'sonner'
 import { Button } from '@/src/shared/ui/button'
 import { SelectField } from '@/src/shared/ui/select-field'
 import { Sheet } from '@/src/shared/ui/sheet'
+import { TextareaField } from '@/src/shared/ui/textarea-field'
 import { TextField } from '@/src/shared/ui/text-field'
+import { OptionalDetails } from './OptionalDetails'
 import { outreachService } from '../outreach.service'
 import { CHANNELS, CHANNEL_LABELS } from '../outreach.types'
 import type { Channel, TargetDetail } from '../outreach.types'
@@ -196,6 +198,15 @@ function ActivitySheet({
           ))}
         </SelectField>
 
+        <TextareaField
+          label="Comment (optional)"
+          value={comment}
+          rows={3}
+          maxLength={1000}
+          autoComplete="off"
+          onChange={(event) => setComment(event.target.value)}
+        />
+
         {type === 'repeat' && (
           <TemplateSelect
             token={token}
@@ -206,24 +217,18 @@ function ActivitySheet({
           />
         )}
 
-        <TextField
-          label="Proof link (optional)"
-          type="url"
-          inputMode="url"
-          value={url}
-          autoComplete="off"
-          autoCapitalize="off"
-          placeholder="https://..."
-          onChange={(event) => setUrl(event.target.value)}
-        />
-
-        <TextField
-          label="Comment (optional)"
-          value={comment}
-          maxLength={1000}
-          autoComplete="off"
-          onChange={(event) => setComment(event.target.value)}
-        />
+        <OptionalDetails summary="Proof link">
+          <TextField
+            label="Proof link (optional)"
+            type="url"
+            inputMode="url"
+            value={url}
+            autoComplete="off"
+            autoCapitalize="off"
+            placeholder="https://..."
+            onChange={(event) => setUrl(event.target.value)}
+          />
+        </OptionalDetails>
 
         <Button type="submit" className="min-h-11 w-full" disabled={isSaving}>
           {isSaving ? 'Saving...' : 'Save'}
