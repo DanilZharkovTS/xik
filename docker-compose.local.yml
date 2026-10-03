@@ -21,9 +21,11 @@ services:
 
   # Локальне S3-сумісне сховище для зображень статей (у продакшні це S3, R2 тощо).
   minio:
-    image: minio/minio
+    image: quay.io/minio/minio
     container_name: xik-minio
     restart: unless-stopped
+    # Лише для завантаження зображень блогу: docker compose --profile storage up -d
+    profiles: ["storage"]
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: xik
@@ -38,8 +40,9 @@ services:
 
   # Одноразово створює відкритий для читання bucket.
   minio-init:
-    image: minio/mc
+    image: quay.io/minio/mc
     container_name: xik-minio-init
+    profiles: ["storage"]
     depends_on:
       - minio
     entrypoint: >

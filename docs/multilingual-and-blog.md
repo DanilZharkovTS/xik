@@ -50,7 +50,7 @@
 | `S3_REGION` | за замовчуванням `auto`/`us-east-1` |
 | `S3_PUBLIC_URL` | публічна адреса файлів (CDN або bucket), без `/` в кінці |
 
-Локально `docker-compose.local.yml` піднімає MinIO (консоль на `http://localhost:9001`, `xik` / `xik-minio-secret`) і створює відкритий bucket `xik-media`. У продакшні bucket має бути доступний для читання публічно (або через CDN).
+Локально `docker compose -f docker-compose.local.yml --profile storage up -d` піднімає MinIO (образи з quay.io, у звичайному `up` його немає) (консоль на `http://localhost:9001`, `xik` / `xik-minio-secret`) і створює відкритий bucket `xik-media`. У продакшні bucket має бути доступний для читання публічно (або через CDN).
 
 ### SEO блогу
 
