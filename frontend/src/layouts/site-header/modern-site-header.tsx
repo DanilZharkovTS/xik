@@ -38,9 +38,9 @@ export function ModernSiteHeader() {
         <div className="mx-auto flex h-full max-w-[1180px] items-center gap-5 px-6">
           <Link
             href={lp('/')}
-            className="mr-auto text-[19px] font-[750] tracking-tight text-[var(--t)] transition-opacity hover:opacity-80"
+            className="mr-auto shrink-0 whitespace-nowrap text-[19px] font-[750] tracking-tight text-[var(--t)] transition-opacity hover:opacity-80"
           >
-            XIK_
+            XIK<span aria-hidden="true" className="logo-cursor">_</span>
           </Link>
 
           {/* Desktop Navigation */}

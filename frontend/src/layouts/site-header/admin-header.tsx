@@ -64,9 +64,9 @@ export function AdminHeader() {
       <div className="mx-auto flex h-11 w-full max-w-7xl md:h-[52px] items-center gap-3 px-4 md:px-6">
         <Link
           href="/dashboard"
-          className="text-[19px] font-[750] tracking-tight text-[var(--t)]"
+          className="shrink-0 whitespace-nowrap text-[19px] font-[750] tracking-tight text-[var(--t)]"
         >
-          XIK_
+          XIK<span aria-hidden="true" className="logo-cursor">_</span>
           <span className="ml-2 text-xs font-medium text-[var(--m)]">
             {isAdmin ? t('nav.admin') : t('nav.journal')}
           </span>
