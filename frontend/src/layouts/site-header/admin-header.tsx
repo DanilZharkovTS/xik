@@ -12,16 +12,19 @@ import { getErrorMessage } from '@/src/shared/api/get-error-message'
 import { BookOpen, House, Package, UserCog, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/src/shared/lib/cn'
+import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
+import type { MessageKey } from '@/src/shared/i18n/messages'
 
-type NavItem = { href: string; label: string; match: string; Icon: LucideIcon; adminOnly?: boolean; tabOnly?: boolean }
+type NavItem = { href: string; labelKey: MessageKey; match: string; Icon: LucideIcon; adminOnly?: boolean; tabOnly?: boolean }
 
 const NAV_ITEMS: NavItem[] = [
   // Лише в нижній панелі на телефоні: на десктопі на дашборд веде лого.
-  { href: '/dashboard', label: 'Home', match: '/dashboard', Icon: House, tabOnly: true },
-  { href: '/outreach/check', label: 'Journal', match: '/outreach', Icon: BookOpen },
-  { href: '/admin/team', label: 'Team', match: '/admin/team', Icon: Users, adminOnly: true },
-  { href: '/admin/products', label: 'Products', match: '/admin/products', Icon: Package, adminOnly: true },
-  { href: '/admin/users', label: 'Users', match: '/admin/users', Icon: UserCog, adminOnly: true },
+  { href: '/dashboard', labelKey: 'nav.home', match: '/dashboard', Icon: House, tabOnly: true },
+  { href: '/outreach/check', labelKey: 'nav.journal', match: '/outreach', Icon: BookOpen },
+  { href: '/admin/team', labelKey: 'nav.team', match: '/admin/team', Icon: Users, adminOnly: true },
+  { href: '/admin/products', labelKey: 'nav.products', match: '/admin/products', Icon: Package, adminOnly: true },
+  { href: '/admin/users', labelKey: 'nav.users', match: '/admin/users', Icon: UserCog, adminOnly: true },
 ]
 
 // Шапка робочої зони (адмін і модератор): замість меню сайту. Навігація на телефоні
@@ -32,6 +35,7 @@ export function useWorkspaceNav(): NavItem[] {
 }
 
 export function AdminHeader() {
+  const { t } = useI18n()
   const pathname = usePathname()
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
@@ -63,13 +67,13 @@ export function AdminHeader() {
         >
           XIK_
           <span className="ml-2 text-xs font-medium text-[var(--m)]">
-            {isAdmin ? 'Admin' : 'Journal'}
+            {isAdmin ? t('nav.admin') : t('nav.journal')}
           </span>
         </Link>
 
-        <nav aria-label="Main" className="ml-4 hidden items-center gap-1 md:flex">
+        <nav aria-label={t('nav.main')} className="ml-4 hidden items-center gap-1 md:flex">
           {items.map((item) => (
-            <HeaderLink key={item.href} item={item} pathname={pathname} />
+            <HeaderLink key={item.href} item={item} pathname={pathname} label={t(item.labelKey)} />
           ))}
         </nav>
 
@@ -78,8 +82,9 @@ export function AdminHeader() {
             href="/"
             className="hidden min-h-9 items-center rounded-full px-3 text-sm text-[var(--m)] hover:text-[var(--t)] sm:inline-flex"
           >
-            View site
+            {t('nav.viewSite')}
           </Link>
+          <LanguageSwitch />
           <ThemeToggle />
           <button
             type="button"
@@ -87,7 +92,7 @@ export function AdminHeader() {
             disabled={isLoggingOut}
             className="min-h-8 rounded-full border border-[var(--l)] px-3.5 text-sm font-medium text-[var(--t)] hover:bg-[var(--s)] disabled:opacity-50"
           >
-            {isLoggingOut ? '...' : 'Log out'}
+            {isLoggingOut ? t('nav.signingOut') : t('nav.logout')}
           </button>
         </div>
       </div>
@@ -96,7 +101,7 @@ export function AdminHeader() {
   )
 }
 
-function HeaderLink({ item, pathname }: { item: NavItem; pathname: string }) {
+function HeaderLink({ item, pathname, label }: { item: NavItem; pathname: string; label: string }) {
   const isActive = pathname.startsWith(item.match)
 
   return (
@@ -110,23 +115,24 @@ function HeaderLink({ item, pathname }: { item: NavItem; pathname: string }) {
           : 'text-[var(--m)] hover:text-[var(--t)]',
       )}
     >
-      {item.label}
+      {label}
     </Link>
   )
 }
 
 // Головне меню на телефоні внизу, як у мобільному застосунку.
 export function AdminTabBar() {
+  const { t } = useI18n()
   const pathname = usePathname()
   const items = useWorkspaceNav()
 
   return (
     <nav
-      aria-label="Main"
+      aria-label={t('nav.main')}
       className="fixed inset-x-0 bottom-0 z-40 grid border-t border-[var(--l)] bg-[var(--bg)] pb-[env(safe-area-inset-bottom)] md:hidden"
       style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
     >
-      {items.map(({ href, label, match, Icon }) => {
+      {items.map(({ href, labelKey, match, Icon }) => {
         const isActive = pathname.startsWith(match)
         return (
           <Link
@@ -139,7 +145,7 @@ export function AdminTabBar() {
             )}
           >
             <Icon aria-hidden="true" className="h-5 w-5" />
-            {label}
+            {t(labelKey)}
           </Link>
         )
       })}

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { FormEvent, ReactElement } from 'react'
 import { toast } from 'sonner'
 
+import type { MessageKey } from '@/src/shared/i18n/messages'
 import { cn } from '@/src/shared/lib/cn'
 import { Button } from '@/src/shared/ui/button'
 import { TextareaField } from '@/src/shared/ui/textarea-field'
@@ -23,22 +24,23 @@ import { IdentifierLink } from './IdentifierLink'
 import { TargetActions } from './TargetActions'
 import { TemplateSelect } from './TemplateSelect'
 import { TargetDetailCard } from './TargetDetailCard'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
-const STATUS_STYLES: Record<CheckStatus, { title: string; className: string }> = {
+const STATUS_STYLES: Record<CheckStatus, { titleKey: MessageKey; className: string }> = {
   free: {
-    title: 'Free: nobody has written to this yet',
+    titleKey: 'result.free',
     className: 'border-emerald-500/60 bg-emerald-500/10',
   },
   mine: {
-    title: 'You already wrote to this',
+    titleKey: 'result.mine',
     className: 'border-sky-500/60 bg-sky-500/10',
   },
   foreign: {
-    title: 'Already taken by another moderator',
+    titleKey: 'result.foreign',
     className: 'border-amber-500/60 bg-amber-500/10',
   },
   do_not_contact: {
-    title: 'Do not contact',
+    titleKey: 'result.doNotContact',
     className: 'border-red-500/60 bg-red-500/10',
   },
 }
@@ -62,7 +64,8 @@ export function CheckResultCard({
   onTaken,
   onError,
 }: CheckResultCardProps): ReactElement {
-  const { title, className } = STATUS_STYLES[result.status]
+  const { t } = useI18n()
+  const { titleKey, className } = STATUS_STYLES[result.status]
 
   return (
     <section
@@ -70,7 +73,7 @@ export function CheckResultCard({
       className={cn('space-y-4 rounded-2xl border p-4', className)}
     >
       <div className="space-y-2">
-        <h2 className="text-xl font-medium">{title}</h2>
+        <h2 className="text-xl font-medium">{t(titleKey)}</h2>
         {/* Коли показано повну картку цілі, ідентифікатор уже є в її списку. */}
         {!result.target && (
           <IdentifierLink
@@ -96,15 +99,15 @@ export function CheckResultCard({
         !result.target && (
           <p>
             {result.status === 'do_not_contact'
-              ? 'This contact asked not to be contacted. Do not write to them.'
-              : 'Writing to them again is not allowed.'}
+              ? t('result.askedNot')
+              : t('result.notAllowed')}
             {result.owner && (
               <>
                 {' '}
-                Owner: <strong>{result.owner.name}</strong>
+                {t('result.owner')} <strong>{result.owner.name}</strong>
                 {result.firstContactedAt && (
                   <>
-                    , first contact{' '}
+                    , {t('result.firstContact')}{' '}
                     <span title={formatDateTime(result.firstContactedAt)}>
                       {formatRelative(result.firstContactedAt)}
                     </span>
@@ -161,6 +164,7 @@ function RegisterForm({
   onTaken,
   onError,
 }: FormCallbacks & { input: CheckInput; channel: Channel }): ReactElement {
+  const { t } = useI18n()
   const [displayName, setDisplayName] = useState('')
   const [templateId, setTemplateId] = useState('')
   const [url, setUrl] = useState('')
@@ -183,7 +187,7 @@ function RegisterForm({
         token,
         productId,
       )
-      applyOutcome(outcome, onTarget, onTaken, 'Registered. This contact is now yours.')
+      applyOutcome(outcome, onTarget, onTaken, t('result.registered'), t('result.faster'))
     } catch (err) {
       await onError(err)
     } finally {
@@ -194,11 +198,11 @@ function RegisterForm({
   return (
     <form onSubmit={submit} className="space-y-3">
       <TextareaField
-        label="Comment (optional)"
+        label={t('result.comment')}
         value={comment}
         rows={3}
         maxLength={1000}
-        placeholder="What did you write, how did it go?"
+        placeholder={t('result.commentPlaceholder')}
         autoComplete="off"
         onChange={(event) => setComment(event.target.value)}
       />
@@ -209,16 +213,16 @@ function RegisterForm({
         value={templateId}
         onChange={setTemplateId}
       />
-      <OptionalDetails summary="Name and proof link">
+      <OptionalDetails summary={t('result.nameAndProof')}>
         <TextField
-          label="Name (optional)"
+          label={t('result.name')}
           value={displayName}
           maxLength={100}
           autoComplete="off"
           onChange={(event) => setDisplayName(event.target.value)}
         />
         <TextField
-          label="Proof link (optional)"
+          label={t('result.proof')}
           type="url"
           inputMode="url"
           value={url}
@@ -230,7 +234,7 @@ function RegisterForm({
       </OptionalDetails>
 
       <Button type="submit" className="min-h-11 w-full" disabled={isSaving}>
-        {isSaving ? 'Registering...' : 'Register first contact'}
+        {isSaving ? t('result.registering') : t('result.register')}
       </Button>
     </form>
   )
@@ -244,6 +248,7 @@ function AddIdentifierForm({
   onTaken,
   onError,
 }: FormCallbacks & { targetId: string }): ReactElement {
+  const { t } = useI18n()
   const [value, setValue] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
@@ -260,7 +265,7 @@ function AddIdentifierForm({
         productId,
       )
       if (outcome.kind === 'created') setValue('')
-      applyOutcome(outcome, onTarget, onTaken, 'Channel added to this contact.')
+      applyOutcome(outcome, onTarget, onTaken, t('result.channelAdded'), t('result.faster'))
     } catch (err) {
       await onError(err)
     } finally {
@@ -271,9 +276,9 @@ function AddIdentifierForm({
   return (
     <form onSubmit={submit} className="space-y-2 border-t border-[var(--l)] pt-4">
       <TextField
-        label="Add another channel to this contact"
+        label={t('result.addChannelLabel')}
         value={value}
-        placeholder="@username, email, site, profile link"
+        placeholder={t('result.addChannelPlaceholder')}
         autoComplete="off"
         autoCapitalize="off"
         spellCheck={false}
@@ -286,7 +291,7 @@ function AddIdentifierForm({
         className="w-full"
         disabled={isSaving || !value.trim()}
       >
-        {isSaving ? 'Adding...' : 'Add channel'}
+        {isSaving ? t('result.adding') : t('result.addChannel')}
       </Button>
     </form>
   )
@@ -297,6 +302,7 @@ function applyOutcome(
   onTarget: (target: TargetDetail) => void,
   onTaken: (result: CheckResult) => void,
   successMessage: string,
+  fasterMessage: string,
 ): void {
   if (outcome.kind === 'created') {
     onTarget(outcome.target)
@@ -304,6 +310,6 @@ function applyOutcome(
     return
   }
 
-  toast.error('Someone was faster: this identifier is already registered.')
+  toast.error(fasterMessage)
   onTaken(outcome.result)
 }

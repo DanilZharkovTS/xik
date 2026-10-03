@@ -11,8 +11,9 @@ import { TextField } from '@/src/shared/ui/text-field'
 import { TextareaField } from '@/src/shared/ui/textarea-field'
 import { outreachService } from '../outreach.service'
 import { TEMPLATE_VARIABLES } from '../render-template'
-import { CHANNELS, TEMPLATE_CHANNEL_LABELS } from '../outreach.types'
+import { CHANNELS, templateChannelLabel } from '../outreach.types'
 import type { Template, TemplateChannel } from '../outreach.types'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type TemplateEditorSheetProps = {
   isOpen: boolean
@@ -29,11 +30,12 @@ const CHANNEL_OPTIONS: TemplateChannel[] = ['any', ...CHANNELS]
 
 // Тіло форми окремим компонентом: key перемонтовує його зі свіжими полями при кожному відкритті.
 export function TemplateEditorSheet(props: TemplateEditorSheetProps): ReactElement {
+  const { t } = useI18n()
   const { isOpen, template, onClose } = props
 
   return (
     <Sheet
-      title={template ? 'Edit template' : 'New template'}
+      title={template ? t('tpl.editor.edit') : t('tpl.editor.new')}
       isOpen={isOpen}
       onClose={onClose}
     >
@@ -50,6 +52,7 @@ function EditorForm({
   onSaved,
   onError,
 }: TemplateEditorSheetProps): ReactElement {
+  const { t } = useI18n()
   const bodyRef = useRef<HTMLTextAreaElement>(null)
   const [channel, setChannel] = useState<TemplateChannel>(template?.channel ?? 'any')
   const [title, setTitle] = useState(template?.title ?? '')
@@ -89,7 +92,7 @@ function EditorForm({
 
       if (!template) {
         onSaved(await outreachService.createTemplate(fields, token, productId))
-        toast.success('Template created.')
+        toast.success(t('tpl.editor.created'))
         onClose()
         return
       }
@@ -115,12 +118,12 @@ function EditorForm({
           setVersion(outcome.template.version)
           onSaved(outcome.template)
         }
-        toast.error('This template was changed meanwhile. The latest version is loaded: review it and save again.')
+        toast.error(t('tpl.editor.stale'))
         return
       }
 
       onSaved(outcome.template)
-      toast.success('Template saved.')
+      toast.success(t('tpl.editor.saved'))
       onClose()
     } catch (err) {
       await onError(err)
@@ -132,7 +135,7 @@ function EditorForm({
   return (
     <form onSubmit={submit} className="space-y-4">
       <TextField
-        label="Title"
+        label={t('tpl.editor.titleField')}
         value={title}
         maxLength={100}
         required
@@ -141,20 +144,20 @@ function EditorForm({
       />
 
       <SelectField
-        label="Channel"
+        label={t('tpl.editor.channel')}
         value={channel}
         onChange={(event) => setChannel(event.target.value as TemplateChannel)}
       >
         {CHANNEL_OPTIONS.map((item) => (
           <option key={item} value={item}>
-            {TEMPLATE_CHANNEL_LABELS[item]}
+            {templateChannelLabel(item)}
           </option>
         ))}
       </SelectField>
 
       {hasSubject && (
         <TextField
-          label="Subject (email)"
+          label={t('tpl.editor.subject')}
           value={subject}
           maxLength={200}
           autoComplete="off"
@@ -164,7 +167,7 @@ function EditorForm({
 
       <TextareaField
         ref={bodyRef}
-        label="Text"
+        label={t('tpl.editor.text')}
         value={body}
         maxLength={5000}
         className="min-h-40"
@@ -173,7 +176,7 @@ function EditorForm({
       />
 
       <div>
-        <p className="mb-1.5 text-sm text-[var(--m)]">Insert variable</p>
+        <p className="mb-1.5 text-sm text-[var(--m)]">{t('tpl.editor.insert')}</p>
         <div className="flex flex-wrap gap-2">
           {TEMPLATE_VARIABLES.map((name) => (
             <button
@@ -189,8 +192,7 @@ function EditorForm({
       </div>
 
       <p className="text-sm text-[var(--m)]">
-        Do not put personal data into templates. The text is shared with everyone in
-        this product.
+        {t('tpl.editor.privacy')}
       </p>
 
       <Button
@@ -198,7 +200,7 @@ function EditorForm({
         className="min-h-11 w-full"
         disabled={isSaving || !title.trim() || !body.trim()}
       >
-        {isSaving ? 'Saving...' : template ? 'Save changes' : 'Create template'}
+        {isSaving ? t('tpl.editor.saving') : template ? t('tpl.editor.saveChanges') : t('tpl.editor.create')}
       </Button>
     </form>
   )

@@ -6,6 +6,7 @@ import type { ReactElement } from 'react'
 import { SelectField } from '@/src/shared/ui/select-field'
 import { outreachService } from '../outreach.service'
 import type { Channel, Template } from '../outreach.types'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type TemplateSelectProps = {
   token: string
@@ -24,6 +25,7 @@ export function TemplateSelect({
   value,
   onChange,
 }: TemplateSelectProps): ReactElement | null {
+  const { t } = useI18n()
   const [templates, setTemplates] = useState<Template[]>([])
 
   useEffect(() => {
@@ -52,11 +54,11 @@ export function TemplateSelect({
 
   return (
     <SelectField
-      label="Template used (optional)"
+      label={t('tpl.select.label')}
       value={value}
       onChange={(event) => onChange(event.target.value)}
     >
-      <option value="">None</option>
+      <option value="">{t('tpl.select.none')}</option>
       {options.map((template) => (
         <option key={template.id} value={template.id}>
           {template.title} (v{template.version})

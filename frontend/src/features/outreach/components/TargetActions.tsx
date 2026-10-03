@@ -11,9 +11,10 @@ import { TextareaField } from '@/src/shared/ui/textarea-field'
 import { TextField } from '@/src/shared/ui/text-field'
 import { OptionalDetails } from './OptionalDetails'
 import { outreachService } from '../outreach.service'
-import { CHANNELS, CHANNEL_LABELS } from '../outreach.types'
+import { CHANNELS, channelLabel } from '../outreach.types'
 import type { Channel, TargetDetail } from '../outreach.types'
 import { TemplateSelect } from './TemplateSelect'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type TargetActionsProps = {
   target: TargetDetail
@@ -33,6 +34,7 @@ export function TargetActions({
   onUpdated,
   onError,
 }: TargetActionsProps): ReactElement | null {
+  const { t } = useI18n()
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null)
   const [isBusy, setIsBusy] = useState(false)
   const { permissions } = target
@@ -40,12 +42,12 @@ export function TargetActions({
   const close = () => setOpenSheet(null)
 
   const release = async () => {
-    if (!window.confirm(`Release ${target.displayName} from "Do not contact"?`)) return
+    if (!window.confirm(t('actions.confirmRelease', { name: target.displayName }))) return
 
     try {
       setIsBusy(true)
       onUpdated(await outreachService.release(target.id, token, productId))
-      toast.success('Released. Writing to this contact is allowed again.')
+      toast.success(t('actions.released'))
     } catch (err) {
       await onError(err)
     } finally {
@@ -65,22 +67,21 @@ export function TargetActions({
     <div className="space-y-2 border-t border-[var(--l)] pt-4">
       {target.status === 'do_not_contact' && (
         <p className="text-sm">
-          {`Repeat contact is blocked while this contact is marked "Do not contact".${
-            target.statusReason ? ` Reason: ${target.statusReason}.` : ''
-          }`}
+          {t('actions.blocked')}
+          {target.statusReason ? ` ${t('actions.reason', { reason: target.statusReason })}` : ''}
         </p>
       )}
 
       <div className="grid gap-2 sm:grid-cols-2">
         {permissions.canRepeat && (
           <Button className="min-h-11" onClick={() => setOpenSheet('repeat')}>
-            Repeat contact
+            {t('actions.repeat')}
           </Button>
         )}
 
         {permissions.canReply && (
           <Button variant="secondary" onClick={() => setOpenSheet('reply')}>
-            Log reply
+            {t('actions.reply')}
           </Button>
         )}
 
@@ -90,13 +91,13 @@ export function TargetActions({
             className="border-red-500/60 text-red-500 hover:border-red-500"
             onClick={() => setOpenSheet('do-not-contact')}
           >
-            Do not contact
+            {t('actions.dnc')}
           </Button>
         )}
 
         {permissions.canRelease && (
           <Button variant="secondary" disabled={isBusy} onClick={release}>
-            {isBusy ? 'Releasing...' : 'Release (admin)'}
+            {isBusy ? t('actions.releasing') : t('actions.release')}
           </Button>
         )}
       </div>
@@ -138,6 +139,7 @@ function ActivitySheet({
   onUpdated,
   onError,
 }: SheetProps & { type: 'repeat' | 'reply' | null }): ReactElement {
+  const { t } = useI18n()
   const [channel, setChannel] = useState<Channel | ''>('')
   const [templateId, setTemplateId] = useState('')
   const [url, setUrl] = useState('')
@@ -163,7 +165,7 @@ function ActivitySheet({
         productId,
       )
       onUpdated(updated)
-      toast.success(type === 'repeat' ? 'Repeat contact saved.' : 'Reply saved.')
+      toast.success(type === 'repeat' ? t('actions.repeatSaved') : t('actions.replySaved'))
       setChannel('')
       setTemplateId('')
       setUrl('')
@@ -178,7 +180,7 @@ function ActivitySheet({
 
   return (
     <Sheet
-      title={type === 'reply' ? 'Log reply' : 'Repeat contact'}
+      title={type === 'reply' ? t('actions.reply') : t('actions.repeat')}
       isOpen={type !== null}
       onClose={onClose}
     >
@@ -186,20 +188,20 @@ function ActivitySheet({
         <p className="break-words text-sm text-[var(--m)]">{target.displayName}</p>
 
         <SelectField
-          label="Channel (optional)"
+          label={t('actions.channelOptional')}
           value={channel}
           onChange={(event) => setChannel(event.target.value as Channel | '')}
         >
-          <option value="">Not specified</option>
+          <option value="">{t('actions.notSpecified')}</option>
           {CHANNELS.map((item) => (
             <option key={item} value={item}>
-              {CHANNEL_LABELS[item]}
+              {channelLabel(item)}
             </option>
           ))}
         </SelectField>
 
         <TextareaField
-          label="Comment (optional)"
+          label={t('result.comment')}
           value={comment}
           rows={3}
           maxLength={1000}
@@ -217,9 +219,9 @@ function ActivitySheet({
           />
         )}
 
-        <OptionalDetails summary="Proof link">
+        <OptionalDetails summary={t('result.proofSummary')}>
           <TextField
-            label="Proof link (optional)"
+            label={t('result.proof')}
             type="url"
             inputMode="url"
             value={url}
@@ -231,7 +233,7 @@ function ActivitySheet({
         </OptionalDetails>
 
         <Button type="submit" className="min-h-11 w-full" disabled={isSaving}>
-          {isSaving ? 'Saving...' : 'Save'}
+          {isSaving ? t('actions.saving') : t('common.save')}
         </Button>
       </form>
     </Sheet>
@@ -247,6 +249,7 @@ function DoNotContactSheet({
   onUpdated,
   onError,
 }: SheetProps & { isOpen: boolean }): ReactElement {
+  const { t } = useI18n()
   const [reason, setReason] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
@@ -263,7 +266,7 @@ function DoNotContactSheet({
           productId,
         ),
       )
-      toast.success('Marked "Do not contact". Everyone will see it.')
+      toast.success(t('actions.dncDone'))
       setReason('')
       onClose()
     } catch (err) {
@@ -274,15 +277,14 @@ function DoNotContactSheet({
   }
 
   return (
-    <Sheet title="Do not contact" isOpen={isOpen} onClose={onClose}>
+    <Sheet title={t('actions.dnc')} isOpen={isOpen} onClose={onClose}>
       <form onSubmit={submit} className="space-y-4">
         <p className="text-base">
-          Nobody will be able to write to <strong>{target.displayName}</strong> again.
-          Only an administrator can undo this.
+          {t('actions.dncIntro', { name: target.displayName })}
         </p>
 
         <TextField
-          label="Reason (optional, visible to you and admins)"
+          label={t('actions.dncReason')}
           value={reason}
           maxLength={500}
           autoComplete="off"
@@ -294,7 +296,7 @@ function DoNotContactSheet({
           className="min-h-11 w-full border-red-500 bg-red-500 text-white"
           disabled={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Mark as Do not contact'}
+          {isSaving ? t('actions.saving') : t('actions.dncSubmit')}
         </Button>
       </form>
     </Sheet>

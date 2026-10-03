@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Button } from '@/src/shared/ui/button'
 import { TextField } from '@/src/shared/ui/text-field'
 import { generatePassword } from '../generate-password'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type PasswordFieldProps = {
   value: string
@@ -18,6 +19,7 @@ export function PasswordField({
   value,
   onChange,
 }: PasswordFieldProps): ReactElement {
+  const { t } = useI18n()
   const [isCopied, setIsCopied] = useState(false)
 
   const copy = async () => {
@@ -25,14 +27,14 @@ export function PasswordField({
       await navigator.clipboard.writeText(value)
       setIsCopied(true)
     } catch {
-      toast.error('Could not copy. Select the password and copy it manually.')
+      toast.error(t('team.pw.copyFailed'))
     }
   }
 
   return (
     <div className="space-y-2">
       <TextField
-        label="Password (8-72 characters)"
+        label={t('team.pw.label')}
         type="text"
         value={value}
         autoComplete="off"
@@ -57,7 +59,7 @@ export function PasswordField({
             onChange(generatePassword())
           }}
         >
-          Generate
+          {t('team.pw.generate')}
         </Button>
 
         <Button
@@ -66,7 +68,7 @@ export function PasswordField({
           disabled={!value}
           onClick={copy}
         >
-          {isCopied ? 'Copied' : 'Copy'}
+          {isCopied ? t('team.pw.copied') : t('team.pw.copy')}
         </Button>
       </div>
     </div>

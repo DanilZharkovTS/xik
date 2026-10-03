@@ -14,18 +14,20 @@ import { adminProductsService } from '../admin-products.service'
 import type { AdminProduct, ListState, ProductKind } from '../admin-products.types'
 import { AdminProductCard } from './AdminProductCard'
 import { ProductFormSheet } from './ProductFormSheet'
+import type { MessageKey } from '@/src/shared/i18n/messages'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type KindFilter = ProductKind | 'all'
 
-const KIND_OPTIONS: { value: KindFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'product', label: 'Products' },
-  { value: 'agent', label: 'Agents' },
+const KIND_VALUES: { value: KindFilter; labelKey: MessageKey }[] = [
+  { value: 'all', labelKey: 'products.all' },
+  { value: 'product', labelKey: 'products.products' },
+  { value: 'agent', labelKey: 'products.agents' },
 ]
 
-const STATE_TABS: { value: ListState; label: string }[] = [
-  { value: 'active', label: 'Active' },
-  { value: 'archived', label: 'Archived' },
+const STATE_VALUES: { value: ListState; labelKey: MessageKey }[] = [
+  { value: 'active', labelKey: 'products.active' },
+  { value: 'archived', labelKey: 'products.archived' },
 ]
 
 // Підкреслені вкладки: окремий тип контролу від полів пошуку й типу, щоб не плутати.
@@ -36,9 +38,11 @@ function StateTabs({
   value: ListState
   onChange: (value: ListState) => void
 }): ReactElement {
+  const { t } = useI18n()
+
   return (
-    <div role="tablist" aria-label="Product state" className="flex border-b border-[var(--l)]">
-      {STATE_TABS.map((tab) => (
+    <div role="tablist" aria-label={t('products.state')} className="flex border-b border-[var(--l)]">
+      {STATE_VALUES.map((tab) => (
         <button
           key={tab.value}
           type="button"
@@ -52,7 +56,7 @@ function StateTabs({
               : 'border-transparent text-[var(--m)] hover:text-[var(--t)]',
           )}
         >
-          {tab.label}
+          {t(tab.labelKey)}
         </button>
       ))}
     </div>
@@ -60,6 +64,7 @@ function StateTabs({
 }
 
 export function AdminProductsScreen(): ReactElement {
+  const { t } = useI18n()
   const token = useAuthStore((state) => state.accessToken)
 
   const [products, setProducts] = useState<AdminProduct[]>([])
@@ -126,30 +131,24 @@ export function AdminProductsScreen(): ReactElement {
   }
 
   const archive = (product: AdminProduct) => {
-    if (
-      !window.confirm(
-        `Archive ${product.name}? It disappears from the site and checkout, and the Stripe product is deactivated. You can restore it later.`,
-      )
-    ) {
-      return
-    }
+    if (!window.confirm(t('products.confirmArchive', { name: product.name }))) return
 
-    void run(product, () => adminProductsService.archive(product.id, token!), 'Archived')
+    void run(product, () => adminProductsService.archive(product.id, token!), t('products.archivedToast'))
   }
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-3 px-4 py-3 md:space-y-6 md:py-10">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium md:text-4xl">Products</h1>
+          <h1 className="text-2xl font-medium md:text-4xl">{t('products.title')}</h1>
           <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
-            Products and agents. Each one is linked to a single Stripe product.
+            {t('products.subtitle')}
           </p>
         </div>
 
         <div>
           <Button className="shrink-0" disabled={!token} onClick={openCreate}>
-            New product
+            {t('products.new')}
           </Button>
         </div>
       </div>
@@ -164,8 +163,8 @@ export function AdminProductsScreen(): ReactElement {
           />
           <input
             type="search"
-            aria-label="Search products"
-            placeholder="Search by name or slug"
+            aria-label={t('products.searchLabel')}
+            placeholder={t('products.search')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="min-h-10 w-full rounded-full border border-[var(--l)] bg-[var(--bg)] pl-10 pr-4 text-base outline-none focus:border-[var(--t)] md:min-h-11"
@@ -173,25 +172,25 @@ export function AdminProductsScreen(): ReactElement {
         </div>
 
         <Segmented
-          label="Type"
+          label={t('products.type')}
           value={kind}
           onChange={setKind}
-          options={KIND_OPTIONS}
+          options={KIND_VALUES.map((item) => ({ value: item.value, label: t(item.labelKey) }))}
           className="md:w-72"
         />
       </div>
 
       {isLoading ? (
-        <p className="py-12 text-center text-[var(--m)]">Loading...</p>
+        <p className="py-12 text-center text-[var(--m)]">{t('common.loading')}</p>
       ) : products.length === 0 ? (
         <div className="rounded-2xl border border-[var(--l)] px-4 py-12 text-center">
           <p className="font-medium">
-            {state === 'archived' ? 'Nothing archived' : 'No products found'}
+            {state === 'archived' ? t('products.noArchived') : t('products.noneFound')}
           </p>
           <p className="mt-1 text-sm text-[var(--m)]">
             {state === 'archived'
-              ? 'Archived products show up here and can be restored.'
-              : 'Create a product, or run the catalog import to load the existing ones.'}
+              ? t('products.archivedHint')
+              : t('products.createHint')}
           </p>
         </div>
       ) : (
@@ -206,7 +205,7 @@ export function AdminProductsScreen(): ReactElement {
                 void run(
                   product,
                   () => adminProductsService.syncStripe(product.id, token!),
-                  'Stripe is in sync',
+                  t('products.syncedToast'),
                 )
               }
               onArchive={() => archive(product)}
@@ -214,7 +213,7 @@ export function AdminProductsScreen(): ReactElement {
                 void run(
                   product,
                   () => adminProductsService.restore(product.id, token!),
-                  'Restored',
+                  t('products.restoredToast'),
                 )
               }
             />

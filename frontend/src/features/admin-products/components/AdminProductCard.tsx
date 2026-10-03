@@ -3,6 +3,7 @@ import type { ReactElement } from 'react'
 import { cn } from '@/src/shared/lib/cn'
 import { Button } from '@/src/shared/ui/button'
 import type { AdminProduct } from '../admin-products.types'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type AdminProductCardProps = {
   product: AdminProduct
@@ -45,6 +46,7 @@ export function AdminProductCard({
   onArchive,
   onRestore,
 }: AdminProductCardProps): ReactElement {
+  const { t } = useI18n()
   const isArchived = product.archivedAt !== null
 
   return (
@@ -61,22 +63,22 @@ export function AdminProductCard({
         </div>
         <p className="shrink-0 text-lg font-medium">
           {formatPrice(product)}
-          <span className="text-sm font-normal text-[var(--m)]">/{product.billingPeriod}</span>
+          <span className="text-sm font-normal text-[var(--m)]">/{t(`products.perPeriod.${product.billingPeriod}`)}</span>
         </p>
       </div>
 
       <p className="text-sm text-[var(--m)]">{product.shortDescription}</p>
 
       <div className="flex flex-wrap gap-1.5">
-        <Badge>{product.kind === 'agent' ? 'Agent' : 'Product'}</Badge>
+        <Badge>{product.kind === 'agent' ? t('products.badge.agent') : t('products.badge.product')}</Badge>
         <Badge muted>{product.status}</Badge>
-        <Badge muted>{product.showPrice ? 'Price shown' : 'Price at checkout'}</Badge>
+        <Badge muted>{product.showPrice ? t('products.badge.priceShown') : t('products.badge.priceCheckout')}</Badge>
         {isArchived ? (
-          <Badge muted>Archived</Badge>
+          <Badge muted>{t('products.badge.archived')}</Badge>
         ) : product.isStripeLinked ? (
-          <Badge>Stripe linked</Badge>
+          <Badge>{t('products.badge.linked')}</Badge>
         ) : (
-          <Badge muted>Not in Stripe</Badge>
+          <Badge muted>{t('products.badge.notStripe')}</Badge>
         )}
       </div>
 
@@ -88,17 +90,17 @@ export function AdminProductCard({
 
       <div className={cn("grid gap-2", isArchived ? "grid-cols-2" : "grid-cols-3")}>
         <Button className="w-full px-2 text-sm md:text-base" disabled={isBusy} onClick={onEdit}>
-          Edit
+          {t('products.edit')}
         </Button>
 
         {isArchived ? (
           <Button variant="secondary" className="w-full" disabled={isBusy} onClick={onRestore}>
-            Restore
+            {t('products.restore')}
           </Button>
         ) : (
           <>
             <Button variant="secondary" className="w-full px-2 text-sm md:text-base" disabled={isBusy} onClick={onSync}>
-              {product.isStripeLinked ? 'Sync' : 'To Stripe'}
+              {product.isStripeLinked ? t('products.sync') : t('products.toStripe')}
             </Button>
             <Button
               variant="secondary"
@@ -106,7 +108,7 @@ export function AdminProductCard({
               disabled={isBusy}
               onClick={onArchive}
             >
-              Archive
+              {t('products.archive')}
             </Button>
           </>
         )}

@@ -12,9 +12,9 @@ import { formatDateTime, formatRelative } from '../format-date'
 import { outreachService } from '../outreach.service'
 import {
   PUBLICATION_CHANNELS,
-  PUBLICATION_CHANNEL_LABELS,
+  publicationChannelLabel,
   PUBLICATION_KINDS,
-  PUBLICATION_KIND_LABELS,
+  publicationKindLabel,
 } from '../outreach.types'
 import type {
   Publication,
@@ -22,8 +22,10 @@ import type {
   PublicationKind,
 } from '../outreach.types'
 import { useOutreachContext } from '../use-outreach-context'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 export function PublicationsScreen(): ReactElement {
+  const { t } = useI18n()
   const { token, productId, handleError } = useOutreachContext()
 
   const [publications, setPublications] = useState<Publication[]>([])
@@ -75,24 +77,24 @@ export function PublicationsScreen(): ReactElement {
     <div className="space-y-3 md:space-y-5">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-medium md:text-4xl">Publications</h1>
+          <h1 className="text-2xl font-medium md:text-4xl">{t('pubs.title')}</h1>
           <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
-            Posts, ads and articles you placed for this product.
+            {t('pubs.intro')}
           </p>
         </div>
 
         <Button className="shrink-0" disabled={!token || !productId} onClick={() => setIsAdding(true)}>
-          Add
+          {t('pubs.add')}
         </Button>
       </div>
 
       {isLoading ? (
-        <p className="py-12 text-center text-[var(--m)]">Loading...</p>
+        <p className="py-12 text-center text-[var(--m)]">{t('common.loading')}</p>
       ) : publications.length === 0 ? (
         <div className="rounded-2xl border border-[var(--l)] px-4 py-12 text-center">
-          <p className="font-medium">No publications yet</p>
+          <p className="font-medium">{t('pubs.emptyTitle')}</p>
           <p className="mt-1 text-sm text-[var(--m)]">
-            Record a post or ad with a link, so your work is visible.
+            {t('pubs.emptyText')}
           </p>
         </div>
       ) : (
@@ -105,8 +107,8 @@ export function PublicationsScreen(): ReactElement {
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="font-medium">
-                    {PUBLICATION_CHANNEL_LABELS[publication.channel]} ·{' '}
-                    {PUBLICATION_KIND_LABELS[publication.kind]}
+                    {publicationChannelLabel(publication.channel)} ·{' '}
+                    {publicationKindLabel(publication.kind)}
                   </p>
                   <time
                     dateTime={publication.occurredAt}
@@ -130,14 +132,14 @@ export function PublicationsScreen(): ReactElement {
                   <p className="break-words text-sm">{publication.comment}</p>
                 )}
 
-                <p className="text-sm text-[var(--m)]">by {publication.author}</p>
+                <p className="text-sm text-[var(--m)]">{t('pubs.by', { name: publication.author })}</p>
               </li>
             ))}
           </ul>
 
           {nextCursor && (
             <Button variant="secondary" className="w-full" disabled={isLoadingMore} onClick={loadMore}>
-              {isLoadingMore ? 'Loading...' : 'Load more'}
+              {isLoadingMore ? t('common.loading') : t('pubs.loadMore')}
             </Button>
           )}
         </>
@@ -174,6 +176,7 @@ function AddPublicationSheet({
   onCreated,
   onError,
 }: AddPublicationSheetProps): ReactElement {
+  const { t } = useI18n()
   const [channel, setChannel] = useState<PublicationChannel>('facebook')
   const [kind, setKind] = useState<PublicationKind>('post')
   const [url, setUrl] = useState('')
@@ -193,14 +196,17 @@ function AddPublicationSheet({
 
       if (outcome.kind === 'duplicate') {
         const who = outcome.existing
-          ? ` by ${outcome.existing.author} on ${formatDateTime(outcome.existing.occurredAt)}`
+          ? t('pubs.duplicateWho', {
+              name: outcome.existing.author,
+              date: formatDateTime(outcome.existing.occurredAt),
+            })
           : ''
-        toast.error(`This publication is already recorded${who}.`)
+        toast.error(t('pubs.duplicate', { who }))
         return
       }
 
       onCreated(outcome.publication)
-      toast.success('Publication saved.')
+      toast.success(t('pubs.saved'))
       setUrl('')
       setComment('')
       onClose()
@@ -212,34 +218,34 @@ function AddPublicationSheet({
   }
 
   return (
-    <Sheet title="Add publication" isOpen={isOpen} onClose={onClose}>
+    <Sheet title={t('pubs.addTitle')} isOpen={isOpen} onClose={onClose}>
       <form onSubmit={submit} className="space-y-4">
         <SelectField
-          label="Where"
+          label={t('pubs.where')}
           value={channel}
           onChange={(event) => setChannel(event.target.value as PublicationChannel)}
         >
           {PUBLICATION_CHANNELS.map((item) => (
             <option key={item} value={item}>
-              {PUBLICATION_CHANNEL_LABELS[item]}
+              {publicationChannelLabel(item)}
             </option>
           ))}
         </SelectField>
 
         <SelectField
-          label="What"
+          label={t('pubs.what')}
           value={kind}
           onChange={(event) => setKind(event.target.value as PublicationKind)}
         >
           {PUBLICATION_KINDS.map((item) => (
             <option key={item} value={item}>
-              {PUBLICATION_KIND_LABELS[item]}
+              {publicationKindLabel(item)}
             </option>
           ))}
         </SelectField>
 
         <TextField
-          label="Link to the publication"
+          label={t('pubs.link')}
           type="url"
           inputMode="url"
           value={url}
@@ -251,7 +257,7 @@ function AddPublicationSheet({
         />
 
         <TextField
-          label="Comment (optional)"
+          label={t('pubs.comment')}
           value={comment}
           maxLength={1000}
           autoComplete="off"
@@ -259,7 +265,7 @@ function AddPublicationSheet({
         />
 
         <Button type="submit" className="min-h-11 w-full" disabled={isSaving || !url.trim()}>
-          {isSaving ? 'Saving...' : 'Save publication'}
+          {isSaving ? t('pubs.saving') : t('pubs.save')}
         </Button>
       </form>
     </Sheet>

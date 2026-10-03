@@ -9,13 +9,18 @@ import { authService } from '../auth.service'
 import useAuthStore from '../store'
 
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
+import { translateNow } from '@/src/shared/i18n/translate'
+import type { MessageKey } from '@/src/shared/i18n/messages'
+import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
 import { Button } from '@/src/shared/ui/button'
 import { AuthInput } from './AuthInput'
 import Link from 'next/link'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type FormErrors = Partial<Record<string, string>>
 
 export const AuthForm: React.FC = () => {
+  const { t } = useI18n()
   const pathname = usePathname()
   const router = useRouter()
 
@@ -54,7 +59,7 @@ export const AuthForm: React.FC = () => {
       const field = issue.path[0]
 
       if (typeof field === 'string' && !fieldErrors[field]) {
-        fieldErrors[field] = issue.message
+        fieldErrors[field] = translateNow(issue.message as MessageKey)
       }
     }
 
@@ -113,12 +118,14 @@ export const AuthForm: React.FC = () => {
 
   return (
     <main className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col justify-center px-4 py-8 md:py-16">
+      <LanguageSwitch className="mb-4 self-start" />
+
       <h1 className="text-2xl font-medium md:text-4xl">
-        {isRegister ? 'Create account' : 'Welcome back'}
+        {isRegister ? t('auth.register.title') : t('auth.login.title')}
       </h1>
 
       <p className="mt-1 text-[var(--m)]">
-        {isRegister ? 'Sign up to get started.' : 'Sign in to continue.'}
+        {isRegister ? t('auth.register.subtitle') : t('auth.login.subtitle')}
       </p>
 
       <form
@@ -128,7 +135,7 @@ export const AuthForm: React.FC = () => {
       >
         <AuthInput
           name="email"
-          label="Email"
+          label={t('auth.email')}
           type="email"
           autoComplete="email"
           value={form.email}
@@ -140,18 +147,18 @@ export const AuthForm: React.FC = () => {
         {isRegister && (
           <AuthInput
             name="name"
-            label="Name"
+            label={t('auth.name')}
             autoComplete="name"
             value={form.name}
             onChange={handleChange}
-            placeholder="Your name"
+            placeholder={t('auth.namePlaceholder')}
             error={errors.name}
           />
         )}
 
         <AuthInput
           name="password"
-          label="Password"
+          label={t('auth.password')}
           type="password"
           autoComplete={isRegister ? 'new-password' : 'current-password'}
           value={form.password}
@@ -163,7 +170,7 @@ export const AuthForm: React.FC = () => {
         {isRegister && (
           <AuthInput
             name="confirmPassword"
-            label="Confirm password"
+            label={t('auth.confirm')}
             type="password"
             autoComplete="new-password"
             value={form.confirmPassword}
@@ -174,7 +181,7 @@ export const AuthForm: React.FC = () => {
         )}
 
         <Button type="submit" className="min-h-11 w-full" disabled={isLoading}>
-          {isLoading ? 'Please wait...' : isRegister ? 'Create account' : 'Sign in'}
+          {isLoading ? t('auth.wait') : isRegister ? t('auth.createAccount') : t('auth.signIn')}
         </Button>
       </form>
 
@@ -182,7 +189,7 @@ export const AuthForm: React.FC = () => {
         href={isRegister ? '/auth/login' : '/auth/register'}
         className="mt-4 inline-flex min-h-11 items-center justify-center text-[var(--m)] hover:text-[var(--t)]"
       >
-        {isRegister ? 'Already have an account? Sign in' : 'No account? Create one'}
+        {isRegister ? t('auth.haveAccount') : t('auth.noAccount')}
       </Link>
     </main>
   )

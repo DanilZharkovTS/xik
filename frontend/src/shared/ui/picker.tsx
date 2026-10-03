@@ -5,6 +5,7 @@ import type { ReactElement } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 
 import { cn } from '@/src/shared/lib/cn'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 import { Sheet } from './sheet'
 
 export type PickerOption = { value: string; label: string }
@@ -34,6 +35,7 @@ export function Picker({
   className,
   disabled,
 }: PickerProps): ReactElement {
+  const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
   const buttonId = useId()
   const selected = options.find((option) => option.value === value)
@@ -60,7 +62,7 @@ export function Picker({
         )}
       >
         <span className={cn('truncate', !selected && 'text-[var(--m)]')}>
-          {selected?.label ?? 'Select...'}
+          {selected?.label ?? t('common.select')}
         </span>
         <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-[var(--m)]" />
       </button>

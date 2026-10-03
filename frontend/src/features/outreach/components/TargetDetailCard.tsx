@@ -1,29 +1,33 @@
 import type { ReactElement } from 'react'
 
+import type { MessageKey } from '@/src/shared/i18n/messages'
 import { formatDateTime, formatRelative } from '../format-date'
 import type { TargetDetail, TargetEvent } from '../outreach.types'
-import { CHANNEL_LABELS } from '../outreach.types'
+import { channelLabel } from '../outreach.types'
 import { IdentifierLink } from './IdentifierLink'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
-const EVENT_LABELS: Record<TargetEvent['type'], string> = {
-  first: 'First contact',
-  repeat: 'Repeat contact',
-  reply: 'Reply',
-  publication: 'Publication',
-  status: 'Status change',
+const EVENT_KEYS: Record<TargetEvent['type'], MessageKey> = {
+  first: 'event.first',
+  repeat: 'event.repeat',
+  reply: 'event.reply',
+  publication: 'event.publication',
+  status: 'event.status',
 }
 
 export function TargetDetailCard({ target }: { target: TargetDetail }): ReactElement {
+  const { t } = useI18n()
+
   return (
     <div className="space-y-4">
       <div>
         <p className="text-lg font-medium">{target.displayName}</p>
         <p className="text-sm text-[var(--m)]">
-          Owner: {target.owner.name} · first contact{' '}
+          {t('detail.owner')} {target.owner.name} · {t('detail.firstContact')}{' '}
           <span title={formatDateTime(target.firstContactedAt)}>
             {formatRelative(target.firstContactedAt)}
           </span>
-          {' · '}last contact{' '}
+          {' · '}{t('detail.lastContact')}{' '}
           <span title={formatDateTime(target.lastContactedAt)}>
             {formatRelative(target.lastContactedAt)}
           </span>
@@ -39,24 +43,24 @@ export function TargetDetailCard({ target }: { target: TargetDetail }): ReactEle
       </ul>
 
       <div>
-        <p className="mb-2 text-xs uppercase tracking-wider text-[var(--m)]">History</p>
+        <p className="mb-2 text-xs uppercase tracking-wider text-[var(--m)]">{t('detail.history')}</p>
 
         <ol className="divide-y divide-[var(--l)] overflow-hidden rounded-xl border border-[var(--l)] bg-[var(--bg)]">
           {target.events.map((event) => (
             <li key={event.id} className="space-y-0.5 px-3 py-2 text-sm">
               <p className="flex flex-wrap items-baseline justify-between gap-x-3">
                 <span className="font-medium">
-                  {EVENT_LABELS[event.type]}
-                  {event.channel ? ` · ${CHANNEL_LABELS[event.channel]}` : ''}
+                  {t(EVENT_KEYS[event.type])}
+                  {event.channel ? ` · ${channelLabel(event.channel)}` : ''}
                 </span>
                 <time dateTime={event.occurredAt} className="text-[var(--m)]">
                   {formatDateTime(event.occurredAt)}
                 </time>
               </p>
-              <p className="text-[var(--m)]">by {event.author}</p>
+              <p className="text-[var(--m)]">{t('detail.by', { name: event.author })}</p>
               {event.template && (
                 <p className="text-[var(--m)]">
-                  Template: {event.template.title}
+                  {t('detail.template', { title: event.template.title })}
                   {event.template.version ? ` (v${event.template.version})` : ''}
                 </p>
               )}

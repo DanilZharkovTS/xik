@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 export interface BreakdownRow {
   key: string
@@ -18,6 +19,7 @@ const BAR_HEIGHT = 10
 // Одна серія: один колір для всіх смуг. Довжина вже несе величину, тому без градієнта.
 // Значення стоїть над смугою, а не всередині неї, тож жоден підпис не обрізається.
 export function BreakdownList({ title, rows, limit = 8 }: BreakdownListProps): ReactElement {
+  const { t } = useI18n()
   const visible = rows.slice(0, limit)
   const rest = rows.slice(limit)
   const shown: BreakdownRow[] =
@@ -26,7 +28,7 @@ export function BreakdownList({ title, rows, limit = 8 }: BreakdownListProps): R
           ...visible,
           {
             key: 'other',
-            label: `Other (${rest.length})`,
+            label: t('reports.other', { count: rest.length }),
             value: rest.reduce((sum, row) => sum + row.value, 0),
           },
         ]
@@ -38,7 +40,7 @@ export function BreakdownList({ title, rows, limit = 8 }: BreakdownListProps): R
       <h2 className="mb-3 text-base font-medium text-[var(--viz-text)]">{title}</h2>
 
       {shown.length === 0 ? (
-        <p className="py-4 text-center text-sm text-[var(--viz-muted)]">No activity in this period</p>
+        <p className="py-4 text-center text-sm text-[var(--viz-muted)]">{t('reports.noActivity')}</p>
       ) : (
         <ul className="space-y-3">
           {shown.map((row) => (

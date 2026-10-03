@@ -1,9 +1,12 @@
-import { CHANNEL_LABELS, PUBLICATION_CHANNEL_LABELS } from '@/src/features/outreach/outreach.types'
+import { translateNow } from '@/src/shared/i18n/translate'
+import type { MessageKey } from '@/src/shared/i18n/messages'
 
-const LABELS: Record<string, string> = {
-  ...PUBLICATION_CHANNEL_LABELS,
-  ...CHANNEL_LABELS,
-  unspecified: 'Not specified',
+// Ключ каналу з звіту: канал контакту, канал публікації або "не вказано".
+export const channelLabel = (key: string): string => {
+  const candidates = [`channel.${key}`, `pubchan.${key}`] as const
+  for (const candidate of candidates) {
+    const label = translateNow(candidate as MessageKey)
+    if (label !== candidate) return label
+  }
+  return key
 }
-
-export const channelLabel = (key: string): string => LABELS[key] ?? key

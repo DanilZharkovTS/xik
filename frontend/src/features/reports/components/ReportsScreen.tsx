@@ -19,8 +19,10 @@ import { ActivityChart } from './ActivityChart'
 import { BreakdownList } from './BreakdownList'
 import { ALL_PRODUCTS, ReportFilters } from './ReportFilters'
 import { StatTiles } from './StatTiles'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 export function ReportsScreen(): ReactElement {
+  const { t } = useI18n()
   const { token, productId, handleError } = useOutreachContext()
   const isAdmin = useAuthStore((state) => state.user?.role === 'admin')
   const products = useOutreachStore((state) => state.products)
@@ -126,11 +128,11 @@ export function ReportsScreen(): ReactElement {
   return (
     <div className="space-y-3 md:space-y-5">
       <div>
-        <h1 className="text-2xl font-medium md:text-4xl">Reports</h1>
+        <h1 className="text-2xl font-medium md:text-4xl">{t('reports.title')}</h1>
         <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
           {isAdmin
-            ? 'Work of your team by period, channel and product.'
-            : 'Your work in this product by period and channel.'}
+            ? t('reports.introAdmin')
+            : t('reports.introMod')}
         </p>
       </div>
 
@@ -161,7 +163,7 @@ export function ReportsScreen(): ReactElement {
 
       {!report ? (
         <p className="py-12 text-center text-[var(--m)]">
-          {isCustomReady ? 'Loading...' : 'Choose the start and end dates.'}
+          {isCustomReady ? t('common.loading') : t('reports.chooseDates')}
         </p>
       ) : (
         <div className={isLoading ? 'space-y-5 opacity-60 transition-opacity' : 'space-y-5 transition-opacity'}>
@@ -169,13 +171,13 @@ export function ReportsScreen(): ReactElement {
 
           <section className="viz-root rounded-2xl border border-[var(--l)] bg-[var(--viz-surface)] p-4">
             <h2 className="mb-3 text-base font-medium text-[var(--viz-text)]">
-              Activity by {report.range.granularity === 'month' ? 'month' : 'day'}
+              {report.range.granularity === 'month' ? t('reports.byMonth') : t('reports.byDay')}
             </h2>
             <ActivityChart report={report} types={visibleTypes} />
           </section>
 
           <BreakdownList
-            title="By channel"
+            title={t('reports.byChannel')}
             rows={report.byChannel.map((row) => ({
               key: row.channel,
               label: channelLabel(row.channel),
@@ -185,14 +187,14 @@ export function ReportsScreen(): ReactElement {
 
           {report.byModerator && (
             <BreakdownList
-              title="By moderator"
+              title={t('reports.byModerator')}
               rows={report.byModerator.map((row) => ({ key: row.id, label: row.name, value: row.total }))}
             />
           )}
 
           {report.byProduct && (
             <BreakdownList
-              title="By product"
+              title={t('reports.byProduct')}
               rows={report.byProduct.map((row) => ({ key: row.id, label: row.name, value: row.total }))}
             />
           )}

@@ -14,6 +14,7 @@ import { ModeratorCard } from './ModeratorCard'
 import { ProductsSheet } from './ProductsSheet'
 import { ResetPasswordSheet } from './ResetPasswordSheet'
 import { TransferTargetsSheet } from './TransferTargetsSheet'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 interface TeamData {
   moderators: Moderator[]
@@ -30,6 +31,7 @@ const fetchTeam = async (token: string): Promise<TeamData> => {
 }
 
 export function TeamScreen(): ReactElement {
+  const { t } = useI18n()
   const token = useAuthStore((state) => state.accessToken)
 
   const [moderators, setModerators] = useState<Moderator[]>([])
@@ -86,9 +88,7 @@ export function TeamScreen(): ReactElement {
 
     if (
       isActive &&
-      !window.confirm(
-        `Deactivate ${moderator.name}? All their sessions will be signed out.`,
-      )
+      !window.confirm(t('team.confirmDeactivate', { name: moderator.name }))
     ) {
       return
     }
@@ -117,9 +117,9 @@ export function TeamScreen(): ReactElement {
     <div className="mx-auto w-full max-w-7xl space-y-3 px-4 py-3 md:space-y-6 md:py-10">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium md:text-4xl">Team</h1>
+          <h1 className="text-2xl font-medium md:text-4xl">{t('team.title')}</h1>
           <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
-            Moderators and the products they can work with.
+            {t('team.subtitle')}
           </p>
         </div>
 
@@ -129,18 +129,18 @@ export function TeamScreen(): ReactElement {
             disabled={!token}
             onClick={() => setIsCreating(true)}
           >
-            Add moderator
+            {t('team.add')}
           </Button>
         </div>
       </div>
 
       {isLoading ? (
-        <p className="py-12 text-center text-[var(--m)]">Loading...</p>
+        <p className="py-12 text-center text-[var(--m)]">{t('common.loading')}</p>
       ) : moderators.length === 0 ? (
         <div className="rounded-2xl border border-[var(--l)] px-4 py-12 text-center">
-          <p className="font-medium">No moderators yet</p>
+          <p className="font-medium">{t('team.emptyTitle')}</p>
           <p className="mt-1 text-sm text-[var(--m)]">
-            Add the first moderator and give them access to a product.
+            {t('team.emptyText')}
           </p>
         </div>
       ) : (

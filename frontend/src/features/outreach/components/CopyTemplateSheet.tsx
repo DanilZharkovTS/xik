@@ -11,7 +11,8 @@ import { Sheet } from '@/src/shared/ui/sheet'
 import { TextField } from '@/src/shared/ui/text-field'
 import { findUnfilled, renderTemplate } from '../render-template'
 import type { OutreachProduct, Template } from '../outreach.types'
-import { TEMPLATE_CHANNEL_LABELS } from '../outreach.types'
+import { templateChannelLabel } from '../outreach.types'
+import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 type CopyTemplateSheetProps = {
   template: Template | null
@@ -25,6 +26,7 @@ export function CopyTemplateSheet({
   product,
   onClose,
 }: CopyTemplateSheetProps): ReactElement {
+  const { t } = useI18n()
   const managerName = useAuthStore((state) => state.user?.name)
   const [recipient, setRecipient] = useState('')
   const [copied, setCopied] = useState<'subject' | 'body' | null>(null)
@@ -50,23 +52,23 @@ export function CopyTemplateSheet({
       await navigator.clipboard.writeText(what === 'subject' ? (subject ?? '') : body)
       setCopied(what)
     } catch {
-      toast.error('Could not copy. Select the text and copy it manually.')
+      toast.error(t('tpl.copySheet.copyFailed'))
     }
   }
 
   return (
-    <Sheet title="Copy template" isOpen={template !== null} onClose={close}>
+    <Sheet title={t('tpl.copySheet.title')} isOpen={template !== null} onClose={close}>
       {template && (
         <div className="space-y-4">
           <div>
             <p className="break-words font-medium">{template.title}</p>
             <p className="text-sm text-[var(--m)]">
-              {TEMPLATE_CHANNEL_LABELS[template.channel]} · v{template.version}
+              {templateChannelLabel(template.channel)} · v{template.version}
             </p>
           </div>
 
           <TextField
-            label="Recipient name (fills {{name}})"
+            label={t('tpl.copySheet.recipient', { tag: '{{name}}' })}
             value={recipient}
             autoComplete="off"
             onChange={(event) => {
@@ -77,7 +79,7 @@ export function CopyTemplateSheet({
 
           {subject !== null && (
             <div className="space-y-1.5">
-              <p className="text-sm text-[var(--m)]">Subject</p>
+              <p className="text-sm text-[var(--m)]">{t('tpl.copySheet.subject')}</p>
               <p className="break-words rounded-xl border border-[var(--l)] bg-[var(--bg)] px-3 py-2">
                 {subject}
               </p>
@@ -85,7 +87,7 @@ export function CopyTemplateSheet({
           )}
 
           <div className="space-y-1.5">
-            <p className="text-sm text-[var(--m)]">Text</p>
+            <p className="text-sm text-[var(--m)]">{t('tpl.copySheet.text')}</p>
             <p className="max-h-60 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-[var(--l)] bg-[var(--bg)] px-3 py-2">
               {body}
             </p>
@@ -93,26 +95,24 @@ export function CopyTemplateSheet({
 
           {unfilled.length > 0 && (
             <p className="text-sm text-amber-500" role="status">
-              Not filled in: {unfilled.map((name) => `{{${name}}}`).join(', ')}. Fill them
-              in before sending.
+              {t('tpl.copySheet.unfilled', { names: unfilled.map((name) => `{{${name}}}`).join(', ') })}
             </p>
           )}
 
           <div className="grid gap-2">
             {subject !== null && (
               <Button variant="secondary" onClick={() => copy('subject')}>
-                {copied === 'subject' ? 'Subject copied' : 'Copy subject'}
+                {copied === 'subject' ? t('tpl.copySheet.subjectCopied') : t('tpl.copySheet.copySubject')}
               </Button>
             )}
 
             <Button className="min-h-11" onClick={() => copy('body')}>
-              {copied === 'body' ? 'Text copied' : 'Copy text'}
+              {copied === 'body' ? t('tpl.copySheet.textCopied') : t('tpl.copySheet.copyText')}
             </Button>
           </div>
 
           <p className="text-sm text-[var(--m)]">
-            After sending, log it in Check and pick this template, so the journal shows
-            which text you used. Do not paste personal data into templates.
+            {t('tpl.copySheet.after')}
           </p>
         </div>
       )}
