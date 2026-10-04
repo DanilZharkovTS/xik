@@ -71,15 +71,32 @@ export const authService = {
     const { rawRefreshToken, hashedRefreshToken, expiresAt } =
       tokenService.generateRefresh()
     const session = await prisma.$transaction(async (tx) => {
-      const refresh = await sessionRepo.findRefreshWithSessionAndUserByToken(refreshToken, tx)
-      if (!refresh || refresh.expiresAt <= new Date() || refresh.revokedAt ||
-          refresh.session.revokedAt || refresh.session.user.deactivatedAt) {
+      const refresh = await sessionRepo.findRefreshWithSessionAndUserByToken(
+        refreshToken,
+        tx
+      )
+      if (
+        !refresh ||
+        refresh.expiresAt <= new Date() ||
+        refresh.revokedAt ||
+        refresh.session.revokedAt ||
+        refresh.session.user.deactivatedAt
+      ) {
         throw ApiError(401, 'UNAUTHORIZED', 'Session is expired or invalid')
       }
       if (!(await sessionRepo.consumeRefresh(refresh.id, tx))) {
-        throw ApiError(401, 'REFRESH_ALREADY_USED', 'Refresh token has already been used')
+        throw ApiError(
+          401,
+          'REFRESH_ALREADY_USED',
+          'Refresh token has already been used'
+        )
       }
-      await sessionRepo.createRefresh(refresh.session.id, hashedRefreshToken, expiresAt, tx)
+      await sessionRepo.createRefresh(
+        refresh.session.id,
+        hashedRefreshToken,
+        expiresAt,
+        tx
+      )
       return refresh.session
     })
     const user = session.user

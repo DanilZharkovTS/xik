@@ -100,7 +100,10 @@ export const sessionRepo = {
     })
     return refreshToken
   },
-  findRefreshWithSessionAndUserByToken: async (token: string, db: DbClient = prisma) => {
+  findRefreshWithSessionAndUserByToken: async (
+    token: string,
+    db: DbClient = prisma
+  ) => {
     const refreshToken = await db.refreshToken.findFirst({
       where: {
         tokenHash: token,
