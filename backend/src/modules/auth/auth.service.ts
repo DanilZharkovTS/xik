@@ -70,11 +70,13 @@ export const authService = {
   refresh: async (refreshToken: string) => {
     const { rawRefreshToken, hashedRefreshToken, expiresAt } =
       tokenService.generateRefresh()
+
     const session = await prisma.$transaction(async (tx) => {
       const refresh = await sessionRepo.findRefreshWithSessionAndUserByToken(
         refreshToken,
         tx
       )
+
       if (
         !refresh ||
         refresh.expiresAt <= new Date() ||
@@ -84,6 +86,7 @@ export const authService = {
       ) {
         throw ApiError(401, 'UNAUTHORIZED', 'Session is expired or invalid')
       }
+
       if (!(await sessionRepo.consumeRefresh(refresh.id, tx))) {
         throw ApiError(
           401,
@@ -91,14 +94,17 @@ export const authService = {
           'Refresh token has already been used'
         )
       }
+
       await sessionRepo.createRefresh(
         refresh.session.id,
         hashedRefreshToken,
         expiresAt,
         tx
       )
+
       return refresh.session
     })
+
     const user = session.user
 
     const accessToken = await tokenService.generateAccess(
