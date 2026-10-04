@@ -15,6 +15,10 @@ export const mediaDir = (): string => path.resolve(process.env.MEDIA_DIR ?? 'med
 const mediaUrl = (): string =>
   (process.env.MEDIA_URL ?? `http://localhost:${process.env.PORT ?? 5001}/media`).replace(/\/$/, '')
 
+// Resolve existing local assets against the current public domain as well as new uploads.
+export const publicAssetUrl = (asset: { key?: string; url: string }): string =>
+  process.env.MEDIA_URL && asset.key ? `${mediaUrl()}/${asset.key}` : asset.url
+
 export const storage: Storage = {
   put: async (key, body) => {
     const root = mediaDir()

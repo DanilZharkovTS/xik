@@ -13,6 +13,7 @@ const router = Router()
 router.get(
   '/',
   authMiddleware.verifyAccess,
+  authMiddleware.requiresRole('admin'),
   userMiddleware.validateFindUsersQuery,
   userController.findUsers
 )

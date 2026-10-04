@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Fragment, useEffect } from 'react'
 import type { ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -27,6 +27,8 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
   const { t } = useI18n()
   const pathname = usePathname()
   const token = useAuthStore((state) => state.accessToken)
+  const sessionId = useAuthStore((state) => state.user?.sessionId)
+  const productId = useOutreachStore((state) => state.selectedProductId)
   const isAdmin = useAuthStore((state) => state.user?.role === 'admin')
   const status = useOutreachStore((state) => state.status)
   const products = useOutreachStore((state) => state.products)
@@ -134,7 +136,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
           )}
         </div>
       ) : (
-        children
+        <Fragment key={`${sessionId}:${productId}`}>{children}</Fragment>
       )}
 
     </div>

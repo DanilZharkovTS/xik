@@ -1,5 +1,5 @@
 import { LoginDto, RegisterDto } from './auth.schema'
-import { api } from '@/src/shared/api/axios'
+import { api, refreshSession } from '@/src/shared/api/axios'
 
 export const authService = {
   register: async (data: RegisterDto & { locale?: string }) => {
@@ -10,10 +10,7 @@ export const authService = {
     const res = await api.post('/auth/login', data)
     return res.data
   },
-  refresh: async () => {
-    const res = await api.post('/auth/refresh', {})
-    return res.data
-  },
+  refresh: refreshSession,
   logout: async () => {
     const res = await api.post('/auth/logout', {})
     return res.data

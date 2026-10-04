@@ -9,7 +9,7 @@ FROM base AS dev
 ENV NODE_ENV=development
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
 
@@ -29,7 +29,7 @@ ARG NEXT_PUBLIC_SITE_URL=https://xik.app
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci --include=dev
 
 COPY . .
 RUN npm run build
@@ -39,7 +39,7 @@ FROM base AS prod
 ENV NODE_ENV=production
 
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next

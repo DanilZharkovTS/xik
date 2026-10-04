@@ -195,7 +195,8 @@ function ProfileTab(): ReactElement {
     try {
       setIsSaving(true)
       const profile = await accountService.update(patch, token)
-      if (user) setAuth({ accessToken: token, user: { ...user, name: profile.name, locale: profile.locale } })
+      const current = useAuthStore.getState()
+      if (current.user) setAuth({ accessToken: current.accessToken, user: { ...current.user, name: profile.name, locale: profile.locale } })
       if (patch.locale) setLocale(patch.locale)
       toast.success(t('account.profile.saved'))
     } catch (err) {

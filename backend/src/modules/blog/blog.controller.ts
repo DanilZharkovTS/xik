@@ -17,9 +17,9 @@ const handle =
     }
   }
 
-const params = (req: Request) => req.validData.params
-const query = (req: Request) => req.validData.query
-const body = (req: Request) => req.validData.body
+const params = (req: Request) => req.validData!.params
+const query = (req: Request) => req.validData!.query
+const body = (req: Request) => req.validData!.body
 
 export const blogController = {
   listPublic: handle((req) => blogService.listPublic(query(req))),

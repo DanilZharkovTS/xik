@@ -1,3 +1,4 @@
+import { publicAssetUrl } from '../media/storage.js'
 import { randomUUID } from 'node:crypto'
 import { Prisma } from '../../generated/prisma/client.js'
 import { prisma } from '../../shared/database/prisma.js'
@@ -83,7 +84,7 @@ const toCard = (article: ArticleFull, lang: ContentLocale) => {
     publishedAt: article.publishedAt,
     updatedAt: article.updatedAt,
     cover: article.cover
-      ? { url: article.cover.url, width: article.cover.width, height: article.cover.height, alt: translation.coverAlt ?? translation.title }
+      ? { url: publicAssetUrl(article.cover), width: article.cover.width, height: article.cover.height, alt: translation.coverAlt ?? translation.title }
       : null,
     category: article.category ? toTaxonomyDto(article.category, lang) : null,
     tags: article.tags.map((tag) => toTaxonomyDto(tag, lang)),
@@ -185,7 +186,7 @@ export const blogService = {
           id: article.id,
           publishedAt: article.publishedAt,
           updatedAt: article.updatedAt,
-          cover: article.cover ? { url: article.cover.url } : null,
+          cover: article.cover ? { url: publicAssetUrl(article.cover) } : null,
           translations: article.translations
             .filter((item) => item.isReady)
             .map((item) => ({ locale: item.locale, slug: item.slug, title: item.title, excerpt: item.excerpt, updatedAt: item.updatedAt })),
@@ -213,7 +214,7 @@ export const blogService = {
             publishedAt: article.publishedAt,
             updatedAt: article.updatedAt,
             title: en?.title ?? '',
-            cover: article.cover ? { url: article.cover.url } : null,
+            cover: article.cover ? { url: publicAssetUrl(article.cover) } : null,
             category: article.category ? toTaxonomyDto(article.category, 'en') : null,
             locales: LOCALES.filter((locale) => translationOf(article, locale)?.isReady),
           }
@@ -467,7 +468,7 @@ const toAdminArticle = async (article: ArticleFull) => {
     updatedAt: article.updatedAt,
     previewToken: article.previewToken,
     cover: article.cover
-      ? { id: article.cover.id, url: article.cover.url, width: article.cover.width, height: article.cover.height }
+      ? { id: article.cover.id, url: publicAssetUrl(article.cover), width: article.cover.width, height: article.cover.height }
       : null,
     categoryId: article.categoryId,
     tagIds: article.tags.map((tag) => tag.id),
@@ -489,6 +490,6 @@ const toAdminArticle = async (article: ArticleFull) => {
       ])
     ),
     // Для прев'ю зображень у редакторі: id -> адреса й розміри.
-    assets: Object.fromEntries([...assets.values()].map((asset) => [asset.id, { url: asset.url, width: asset.width, height: asset.height }])),
+    assets: Object.fromEntries([...assets.values()].map((asset) => [asset.id, { url: publicAssetUrl(asset), width: asset.width, height: asset.height }])),
   }
 }

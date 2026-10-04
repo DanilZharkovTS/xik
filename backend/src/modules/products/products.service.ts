@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { prisma, type DbClient } from '../../shared/database/prisma.js'
 import { Prisma } from '../../generated/prisma/client.js'
 import { Pagination } from '../../shared/types/types.js'
 import { ApiError } from '../../shared/utils/ApiError.js'
@@ -33,8 +34,8 @@ const bestEffort = async (label: string, action: () => Promise<unknown>) => {
   }
 }
 
-const requireProduct = async (id: string): Promise<Product> => {
-  const product = (await productsRepo.findById(id)) as Product | null
+const requireProduct = async (id: string, db: DbClient = prisma): Promise<Product> => {
+  const product = (await productsRepo.findById(id, db)) as Product | null
 
   if (!product) {
     throw ApiError(404, 'PRODUCT_NOT_FOUND', 'Product not found')
@@ -51,6 +52,13 @@ const pricingOf = (product: Product) => ({
   currency: product.currency,
   billingPeriod: product.billingPeriod,
 })
+
+// Read and write a product under one database lock, including its Stripe changes.
+const withProductLock = <T>(id: string, action: (db: DbClient) => Promise<T>): Promise<T> =>
+  prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT "id" FROM "Product" WHERE "id" = ${id} FOR UPDATE`
+    return action(tx)
+  }, { maxWait: 15_000, timeout: 60_000 })
 
 export const productsService = {
   toggleSavedProduct: async (user: TokenPayload, productId: string) => {
@@ -116,7 +124,7 @@ export const productsService = {
 
     const productsWithIsSaved = products.map((saved) => ({
       ...saved,
-      product: { ...saved.product, isSaved: true },
+      product: toPublicDto(saved.product as Product, true),
     }))
 
     const lastId = products.at(-1)?.id
@@ -160,8 +168,8 @@ export const productsService = {
       throw err
     }
   },
-  updateProduct: async (id: string, data: UpdateProductDto) => {
-    const product = await requireProduct(id)
+  updateProduct: async (id: string, data: UpdateProductDto) => withProductLock(id, async (db) => {
+    const product = await requireProduct(id, db)
 
     if (product.archivedAt) {
       throw ApiError(409, 'PRODUCT_ARCHIVED', 'Restore the product before editing it')
@@ -176,7 +184,7 @@ export const productsService = {
     }
 
     if (data.slug !== undefined && data.slug !== product.slug) {
-      if (await productsRepo.findBySlugAny(data.slug)) throw slugTaken()
+      if (await productsRepo.findBySlugAny(data.slug, db)) throw slugTaken()
     }
 
     const stripeProductId = product.stripeProductId!
@@ -231,7 +239,7 @@ export const productsService = {
     let updated: Product
 
     try {
-      updated = (await productsRepo.updateProduct(id, data, newPriceId)) as Product
+      updated = (await productsRepo.updateProduct(id, data, newPriceId, db)) as Product
     } catch (err) {
       if (newPriceId) {
         await bestEffort('deactivate new price', () => stripeCatalog.deactivatePrice(newPriceId!))
@@ -248,10 +256,10 @@ export const productsService = {
     }
 
     return { response: { product: toAdminDto(updated) } }
-  },
+  }),
   // Видалення це архівування: продукт зникає з сайту й оплати, а журнал, історія та Stripe-привʼязка лишаються.
-  archiveProduct: async (id: string) => {
-    const product = await requireProduct(id)
+  archiveProduct: async (id: string) => withProductLock(id, async (db) => {
+    const product = await requireProduct(id, db)
 
     if (product.archivedAt) {
       throw ApiError(409, 'ALREADY_ARCHIVED', 'Product is already archived')
@@ -262,7 +270,7 @@ export const productsService = {
     }
 
     try {
-      const archived = (await productsRepo.setArchivedAt(id, new Date())) as Product
+      const archived = (await productsRepo.setArchivedAt(id, new Date(), db)) as Product
       return { response: { product: toAdminDto(archived) } }
     } catch (err) {
       if (product.stripeProductId) {
@@ -272,9 +280,9 @@ export const productsService = {
       }
       throw err
     }
-  },
-  restoreProduct: async (id: string) => {
-    const product = await requireProduct(id)
+  }),
+  restoreProduct: async (id: string) => withProductLock(id, async (db) => {
+    const product = await requireProduct(id, db)
 
     if (!product.archivedAt) {
       throw ApiError(409, 'NOT_ARCHIVED', 'Product is not archived')
@@ -285,7 +293,7 @@ export const productsService = {
     }
 
     try {
-      const restored = (await productsRepo.setArchivedAt(id, null)) as Product
+      const restored = (await productsRepo.setArchivedAt(id, null, db)) as Product
       return { response: { product: toAdminDto(restored) } }
     } catch (err) {
       if (product.stripeProductId) {
@@ -295,10 +303,10 @@ export const productsService = {
       }
       throw err
     }
-  },
+  }),
   // Привʼязує продукт до Stripe або лагодить розбіжності (немає Stripe-продукту, ціни чи вони не збігаються).
-  syncWithStripe: async (id: string) => {
-    const product = await requireProduct(id)
+  syncWithStripe: async (id: string) => withProductLock(id, async (db) => {
+    const product = await requireProduct(id, db)
 
     if (product.archivedAt) {
       throw ApiError(409, 'PRODUCT_ARCHIVED', 'Restore the product before syncing it')
@@ -314,7 +322,7 @@ export const productsService = {
       )
 
       try {
-        current = (await productsRepo.setStripeIds(id, stripe)) as Product
+        current = (await productsRepo.setStripeIds(id, stripe, db)) as Product
       } catch (err) {
         await bestEffort('deactivate price', () => stripeCatalog.deactivatePrice(stripe.stripePriceId))
         await bestEffort('deactivate product', () =>
@@ -360,6 +368,7 @@ export const productsService = {
       const isPriceValid =
         remotePrice !== null &&
         remotePrice.active &&
+        (typeof remotePrice.product === 'string' ? remotePrice.product : remotePrice.product.id) === stripeProductId &&
         remotePrice.unit_amount === expectedAmount &&
         remotePrice.currency === product.currency.toLowerCase() &&
         remotePrice.recurring?.interval === product.billingPeriod
@@ -371,7 +380,7 @@ export const productsService = {
           current = (await productsRepo.setStripeIds(id, {
             stripeProductId,
             stripePriceId: newPriceId,
-          })) as Product
+          }, db)) as Product
         } catch (err) {
           await bestEffort('deactivate new price', () => stripeCatalog.deactivatePrice(newPriceId))
           throw err
@@ -387,5 +396,5 @@ export const productsService = {
     }
 
     return { response: { product: toAdminDto(current), repaired } }
-  },
+  }),
 }

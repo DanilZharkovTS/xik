@@ -19,7 +19,7 @@ type EmailRequest = {
 }
 
 // Усі п'ять листів проходять одним шляхом: текст і тема беруться з шаблонів потрібною мовою.
-const send = async (kind: EmailKind, data: EmailRequest) => {
+const send = async (kind: EmailKind, data: EmailRequest, idempotencyKey?: string) => {
   const rendered = renderEmail(kind, data.locale, data)
 
   const email = await resend.emails.send({
@@ -28,7 +28,7 @@ const send = async (kind: EmailKind, data: EmailRequest) => {
     subject: rendered.subject,
     html: rendered.html,
     text: rendered.text,
-  })
+  }, idempotencyKey ? { idempotencyKey } : undefined)
 
   if (email.error) {
     throw ApiError(400, email.error.message, 'EMAIL_SEND_FAILED')
@@ -38,9 +38,9 @@ const send = async (kind: EmailKind, data: EmailRequest) => {
 }
 
 export const emailService = {
-  sendSigningKey: (data: SendSigningKeyEmailDto) => send('signingKey', data),
-  sendCanceledSubscription: (data: CancelSubscriptionEmailDto) => send('subscriptionCanceled', data),
-  sendDeletedSubscription: (data: DeleteSubscriptionEmailDto) => send('subscriptionDeleted', data),
-  sendPaymentAttemptFailed: (data: PaymentAttemptFailedEmailDto) => send('paymentFailed', data),
-  sendSubscriptionStarted: (data: SubscriptionStartedEmailDto) => send('subscriptionStarted', data),
+  sendSigningKey: (data: SendSigningKeyEmailDto, idempotencyKey?: string) => send('signingKey', data, idempotencyKey),
+  sendCanceledSubscription: (data: CancelSubscriptionEmailDto, idempotencyKey?: string) => send('subscriptionCanceled', data, idempotencyKey),
+  sendDeletedSubscription: (data: DeleteSubscriptionEmailDto, idempotencyKey?: string) => send('subscriptionDeleted', data, idempotencyKey),
+  sendPaymentAttemptFailed: (data: PaymentAttemptFailedEmailDto, idempotencyKey?: string) => send('paymentFailed', data, idempotencyKey),
+  sendSubscriptionStarted: (data: SubscriptionStartedEmailDto, idempotencyKey?: string) => send('subscriptionStarted', data, idempotencyKey),
 }

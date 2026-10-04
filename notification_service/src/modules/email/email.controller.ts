@@ -4,7 +4,7 @@ import { emailService } from './email.service'
 export const emailController = { 
   sendSigningKey: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await emailService.sendSigningKey(req.body)
+      const result = await emailService.sendSigningKey(req.body, req.get('idempotency-key'))
       res.status(200).json(result)
     } catch (err) {
       next(err)
@@ -12,7 +12,7 @@ export const emailController = {
   },
   sendCanceledSubscription: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await emailService.sendCanceledSubscription(req.body)
+      const result = await emailService.sendCanceledSubscription(req.body, req.get('idempotency-key'))
       res.status(200).json(result)
     } catch (err) {
       next(err)
@@ -20,7 +20,7 @@ export const emailController = {
   },
   sendDeletedSubscription: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await emailService.sendDeletedSubscription(req.body)
+      const result = await emailService.sendDeletedSubscription(req.body, req.get('idempotency-key'))
       res.status(200).json(result)
     } catch (err) {
       next(err)
@@ -28,7 +28,7 @@ export const emailController = {
   },
   sendPaymentAttemptFailed: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await emailService.sendPaymentAttemptFailed(req.body)
+      const result = await emailService.sendPaymentAttemptFailed(req.body, req.get('idempotency-key'))
       res.status(200).json(result)
     } catch (err) {
       next(err)
@@ -36,7 +36,7 @@ export const emailController = {
   },
   sendSubscriptionStarted: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await emailService.sendSubscriptionStarted(req.body)
+      const result = await emailService.sendSubscriptionStarted(req.body, req.get('idempotency-key'))
       res.status(200).json(result)
     } catch (err) {
       next(err)
