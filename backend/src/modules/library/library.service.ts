@@ -30,9 +30,7 @@ export const libraryService = {
     return { response: { libraryItem } }
   },
   revokeLibraryAccess: async (subscriptionId: string) => {
-    const libraryItem = await libraryRepo.cancelBySubscription(
-      subscriptionId
-    )
+    const libraryItem = await libraryRepo.cancelBySubscription(subscriptionId)
     return { response: { libraryItem } }
   },
 }
