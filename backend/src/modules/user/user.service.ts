@@ -31,12 +31,31 @@ export const userService = {
       const target = await tx.user.findUnique({ where: { id: userId } })
       if (!target) throw ApiError(404, 'USER_NOT_FOUND', 'User not found')
       if (target.role === role) return
-      if (target.role === 'admin' && !target.deactivatedAt && role !== 'admin') {
-        const admins = await tx.user.count({ where: { role: 'admin', deactivatedAt: null } })
-        if (admins <= 1) throw ApiError(409, 'LAST_ADMIN', 'At least one active administrator is required')
+      if (
+        target.role === 'admin' &&
+        !target.deactivatedAt &&
+        role !== 'admin'
+      ) {
+        const admins = await tx.user.count({
+          where: { role: 'admin', deactivatedAt: null },
+        })
+        if (admins <= 1)
+          throw ApiError(
+            409,
+            'LAST_ADMIN',
+            'At least one active administrator is required'
+          )
       }
       await tx.user.update({ where: { id: userId }, data: { role } })
-      await auditRepo.record({ actorUserId: myId, action: 'user_role_changed', targetUserId: userId, meta: { from: target.role, to: role } }, tx)
+      await auditRepo.record(
+        {
+          actorUserId: myId,
+          action: 'user_role_changed',
+          targetUserId: userId,
+          meta: { from: target.role, to: role },
+        },
+        tx
+      )
     })
 
     return { response: { newRole: role } }

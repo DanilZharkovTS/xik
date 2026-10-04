@@ -1,10 +1,17 @@
-import { NextFunction, Request, Response } from "express"
-import { billingService } from "./billing.service.js"
+import { NextFunction, Request, Response } from 'express'
+import { billingService } from './billing.service.js'
 
 export const billingController = {
-  redirectToCkeckout: async (req: Request, res: Response, next: NextFunction) => {
+  redirectToCkeckout: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const result = await billingService.createCheckoutSession(req.user, req.validData!.body)
+      const result = await billingService.createCheckoutSession(
+        req.user,
+        req.validData!.body
+      )
       res.status(200).json(result.response)
     } catch (err) {
       next(err)
@@ -19,5 +26,5 @@ export const billingController = {
       console.error('Controller error in stripeWebhook:', err)
       next(err)
     }
-  }
+  },
 }

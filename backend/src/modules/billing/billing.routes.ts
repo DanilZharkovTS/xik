@@ -13,5 +13,4 @@ router.post(
   billingController.redirectToCkeckout
 )
 
-
 export default router

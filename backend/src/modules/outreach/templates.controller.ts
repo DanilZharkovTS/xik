@@ -21,19 +21,33 @@ export const templatesController = {
   list: handle((req) =>
     templatesService.list(req.user, req.product!.id, req.validData!.query)
   ),
-  get: handle((req) => templatesService.get(req.user, req.product!.id, idOf(req))),
+  get: handle((req) =>
+    templatesService.get(req.user, req.product!.id, idOf(req))
+  ),
   create: handle(
-    (req) => templatesService.create(req.user, req.product!.id, req.validData!.body),
+    (req) =>
+      templatesService.create(req.user, req.product!.id, req.validData!.body),
     201
   ),
   update: handle((req) =>
-    templatesService.update(req.user, req.product!.id, idOf(req), req.validData!.body)
+    templatesService.update(
+      req.user,
+      req.product!.id,
+      idOf(req),
+      req.validData!.body
+    )
   ),
-  archive: handle((req) => templatesService.archive(req.user, req.product!.id, idOf(req))),
-  restore: handle((req) => templatesService.restore(req.user, req.product!.id, idOf(req))),
+  archive: handle((req) =>
+    templatesService.archive(req.user, req.product!.id, idOf(req))
+  ),
+  restore: handle((req) =>
+    templatesService.restore(req.user, req.product!.id, idOf(req))
+  ),
   duplicate: handle(
     (req) => templatesService.duplicate(req.user, req.product!.id, idOf(req)),
     201
   ),
-  remove: handle((req) => templatesService.remove(req.user, req.product!.id, idOf(req))),
+  remove: handle((req) =>
+    templatesService.remove(req.user, req.product!.id, idOf(req))
+  ),
 }

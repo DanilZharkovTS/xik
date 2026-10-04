@@ -14,12 +14,17 @@ export const app = express()
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
     credentials: true,
   })
 )
 
-app.post('/billing/webhook', express.raw({ type: 'application/json' }), billingMiddlewares.validateWebhookSignature, billingController.stripeWebhook)
+app.post(
+  '/billing/webhook',
+  express.raw({ type: 'application/json' }),
+  billingMiddlewares.validateWebhookSignature,
+  billingController.stripeWebhook
+)
 
 // Зображення статей лежать на сервері; назви файлів незмінні (містять випадковий id), тож кеш довгий.
 app.use(
@@ -56,4 +61,3 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`Example app listening on port ${PORT}!`)
   })
 }
-

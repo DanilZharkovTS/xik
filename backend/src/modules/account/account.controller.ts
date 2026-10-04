@@ -12,7 +12,10 @@ export const accountController = {
   },
   updateProfile: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await accountService.updateProfile(req.user, req.validData!.body)
+      const result = await accountService.updateProfile(
+        req.user,
+        req.validData!.body
+      )
       res.status(200).json(result.response)
     } catch (err) {
       next(err)
@@ -20,7 +23,10 @@ export const accountController = {
   },
   listLibrary: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await accountService.listLibrary(req.user, req.validData!.query.lang)
+      const result = await accountService.listLibrary(
+        req.user,
+        req.validData!.query.lang
+      )
       res.status(200).json(result.response)
     } catch (err) {
       next(err)
@@ -28,7 +34,10 @@ export const accountController = {
   },
   listSaved: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await accountService.listSaved(req.user, req.validData!.query.lang)
+      const result = await accountService.listSaved(
+        req.user,
+        req.validData!.query.lang
+      )
       res.status(200).json(result.response)
     } catch (err) {
       next(err)

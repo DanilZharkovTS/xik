@@ -11,9 +11,7 @@ export const userRepo = {
     })
     return user
   },
-  findUsersByName: async (
-    data: FindUsersDto
-  ) => {
+  findUsersByName: async (data: FindUsersDto) => {
     const users = await prisma.user.findMany({
       where: data.name
         ? {
@@ -35,7 +33,14 @@ export const userRepo = {
         : {}),
 
       take: 50,
-      select: { id: true, email: true, name: true, role: true, createdAt: true, deactivatedAt: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        deactivatedAt: true,
+      },
 
       orderBy: [
         {
@@ -55,7 +60,7 @@ export const userRepo = {
         id: userId,
       },
       data: {
-        role
+        role,
       },
     })
   },

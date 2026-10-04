@@ -35,14 +35,15 @@ export const PRODUCT_CURRENCIES = [
   'UAH',
 ] as const
 
-export const PRODUCT_BILLING_PERIODS = [
-  'week',
-  'month',
-  'year',
-] as const
+export const PRODUCT_BILLING_PERIODS = ['week', 'month', 'year'] as const
 export const PRODUCT_KINDS = ['product', 'agent'] as const
 
-export const PRODUCT_STATUSES = ['production', 'active', 'beta', 'build'] as const
+export const PRODUCT_STATUSES = [
+  'production',
+  'active',
+  'beta',
+  'build',
+] as const
 
 // Мови контенту. Англійська обовʼязкова й живе в основних полях; es і uk лежать у translations.
 export const CONTENT_LOCALES = ['en', 'es', 'uk'] as const

@@ -1,6 +1,6 @@
-import { UserRole } from "../user/user.types.js"
+import { UserRole } from '../user/user.types.js'
 
-  export interface Session {
+export interface Session {
   id: string
   userId: string
 
@@ -22,7 +22,7 @@ export interface RefreshToken {
   revoked_at: Date | null
 }
 
-export interface TokenPayload  {
+export interface TokenPayload {
   id: string
   email: string
   role: UserRole

@@ -3,7 +3,12 @@ import { createHash, randomBytes } from 'node:crypto'
 import { UserRole } from '../../modules/user/user.types.js'
 
 export const tokenService = {
-  generateAccess: async (userId: string, email: string,role: UserRole, sessionId: string) => {
+  generateAccess: async (
+    userId: string,
+    email: string,
+    role: UserRole,
+    sessionId: string
+  ) => {
     const token = jwt.sign(
       {
         id: userId,

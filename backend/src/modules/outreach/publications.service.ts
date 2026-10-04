@@ -3,10 +3,7 @@ import { ApiError } from '../../shared/utils/ApiError.js'
 import type { TokenPayload } from '../auth/auth.types.js'
 import { normalizePublicationUrl } from './normalizers.js'
 import { publicationsRepo } from './publications.repo.js'
-import type {
-  AddPublicationDto,
-  ListPublicationsDto,
-} from './events.schema.js'
+import type { AddPublicationDto, ListPublicationsDto } from './events.schema.js'
 
 interface PublicationRow {
   id: string
@@ -37,7 +34,11 @@ export const publicationsService = {
     const urlNormalized = normalizePublicationUrl(dto.url)
 
     if (!urlNormalized) {
-      throw ApiError(400, 'INVALID_URL', 'Enter a valid http(s) link to the publication')
+      throw ApiError(
+        400,
+        'INVALID_URL',
+        'Enter a valid http(s) link to the publication'
+      )
     }
 
     try {
@@ -55,11 +56,17 @@ export const publicationsService = {
       return { status: 201, response: { publication: toDto(event) } }
     } catch (err) {
       // Часткований унікальний індекс: однакова публікація вже записана (можливо, щойно).
-      if (!(err instanceof Prisma.PrismaClientKnownRequestError) || err.code !== 'P2002') {
+      if (
+        !(err instanceof Prisma.PrismaClientKnownRequestError) ||
+        err.code !== 'P2002'
+      ) {
         throw err
       }
 
-      const existing = await publicationsRepo.findByUrl(productId, urlNormalized)
+      const existing = await publicationsRepo.findByUrl(
+        productId,
+        urlNormalized
+      )
 
       return {
         status: 409,

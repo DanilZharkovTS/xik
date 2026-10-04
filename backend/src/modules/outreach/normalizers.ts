@@ -64,7 +64,11 @@ const PATH_PLATFORMS = new Set([
 ])
 
 // Сайти, де ціль це піддомен: acme.substack.com та other.substack.com різні.
-const SUBDOMAIN_PLATFORMS = new Set(['substack.com', 'tumblr.com', 'bubbleapps.io'])
+const SUBDOMAIN_PLATFORMS = new Set([
+  'substack.com',
+  'tumblr.com',
+  'bubbleapps.io',
+])
 
 // Параметри, що змінюють сторінку на Facebook. Решта (fbclid, utm_*, ref) це сміття.
 const FACEBOOK_KEPT_PARAMS = ['id', 'story_fbid']
@@ -73,7 +77,9 @@ const toUrl = (raw: string): URL | null => {
   if (/\s/.test(raw)) return null
 
   try {
-    return new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`)
+    return new URL(
+      /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`
+    )
   } catch {
     return null
   }
@@ -111,8 +117,7 @@ const telegramUsernameFrom = (raw: string): string | null => {
 }
 
 const telegram = (raw: string, isExplicit: boolean): string | null => {
-  const found =
-    telegramUsernameFrom(raw) ?? (isExplicit ? raw.trim() : null)
+  const found = telegramUsernameFrom(raw) ?? (isExplicit ? raw.trim() : null)
   const name = found?.toLowerCase()
 
   // Інвайти (t.me/+hash, t.me/joinchat/...) не юзернейми, їх відсікає перевірка формату.
@@ -177,14 +182,16 @@ const website = (raw: string): string | null => {
   return domain
 }
 
-const normalizers: Record<Channel, (raw: string, isExplicit: boolean) => string | null> =
-  {
-    telegram,
-    email: (raw) => email(raw),
-    linkedin: (raw) => linkedin(raw),
-    facebook: (raw) => facebook(raw),
-    website: (raw) => website(raw),
-  }
+const normalizers: Record<
+  Channel,
+  (raw: string, isExplicit: boolean) => string | null
+> = {
+  telegram,
+  email: (raw) => email(raw),
+  linkedin: (raw) => linkedin(raw),
+  facebook: (raw) => facebook(raw),
+  website: (raw) => website(raw),
+}
 
 export const isChannel = (value: string): value is Channel =>
   (CHANNELS as readonly string[]).includes(value)
@@ -221,7 +228,10 @@ export const parseIdentifier = (
 }
 
 // Посилання, за яким менеджер відкриває ціль одним дотиком.
-export const identifierHref = ({ channel, value }: NormalizedIdentifier): string => {
+export const identifierHref = ({
+  channel,
+  value,
+}: NormalizedIdentifier): string => {
   switch (channel) {
     case 'telegram':
       return `https://t.me/${value}`
@@ -247,7 +257,12 @@ export const PUBLICATION_CHANNELS = [
 
 export type PublicationChannel = (typeof PUBLICATION_CHANNELS)[number]
 
-export const PUBLICATION_KINDS = ['post', 'ad', 'article', 'link_in_offer'] as const
+export const PUBLICATION_KINDS = [
+  'post',
+  'ad',
+  'article',
+  'link_in_offer',
+] as const
 
 export type PublicationKind = (typeof PUBLICATION_KINDS)[number]
 

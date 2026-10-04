@@ -48,7 +48,10 @@ export const eventsService = {
     targetId: string,
     dto: AddEventDto
   ) => {
-    const template = await templatesService.resolveForEvent(productId, dto.templateId)
+    const template = await templatesService.resolveForEvent(
+      productId,
+      dto.templateId
+    )
 
     await prisma.$transaction(async (tx) => {
       const target = await lockOrThrow(actor, productId, targetId, tx)
@@ -96,7 +99,11 @@ export const eventsService = {
       const target = await lockOrThrow(actor, productId, targetId, tx)
 
       if (!canMarkDoNotContact(actor, target)) {
-        throw ApiError(409, 'ALREADY_DO_NOT_CONTACT', 'Target is already marked do not contact')
+        throw ApiError(
+          409,
+          'ALREADY_DO_NOT_CONTACT',
+          'Target is already marked do not contact'
+        )
       }
 
       const reason = dto.reason || null
@@ -132,7 +139,11 @@ export const eventsService = {
       const target = await lockOrThrow(actor, productId, targetId, tx)
 
       if (!canRelease(actor, target)) {
-        throw ApiError(409, 'NOT_DO_NOT_CONTACT', 'Target is not marked do not contact')
+        throw ApiError(
+          409,
+          'NOT_DO_NOT_CONTACT',
+          'Target is not marked do not contact'
+        )
       }
 
       await targetsRepo.setStatus(targetId, 'active', null, tx)

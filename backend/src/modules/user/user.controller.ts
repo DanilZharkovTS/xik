@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express"
-import { userService } from "./user.service.js"
+import { NextFunction, Request, Response } from 'express'
+import { userService } from './user.service.js'
 
 export const userController = {
   findUsers: async (req: Request, res: Response, next: NextFunction) => {

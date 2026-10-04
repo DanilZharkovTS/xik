@@ -125,19 +125,17 @@ export const createProductSchema = z.object({
 })
 
 // Часткове оновлення: значення за замовчуванням тут не застосовуються.
-export const updateProductSchema = createProductSchema
-  .partial()
-  .extend({
-    // partial() зберігає .default(), тому без цього відсутнє поле перезаписало б існуюче.
-    kind: z.enum(PRODUCT_KINDS).optional(),
-    status: z.enum(PRODUCT_STATUSES).optional(),
-    highlights: z.array(z.string().trim().min(1).max(80)).max(8).optional(),
-    capabilities: z.array(capability).max(12).optional(),
-    protocols: z.array(z.string().trim().min(1).max(40)).max(12).optional(),
-    sortOrder: z.number().int().min(0).max(9999).optional(),
-    showPrice: z.boolean().optional(),
-    translations: translationsSchema.optional(),
-  })
+export const updateProductSchema = createProductSchema.partial().extend({
+  // partial() зберігає .default(), тому без цього відсутнє поле перезаписало б існуюче.
+  kind: z.enum(PRODUCT_KINDS).optional(),
+  status: z.enum(PRODUCT_STATUSES).optional(),
+  highlights: z.array(z.string().trim().min(1).max(80)).max(8).optional(),
+  capabilities: z.array(capability).max(12).optional(),
+  protocols: z.array(z.string().trim().min(1).max(40)).max(12).optional(),
+  sortOrder: z.number().int().min(0).max(9999).optional(),
+  showPrice: z.boolean().optional(),
+  translations: translationsSchema.optional(),
+})
 
 //dto
 

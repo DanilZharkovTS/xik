@@ -43,7 +43,12 @@ export const optimizeImage = async (
   try {
     const pipeline = sharp(input, { limitInputPixels: MAX_PIXELS })
       .rotate()
-      .resize({ width: MAX_SIDE, height: MAX_SIDE, fit: 'inside', withoutEnlargement: true })
+      .resize({
+        width: MAX_SIDE,
+        height: MAX_SIDE,
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
 
     const encoded =
       ext === 'jpg'
@@ -55,18 +60,27 @@ export const optimizeImage = async (
     const { data, info } = await encoded.toBuffer({ resolveWithObject: true })
     const wasResized = Math.max(size.width, size.height) > MAX_SIDE
 
-    if (data.length >= input.length && !wasResized) return { body: input, ...size }
+    if (data.length >= input.length && !wasResized)
+      return { body: input, ...size }
 
     return { body: data, width: info.width, height: info.height }
   } catch {
-    throw ApiError(415, 'UNSUPPORTED_MEDIA_TYPE', 'The image could not be processed')
+    throw ApiError(
+      415,
+      'UNSUPPORTED_MEDIA_TYPE',
+      'The image could not be processed'
+    )
   }
 }
 
 export const mediaService = {
   upload: async (user: TokenPayload, body: unknown) => {
     if (!Buffer.isBuffer(body) || body.length === 0) {
-      throw ApiError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Send a JPEG, PNG, WebP or GIF image as the request body')
+      throw ApiError(
+        415,
+        'UNSUPPORTED_MEDIA_TYPE',
+        'Send a JPEG, PNG, WebP or GIF image as the request body'
+      )
     }
 
     if (body.length > MAX_UPLOAD_BYTES) {
@@ -78,23 +92,42 @@ export const mediaService = {
     try {
       info = imageSize(body)
     } catch {
-      throw ApiError(415, 'UNSUPPORTED_MEDIA_TYPE', 'The file is not a valid image')
+      throw ApiError(
+        415,
+        'UNSUPPORTED_MEDIA_TYPE',
+        'The file is not a valid image'
+      )
     }
 
     const type = TYPES[info.type as keyof typeof TYPES]
 
     if (!type || !info.width || !info.height) {
-      throw ApiError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Only JPEG, PNG, WebP and GIF are allowed')
+      throw ApiError(
+        415,
+        'UNSUPPORTED_MEDIA_TYPE',
+        'Only JPEG, PNG, WebP and GIF are allowed'
+      )
     }
 
     if (info.width > MAX_DIMENSION || info.height > MAX_DIMENSION) {
-      throw ApiError(413, 'IMAGE_TOO_LARGE', `Image is larger than ${MAX_DIMENSION}px`)
+      throw ApiError(
+        413,
+        'IMAGE_TOO_LARGE',
+        `Image is larger than ${MAX_DIMENSION}px`
+      )
     }
 
-    const processed = await optimizeImage(body, type.ext, { width: info.width, height: info.height })
+    const processed = await optimizeImage(body, type.ext, {
+      width: info.width,
+      height: info.height,
+    })
 
     if (processed.body.length > MAX_STORED_BYTES) {
-      throw ApiError(413, 'IMAGE_TOO_LARGE', 'Image is larger than 8 MB even after compression')
+      throw ApiError(
+        413,
+        'IMAGE_TOO_LARGE',
+        'Image is larger than 8 MB even after compression'
+      )
     }
 
     const now = new Date()
@@ -127,7 +160,13 @@ export const mediaService = {
       prisma.mediaAsset.count(),
     ])
 
-    return { response: { assets: items.map(toAssetDto), total, pages: Math.max(1, Math.ceil(total / take)) } }
+    return {
+      response: {
+        assets: items.map(toAssetDto),
+        total,
+        pages: Math.max(1, Math.ceil(total / take)),
+      },
+    }
   },
 }
 

@@ -2,7 +2,10 @@ import { randomUUID } from 'node:crypto'
 import type { Prisma } from '../../generated/prisma/client.js'
 import { prisma } from '../../shared/database/prisma.js'
 import { productsRepo } from './products.repo.js'
-import { createProductSchema, type CreateProductDto } from './products.schema.js'
+import {
+  createProductSchema,
+  type CreateProductDto,
+} from './products.schema.js'
 
 export interface ImportResult {
   created: string[]
@@ -20,7 +23,12 @@ export async function importCatalog(
   rawItems: unknown[],
   options: { useStripe: boolean }
 ): Promise<ImportResult> {
-  const result: ImportResult = { created: [], skipped: [], translated: [], failed: [] }
+  const result: ImportResult = {
+    created: [],
+    skipped: [],
+    translated: [],
+    failed: [],
+  }
 
   for (const raw of rawItems) {
     const slug = String((raw as { slug?: unknown })?.slug ?? '?')
@@ -29,7 +37,11 @@ export async function importCatalog(
       const parsed = createProductSchema.safeParse(raw)
 
       if (!parsed.success) {
-        throw new Error(parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '))
+        throw new Error(
+          parsed.error.issues
+            .map((i) => `${i.path.join('.')}: ${i.message}`)
+            .join('; ')
+        )
       }
 
       const data: CreateProductDto = parsed.data
@@ -40,7 +52,8 @@ export async function importCatalog(
       })
 
       if (existing) {
-        const hasOwn = Object.keys((existing.translations ?? {}) as object).length > 0
+        const hasOwn =
+          Object.keys((existing.translations ?? {}) as object).length > 0
 
         if (!hasOwn && Object.keys(data.translations).length > 0) {
           await prisma.product.update({
@@ -65,7 +78,9 @@ export async function importCatalog(
       result.created.push(data.slug)
     } catch (err) {
       const message =
-        err && typeof err === 'object' && 'message' in err ? String((err as { message: unknown }).message) : String(err)
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message: unknown }).message)
+          : String(err)
       result.failed.push({ slug, error: message })
     }
   }
