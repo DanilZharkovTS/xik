@@ -65,14 +65,19 @@ const ADMIN_ONLY_IN_PRODUCT: Array<[Method, string]> = [
   ['delete', '/api/outreach/templates/x'],
 ]
 
-const send = (method: Method, path: string, headers: Record<string, string> = {}) =>
-  api()[method](path).set(headers).send({})
+const send = (
+  method: Method,
+  path: string,
+  headers: Record<string, string> = {}
+) => api()[method](path).set(headers).send({})
 
 const setup = async () => {
   const admin = await createUser('admin', 'admin@test.io')
   await createUser('moderator', 'mod@test.io')
   await createUser('user', 'buyer@test.io')
-  const mod = await prisma.user.findFirstOrThrow({ where: { email: 'mod@test.io' } })
+  const mod = await prisma.user.findFirstOrThrow({
+    where: { email: 'mod@test.io' },
+  })
   const product = await createProduct('A')
   await grant(mod.id, product.id, admin.id)
   return {
@@ -84,16 +89,21 @@ const setup = async () => {
 }
 
 describe('кожен ендпоінт журналу закритий від сторонніх', () => {
-  it.each([...PRODUCT_ROUTES, ...ADMIN_ONLY_ROUTES])('%s %s без токена 401', async (method, path) => {
-    const res = await send(method, path)
+  it.each([...PRODUCT_ROUTES, ...ADMIN_ONLY_ROUTES])(
+    '%s %s без токена 401',
+    async (method, path) => {
+      const res = await send(method, path)
 
-    expect(res.status).toBe(401)
-  })
+      expect(res.status).toBe(401)
+    }
+  )
 
   it.each([...PRODUCT_ROUTES, ...ADMIN_ONLY_ROUTES])(
     '%s %s з невалідним токеном 401',
     async (method, path) => {
-      const res = await send(method, path, { Authorization: 'Bearer not.a.token' })
+      const res = await send(method, path, {
+        Authorization: 'Bearer not.a.token',
+      })
 
       expect(res.status).toBe(401)
     }
@@ -210,12 +220,22 @@ describe('логи без секретів', () => {
   it('помилка при створенні модератора не пише пароль у лог', async () => {
     const { admin } = await setup()
     const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    const body = { email: 'dup@test.io', name: 'Dup', password: 'super-secret-pass' }
+    const body = {
+      email: 'dup@test.io',
+      name: 'Dup',
+      password: 'super-secret-pass',
+    }
 
-    await api().post('/api/team/moderators').set(auth(admin)).send(body).expect(201)
+    await api()
+      .post('/api/team/moderators')
+      .set(auth(admin))
+      .send(body)
+      .expect(201)
     await api().post('/api/team/moderators').set(auth(admin)).send(body)
 
-    const logged = spy.mock.calls.map((call) => call.map(String).join(' ')).join('\n')
+    const logged = spy.mock.calls
+      .map((call) => call.map(String).join(' '))
+      .join('\n')
     spy.mockRestore()
 
     expect(logged).not.toContain('super-secret-pass')

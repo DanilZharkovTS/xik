@@ -66,7 +66,11 @@ export const loginOk = async (email: string, password = 'password-123') => {
   return result
 }
 
-export const grant = async (userId: string, productId: string, grantedById: string) => {
+export const grant = async (
+  userId: string,
+  productId: string,
+  grantedById: string
+) => {
   return prisma.productMembership.create({
     data: { userId, productId, grantedById },
   })

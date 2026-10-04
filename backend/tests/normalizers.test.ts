@@ -56,7 +56,10 @@ describe('email', () => {
 describe('linkedin', () => {
   check('linkedin', [
     ['https://www.linkedin.com/in/John-Doe/', 'linkedin.com/in/john-doe'],
-    ['linkedin.com/in/john-doe?utm_source=share&utm_medium=ios', 'linkedin.com/in/john-doe'],
+    [
+      'linkedin.com/in/john-doe?utm_source=share&utm_medium=ios',
+      'linkedin.com/in/john-doe',
+    ],
     ['https://ua.linkedin.com/in/john-doe#about', 'linkedin.com/in/john-doe'],
     ['https://m.linkedin.com/company/Acme', 'linkedin.com/company/acme'],
     ['https://linkedin.com/', null],
@@ -67,10 +70,16 @@ describe('linkedin', () => {
 describe('facebook', () => {
   check('facebook', [
     ['https://www.facebook.com/John.Doe/', 'facebook.com/john.doe'],
-    ['https://m.facebook.com/john.doe?fbclid=abc&ref=bookmarks', 'facebook.com/john.doe'],
+    [
+      'https://m.facebook.com/john.doe?fbclid=abc&ref=bookmarks',
+      'facebook.com/john.doe',
+    ],
     ['https://web.facebook.com/john.doe', 'facebook.com/john.doe'],
     ['https://fb.com/john.doe', 'facebook.com/john.doe'],
-    ['https://www.facebook.com/profile.php?id=100001&fbclid=x', 'facebook.com/profile.php?id=100001'],
+    [
+      'https://www.facebook.com/profile.php?id=100001&fbclid=x',
+      'facebook.com/profile.php?id=100001',
+    ],
     ['facebook.com/', null],
     ['https://example.com/john', null],
   ])
@@ -120,12 +129,16 @@ describe('автовизначення каналу', () => {
     expect(parseIdentifier(input)).toEqual({ channel, value })
   })
 
-  it.each(['', '   ', 'durov', 'just words here', 'http://localhost', 'x'.repeat(3000)])(
-    'не визначається: %j',
-    (input) => {
-      expect(parseIdentifier(input)).toBeNull()
-    }
-  )
+  it.each([
+    '',
+    '   ',
+    'durov',
+    'just words here',
+    'http://localhost',
+    'x'.repeat(3000),
+  ])('не визначається: %j', (input) => {
+    expect(parseIdentifier(input)).toBeNull()
+  })
 
   it('канал можна задати вручну для голого юзернейма', () => {
     expect(parseIdentifier('durov', 'telegram')).toEqual({
@@ -135,9 +148,12 @@ describe('автовизначення каналу', () => {
   })
 
   it('різні записи одного Telegram дають одне значення', () => {
-    const values = ['@Durov', 't.me/durov', 'https://t.me/DUROV/', 'tg://resolve?domain=durov'].map(
-      (v) => parseIdentifier(v)?.value
-    )
+    const values = [
+      '@Durov',
+      't.me/durov',
+      'https://t.me/DUROV/',
+      'tg://resolve?domain=durov',
+    ].map((v) => parseIdentifier(v)?.value)
     expect(new Set(values).size).toBe(1)
   })
 })
@@ -146,8 +162,14 @@ describe('посилання для відкриття', () => {
   it.each([
     [{ channel: 'telegram', value: 'durov' }, 'https://t.me/durov'],
     [{ channel: 'email', value: 'a@b.com' }, 'mailto:a@b.com'],
-    [{ channel: 'linkedin', value: 'linkedin.com/in/john' }, 'https://linkedin.com/in/john'],
-    [{ channel: 'facebook', value: 'facebook.com/john' }, 'https://facebook.com/john'],
+    [
+      { channel: 'linkedin', value: 'linkedin.com/in/john' },
+      'https://linkedin.com/in/john',
+    ],
+    [
+      { channel: 'facebook', value: 'facebook.com/john' },
+      'https://facebook.com/john',
+    ],
     [{ channel: 'website', value: 'company.com' }, 'https://company.com'],
   ] as const)('%j', (identifier, href) => {
     expect(identifierHref(identifier)).toBe(href)
@@ -156,27 +178,39 @@ describe('посилання для відкриття', () => {
 
 describe('нормалізація URL публікацій', () => {
   it.each([
-    ['https://www.instagram.com/p/AbC123/?igsh=xyz&utm_source=ig', 'instagram.com/p/AbC123'],
+    [
+      'https://www.instagram.com/p/AbC123/?igsh=xyz&utm_source=ig',
+      'instagram.com/p/AbC123',
+    ],
     ['https://instagram.com/p/AbC123', 'instagram.com/p/AbC123'],
-    ['https://m.facebook.com/story.php?story_fbid=9&id=1&fbclid=zz', 'facebook.com/story.php?id=1&story_fbid=9'],
+    [
+      'https://m.facebook.com/story.php?story_fbid=9&id=1&fbclid=zz',
+      'facebook.com/story.php?id=1&story_fbid=9',
+    ],
     ['https://youtu.be/dQw4w9WgXcQ?si=abc', 'youtu.be/dQw4w9WgXcQ'],
     ['https://www.threads.net/@acme/post/XyZ/', 'threads.net/@acme/post/XyZ'],
     ['  https://Example.COM/Article#section  ', 'example.com/Article'],
   ])('%s -> %s', async (input, expected) => {
-    const { normalizePublicationUrl } = await import('../src/modules/outreach/normalizers.js')
+    const { normalizePublicationUrl } =
+      await import('../src/modules/outreach/normalizers.js')
     expect(normalizePublicationUrl(input)).toBe(expected)
   })
 
-  it.each(['javascript:alert(1)', 'ftp://example.com/x', 'not a url', 'http://localhost/x', ''])(
-    'відхиляє %j',
-    async (input) => {
-      const { normalizePublicationUrl } = await import('../src/modules/outreach/normalizers.js')
-      expect(normalizePublicationUrl(input)).toBeNull()
-    }
-  )
+  it.each([
+    'javascript:alert(1)',
+    'ftp://example.com/x',
+    'not a url',
+    'http://localhost/x',
+    '',
+  ])('відхиляє %j', async (input) => {
+    const { normalizePublicationUrl } =
+      await import('../src/modules/outreach/normalizers.js')
+    expect(normalizePublicationUrl(input)).toBeNull()
+  })
 
   it('регістр шляху зберігається: коди дописів чутливі до регістру', async () => {
-    const { normalizePublicationUrl } = await import('../src/modules/outreach/normalizers.js')
+    const { normalizePublicationUrl } =
+      await import('../src/modules/outreach/normalizers.js')
     expect(normalizePublicationUrl('https://instagram.com/p/AbC')).not.toBe(
       normalizePublicationUrl('https://instagram.com/p/abc')
     )
