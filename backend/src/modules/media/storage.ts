@@ -10,10 +10,14 @@ export interface Storage {
   put: (key: string, body: Buffer, contentType: string) => Promise<string>
 }
 
-export const mediaDir = (): string => path.resolve(process.env.MEDIA_DIR ?? 'media')
+export const mediaDir = (): string =>
+  path.resolve(process.env.MEDIA_DIR ?? 'media')
 
 const mediaUrl = (): string =>
-  (process.env.MEDIA_URL ?? `http://localhost:${process.env.PORT ?? 5001}/media`).replace(/\/$/, '')
+  (
+    process.env.MEDIA_URL ??
+    `http://localhost:${process.env.PORT ?? 5001}/media`
+  ).replace(/\/$/, '')
 
 // Resolve existing local assets against the current public domain as well as new uploads.
 export const publicAssetUrl = (asset: { key?: string; url: string }): string =>
@@ -33,7 +37,10 @@ export const storage: Storage = {
       await mkdir(path.dirname(file), { recursive: true })
       await writeFile(file, body)
     } catch (err) {
-      console.error('Media write failed:', err instanceof Error ? err.message : err)
+      console.error(
+        'Media write failed:',
+        err instanceof Error ? err.message : err
+      )
       throw ApiError(
         502,
         'STORAGE_UNAVAILABLE',
