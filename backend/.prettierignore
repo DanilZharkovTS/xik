@@ -2,3 +2,12 @@ dist
 node_modules
 src/generated
 coverage
+.agents
+.claude
+.cursor
+.devin
+prisma
+media
+*.md
+*.json
+package-lock.json
