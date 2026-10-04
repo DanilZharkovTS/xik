@@ -25,15 +25,7 @@ export type ProductCategory =
   | 'lifestyle'
 
 export type ProductCurrency =
-  | 'USD'
-  | 'EUR'
-  | 'GBP'
-  | 'CAD'
-  | 'AUD'
-  | 'JPY'
-  | 'CHF'
-  | 'CNY'
-  | 'UAH'
+  'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY' | 'CHF' | 'CNY' | 'UAH'
 
 export type ProductBillingPeriod = 'week' | 'month' | 'year'
 
