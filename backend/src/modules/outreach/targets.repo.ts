@@ -26,7 +26,11 @@ export const targetsRepo = {
   ) => {
     const identifier = await db.outreachIdentifier.findUnique({
       where: {
-        productId_channel_valueNormalized: { productId, channel, valueNormalized },
+        productId_channel_valueNormalized: {
+          productId,
+          channel,
+          valueNormalized,
+        },
       },
       select: {
         target: {
@@ -97,11 +101,7 @@ export const targetsRepo = {
     await db.outreachEvent.create({ data })
   },
   // Блокує рядок цілі до кінця транзакції: зміна статусу й додавання події не перегоняють одне одного.
-  lockTarget: async (
-    productId: string,
-    targetId: string,
-    db: DbClient
-  ) => {
+  lockTarget: async (productId: string, targetId: string, db: DbClient) => {
     const rows = await db.$queryRaw<
       { id: string; ownerUserId: string; status: 'active' | 'do_not_contact' }[]
     >`

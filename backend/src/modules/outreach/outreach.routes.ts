@@ -41,7 +41,9 @@ const writeLimiter = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   handler: (req, res, next) =>
-    next(ApiError(429, 'RATE_LIMITED', 'Too many requests, try again in a minute')),
+    next(
+      ApiError(429, 'RATE_LIMITED', 'Too many requests, try again in a minute')
+    ),
 })
 
 // Усе тут працює в межах продукту, який сервер звіряє з членством користувача.
@@ -61,11 +63,7 @@ router.post(
   targetsController.register
 )
 
-router.get(
-  '/targets',
-  validateQuery(listTargetsSchema),
-  targetsController.list
-)
+router.get('/targets', validateQuery(listTargetsSchema), targetsController.list)
 
 router.get(
   '/targets/:targetId',

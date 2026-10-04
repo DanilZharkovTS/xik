@@ -77,7 +77,10 @@ export const targetsService = {
     dto: RegisterTargetDto
   ) => {
     const normalized = parseOrThrow(dto)
-    const template = await templatesService.resolveForEvent(productId, dto.templateId)
+    const template = await templatesService.resolveForEvent(
+      productId,
+      dto.templateId
+    )
     const now = new Date()
 
     try {
@@ -146,37 +149,60 @@ export const targetsService = {
     dto: AddIdentifierDto
   ) => {
     const normalized = parseOrThrow(dto)
-    return prisma.$transaction(async (tx) => {
-      const target = await targetsRepo.lockTarget(productId, targetId, tx)
+    return prisma
+      .$transaction(async (tx) => {
+        const target = await targetsRepo.lockTarget(productId, targetId, tx)
 
-      if (!target) {
-        throw ApiError(404, 'TARGET_NOT_FOUND', 'Target not found')
-      }
+        if (!target) {
+          throw ApiError(404, 'TARGET_NOT_FOUND', 'Target not found')
+        }
 
-      if (!canViewDetails(actor, target)) {
-        throw ApiError(403, 'FORBIDDEN', 'This target belongs to another moderator')
-      }
+        if (!canViewDetails(actor, target)) {
+          throw ApiError(
+            403,
+            'FORBIDDEN',
+            'This target belongs to another moderator'
+          )
+        }
 
-      if (!canModify(actor, target)) {
-        throw ApiError(409, 'TARGET_BLOCKED', 'Do not contact: target cannot be changed')
-      }
+        if (!canModify(actor, target)) {
+          throw ApiError(
+            409,
+            'TARGET_BLOCKED',
+            'Do not contact: target cannot be changed'
+          )
+        }
 
-      const isFree = await targetsRepo.insertIdentifierIfFree({
-        targetId,
-        productId,
-        channel: normalized.channel,
-        valueNormalized: normalized.value,
-      }, tx)
+        const isFree = await targetsRepo.insertIdentifierIfFree(
+          {
+            targetId,
+            productId,
+            channel: normalized.channel,
+            valueNormalized: normalized.value,
+          },
+          tx
+        )
 
-      if (!isFree) {
-        throw new IdentifierTaken()
-      }
-      const detail = await targetsRepo.findDetailById(productId, targetId, tx)
-      return { status: 201, response: { target: toDetailDto(detail!, actor) } }
-    }).catch(async (err: unknown) => {
-      if (!(err instanceof IdentifierTaken)) throw err
-      return { status: 409, response: { code: 'ALREADY_REGISTERED', message: 'This identifier is already registered', ...(await lookup(actor, productId, normalized)) } }
-    })
+        if (!isFree) {
+          throw new IdentifierTaken()
+        }
+        const detail = await targetsRepo.findDetailById(productId, targetId, tx)
+        return {
+          status: 201,
+          response: { target: toDetailDto(detail!, actor) },
+        }
+      })
+      .catch(async (err: unknown) => {
+        if (!(err instanceof IdentifierTaken)) throw err
+        return {
+          status: 409,
+          response: {
+            code: 'ALREADY_REGISTERED',
+            message: 'This identifier is already registered',
+            ...(await lookup(actor, productId, normalized)),
+          },
+        }
+      })
   },
   list: async (actor: TokenPayload, productId: string, dto: ListTargetsDto) => {
     const rows = await targetsRepo.listTargets({
@@ -205,7 +231,11 @@ export const targetsService = {
     }
 
     if (!canViewDetails(actor, target)) {
-      throw ApiError(403, 'FORBIDDEN', 'This target belongs to another moderator')
+      throw ApiError(
+        403,
+        'FORBIDDEN',
+        'This target belongs to another moderator'
+      )
     }
 
     return { response: { target: toDetailDto(target, actor) } }

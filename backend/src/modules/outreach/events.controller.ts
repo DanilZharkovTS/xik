@@ -41,7 +41,11 @@ export const eventsController = {
       next(err)
     }
   },
-  createPublication: async (req: Request, res: Response, next: NextFunction) => {
+  createPublication: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const result = await publicationsService.create(
         req.user,
