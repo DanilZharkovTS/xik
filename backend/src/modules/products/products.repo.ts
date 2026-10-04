@@ -1,5 +1,5 @@
 import { Prisma } from '../../generated/prisma/client.js'
-import { prisma } from '../../shared/database/prisma.js'
+import { prisma, type DbClient } from '../../shared/database/prisma.js'
 import { Pagination } from '../../shared/types/types.js'
 import type { CreateProductDto, UpdateProductDto } from './products.schema.js'
 
@@ -67,9 +67,10 @@ export const productsRepo = {
   updateProduct: async (
     id: string,
     data: UpdateProductDto,
-    stripePriceId?: string
+    stripePriceId?: string,
+    db: DbClient = prisma
   ) => {
-    const product = await prisma.product.update({
+    const product = await db.product.update({
       where: { id },
       data: {
         ...writableFields(data),
@@ -80,29 +81,30 @@ export const productsRepo = {
   },
   setStripeIds: async (
     id: string,
-    ids: { stripeProductId?: string | null; stripePriceId?: string | null }
+    ids: { stripeProductId?: string | null; stripePriceId?: string | null },
+    db: DbClient = prisma
   ) => {
-    const product = await prisma.product.update({
+    const product = await db.product.update({
       where: { id },
       data: ids,
     })
     return product
   },
-  setArchivedAt: async (id: string, archivedAt: Date | null) => {
-    const product = await prisma.product.update({
+  setArchivedAt: async (id: string, archivedAt: Date | null, db: DbClient = prisma) => {
+    const product = await db.product.update({
       where: { id },
       data: { archivedAt },
     })
     return product
   },
-  findById: async (id: string) => {
-    const product = await prisma.product.findUnique({
+  findById: async (id: string, db: DbClient = prisma) => {
+    const product = await db.product.findUnique({
       where: { id },
     })
     return product
   },
-  findBySlugAny: async (slug: string) => {
-    const product = await prisma.product.findUnique({
+  findBySlugAny: async (slug: string, db: DbClient = prisma) => {
+    const product = await db.product.findUnique({
       where: { slug },
       select: { id: true },
     })
@@ -213,6 +215,7 @@ export const productsRepo = {
     const savedProducts = await prisma.savedProduct.findMany({
       where: {
         userId,
+        product: { archivedAt: null },
       },
       include: {
         product: true,

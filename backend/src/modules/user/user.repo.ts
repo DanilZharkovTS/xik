@@ -35,6 +35,7 @@ export const userRepo = {
         : {}),
 
       take: 50,
+      select: { id: true, email: true, name: true, role: true, createdAt: true, deactivatedAt: true },
 
       orderBy: [
         {

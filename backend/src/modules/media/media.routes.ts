@@ -28,7 +28,7 @@ router.get(
   validateQuery(z.object({ page: z.coerce.number().int().min(1).max(1000).default(1) })),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await mediaService.list(req.validData.query.page)
+      const result = await mediaService.list(req.validData!.query.page)
       res.status(200).json(result.response)
     } catch (err) {
       next(err)

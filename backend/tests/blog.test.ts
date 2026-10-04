@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Підроблене сховище: мережі до S3 у тестах немає.
 const store = vi.hoisted(() => ({ puts: [] as { key: string; mime: string; size: number }[] }))
-vi.mock('../src/modules/media/storage.js', () => ({
+vi.mock('../src/modules/media/storage.js', async (importOriginal) => ({
+  ...await importOriginal<typeof import('../src/modules/media/storage.js')>(),
   mediaDir: () => '/tmp/xik-test-media',
   storage: {
     put: async (key: string, body: Buffer, mime: string) => {
@@ -17,9 +18,12 @@ import { prisma } from '../src/shared/database/prisma.js'
 import { api, auth, createProduct, createUser, loginOk, resetDb } from './helpers.js'
 
 beforeEach(async () => {
+  vi.stubEnv('MEDIA_URL', 'https://cdn.test')
   await resetDb()
   store.puts.length = 0
 })
+
+afterEach(() => vi.unstubAllEnvs())
 
 // 1x1 PNG
 const PNG = Buffer.from(

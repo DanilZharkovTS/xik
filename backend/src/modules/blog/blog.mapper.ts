@@ -1,3 +1,4 @@
+import { publicAssetUrl } from '../media/storage.js'
 import type { ContentLocale } from '../products/product.constants.js'
 import { toCatalogDto } from '../products/products.mapper.js'
 import type { Product } from '../products/products.types.js'
@@ -8,6 +9,7 @@ import type { Block } from './blog.blocks.js'
 export interface AssetRow {
   id: string
   url: string
+  key?: string
   width: number
   height: number
 }
@@ -55,7 +57,7 @@ export const resolveBlocks = (
       case 'image': {
         const asset = assets.get(block.assetId)
         return asset
-          ? [{ id: block.id, type: 'image' as const, url: asset.url, width: asset.width, height: asset.height, alt: block.alt, caption: block.caption ?? null }]
+          ? [{ id: block.id, type: 'image' as const, url: publicAssetUrl(asset), width: asset.width, height: asset.height, alt: block.alt, caption: block.caption ?? null }]
           : []
       }
       case 'video': {

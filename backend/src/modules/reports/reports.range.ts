@@ -30,8 +30,11 @@ const firstOfMonth = (date: string, monthOffset = 0): string => {
   return format(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + monthOffset, 1)))
 }
 
-export const isValidDate = (value: string): boolean =>
-  /^\d{4}-\d{2}-\d{2}$/.test(value) && format(toUtc(value)) === value
+export const isValidDate = (value: string): boolean => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = toUtc(value)
+  return Number.isFinite(date.getTime()) && format(date) === value
+}
 
 export const daysBetween = (from: string, to: string): number =>
   Math.round((toUtc(to).getTime() - toUtc(from).getTime()) / DAY_MS)

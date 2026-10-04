@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { useOutreachStore } from '../outreach/outreach-store'
 import {
   AuthState,
   AuthStateStatus,
@@ -23,7 +24,8 @@ const useAuthStore = create<AuthState>((set) => ({
       user: data.user,
     }),
   setAuthStatus: (status: AuthStateStatus) => set({ status: status }),
-  clearAuth: () =>
+  clearAuth: () => {
+    useOutreachStore.getState().reset()
     set({
       status: 'unauthenticated',
       accessToken: null,
@@ -34,7 +36,8 @@ const useAuthStore = create<AuthState>((set) => ({
         password: '',
         confirmPassword: '',
       },
-    }),
+    })
+  },
 
   setAuthFormField: (key: string, value: string) =>
     set((state) => ({

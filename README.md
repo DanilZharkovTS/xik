@@ -55,7 +55,7 @@ docker compose -f docker-compose.local.yml up -d --build
 | **Frontend** | [http://localhost:3000](http://localhost:3000) | Next.js web application |
 | **Backend API** | [http://localhost:5001](http://localhost:5001) | Express REST API endpoints |
 | **Notifications** | [http://localhost:3002](http://localhost:3002) | Resend email notification service (internal: `http://notifications:3002`) |
-| **PostgreSQL** | `localhost:5432` | Database (`user: postgres`, `password: 1234`, `db: xik_db`) |
+| **PostgreSQL** | `localhost:5433` | Database (`user: postgres`, `password: 1234`, `db: xik_db`) |
 
 > [!NOTE]
 > The backend runs on port `5001` because port `5000` is reserved by default on macOS for AirPlay Receiver (`ControlCenter`).
@@ -107,7 +107,7 @@ The production configuration is optimized for security, performance, and minimal
 - Uses multi-stage builds (`target: prod`) without development dependencies.
 - Application code is baked into the immutable image artifacts (no host directory mounts).
 - Automatic container restarts (`restart: always`).
-- Health checks ensure zero-downtime dependency startup.
+- Health checks ensure the database is ready before the backend starts.
 
 ### Step 1. Configure Environment Variables
 
@@ -130,6 +130,17 @@ JWT_SECRET=your_production_jwt_secret
 STRIPE_SECRET=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
+
+`POSTGRES_PASSWORD`, `DATABASE_URL` and `MEDIA_URL` are required in production.
+PostgreSQL and notifications are available only inside the Docker network.
+Set `MEDIA_URL=https://api.your-domain.com/media` before uploading article images.
+
+Configure the Stripe webhook at `https://api.your-domain.com/billing/webhook` for:
+`checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`,
+`invoice.payment_failed`, `customer.subscription.updated`, and `customer.subscription.deleted`.
+The handler grants and renews paid access, records cancellation, and deduplicates events.
+Failed notifications remain pending and are retried when Stripe redelivers the event;
+`NOTIFICATIONS_SERVICE_URL` and `NOTIFICATIONS_SERVICE_SECRET` must be configured.
 
 ### Step 2. Build and Start Production Containers
 

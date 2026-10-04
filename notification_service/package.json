@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "tsx watch src/app.ts",
     "build": "tsc",
-    "start": "tsx src/app.ts"
+    "start": "node dist/app.js",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
