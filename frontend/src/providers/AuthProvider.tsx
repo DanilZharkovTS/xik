@@ -15,6 +15,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const refresh = async () => {
       try {
         const res = await authService.refresh()
+        if (!res.accessToken || !res.user) {
+          setAuthStatus('unauthenticated')
+          return
+        }
         setAuth({
           accessToken: res.accessToken,
           user: res.user,
@@ -30,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           toast.error(err.message)
         }
         console.error(err)
+        setAuthStatus('unauthenticated')
         return
       }
     }

@@ -46,7 +46,7 @@ const authenticate = async (req: Request): Promise<TokenPayload> => {
 export const authMiddleware = {
   hashTokens: (...names: string[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
-      const tokens = {}
+      const tokens: Record<string, string> = {}
 
       for (const name of names) {
         const token = req.cookies[name]
@@ -79,7 +79,7 @@ export const authMiddleware = {
     try {
       req.user = await authenticate(req)
     } catch (err) {
-      req.user = null
+      delete (req as { user?: TokenPayload }).user
     }
     next()
   },

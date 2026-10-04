@@ -30,6 +30,7 @@ interface OutreachState {
   setProducts: (products: OutreachProduct[]) => void
   setError: () => void
   selectProduct: (id: string) => void
+  reset: () => void
 }
 
 // Вибраний продукт лише зручність інтерфейсу: сервер у кожному запиті звіряє його із членством.
@@ -37,6 +38,7 @@ export const useOutreachStore = create<OutreachState>((set, get) => ({
   status: 'loading',
   products: [],
   selectedProductId: null,
+  reset: () => set({ status: 'loading', products: [], selectedProductId: null }),
 
   setProducts: (products) => {
     const saved = get().selectedProductId ?? readSavedProductId()

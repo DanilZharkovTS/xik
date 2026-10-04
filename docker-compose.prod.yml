@@ -5,10 +5,8 @@ services:
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_secure_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-xik_db}
-    ports:
-      - "5432:5432"
     volumes:
       - ./docker/postgres/data:/var/lib/postgresql/data
     networks:
@@ -26,8 +24,6 @@ services:
       dockerfile: Dockerfile
       target: prod
     restart: always
-    ports:
-      - "3002:3002"
     environment:
       NODE_ENV: production
       PORT: 3002
@@ -49,7 +45,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5001
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres_secure_password@postgres:5432/xik_db}
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       # Скидання кешу каталогу на фронтенді після змін продукту (вимкнено без секрету)
       FRONTEND_INTERNAL_URL: ${FRONTEND_INTERNAL_URL:-http://frontend:3000}
@@ -62,7 +58,7 @@ services:
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
       # Зображення статей лежать на сервері (том ./docker/media); MEDIA_URL це адреса API в браузері.
       MEDIA_DIR: /data/media
-      MEDIA_URL: ${MEDIA_URL:-http://localhost:5001/media}
+      MEDIA_URL: ${MEDIA_URL:?Set MEDIA_URL to the public API media URL}
       REPORT_TIMEZONE: ${REPORT_TIMEZONE:-Europe/Kyiv}
       OUTREACH_RATE_LIMIT: ${OUTREACH_RATE_LIMIT:-30}
       LOGIN_RATE_LIMIT: ${LOGIN_RATE_LIMIT:-10}

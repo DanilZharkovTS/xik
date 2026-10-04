@@ -4,6 +4,7 @@ import { LoginDto, RegisterDto } from './auth.schema.js'
 import { tokenService } from '../../shared/services/token.service.js'
 import { sessionRepo } from './repos/session.repo.js'
 import { ApiError } from '../../shared/utils/ApiError.js'
+import { prisma } from '../../shared/database/prisma.js'
 
 export const authService = {
   register: async (data: RegisterDto) => {
@@ -24,7 +25,7 @@ export const authService = {
   login: async (data: LoginDto) => {
     const user = await authRepo.findUserWithCredentialsByEmail(data.email)
 
-    if (!user || user.deactivatedAt) {
+    if (!user || user.deactivatedAt || !user.credentials) {
       throw ApiError(401, 'UNAUTHORIZED', 'Email or/and password is incorrect')
     }
 
@@ -67,28 +68,21 @@ export const authService = {
     }
   },
   refresh: async (refreshToken: string) => {
-    const refresh = await sessionRepo.findRefreshWithSessionAndUserByToken(
-      refreshToken
-    )
-
-    const session = refresh?.session
-    const user = session?.user
-
-    if (
-      !refresh ||
-      new Date() > refresh.expiresAt ||
-      refresh.revokedAt ||
-      session?.revokedAt ||
-      user?.deactivatedAt
-    ) {
-      throw ApiError(401, 'UNAUTHORIZED', 'Session is expired or invalid')
-    }
-
-    await sessionRepo.revokeRefresh(refresh.id)
-
     const { rawRefreshToken, hashedRefreshToken, expiresAt } =
       tokenService.generateRefresh()
-    await sessionRepo.createRefresh(session.id, hashedRefreshToken, expiresAt)
+    const session = await prisma.$transaction(async (tx) => {
+      const refresh = await sessionRepo.findRefreshWithSessionAndUserByToken(refreshToken, tx)
+      if (!refresh || refresh.expiresAt <= new Date() || refresh.revokedAt ||
+          refresh.session.revokedAt || refresh.session.user.deactivatedAt) {
+        throw ApiError(401, 'UNAUTHORIZED', 'Session is expired or invalid')
+      }
+      if (!(await sessionRepo.consumeRefresh(refresh.id, tx))) {
+        throw ApiError(401, 'REFRESH_ALREADY_USED', 'Refresh token has already been used')
+      }
+      await sessionRepo.createRefresh(refresh.session.id, hashedRefreshToken, expiresAt, tx)
+      return refresh.session
+    })
+    const user = session.user
 
     const accessToken = await tokenService.generateAccess(
       user.id,

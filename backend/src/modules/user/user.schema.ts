@@ -3,7 +3,9 @@ import z from 'zod'
 export const findUsersSchema = z.object({
   name: z.string().optional(),
   lastId: z.string().optional(),
-  lastCreatedAt: z.date().optional(),
+  lastCreatedAt: z.coerce.date().optional(),
+}).refine((data) => Boolean(data.lastId) === Boolean(data.lastCreatedAt), {
+  message: 'Both cursor fields are required',
 })
 
 export const changeUserRoleSchema = z.object({

@@ -4,7 +4,7 @@ import { authService } from './auth.service.js'
 export const authController = {
   register: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await authService.register(req.validData.body)
+      const result = await authService.register(req.validData!.body)
       res.status(201).json(result.response)
     } catch (err) {
       next(err)
@@ -12,11 +12,12 @@ export const authController = {
   },
   login: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await authService.login(req.validData.body)
+      const result = await authService.login(req.validData!.body)
       res.cookie('refreshToken', result.rawRefreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       res.status(200).json(result.response)
     } catch (err) {
@@ -25,21 +26,21 @@ export const authController = {
   },
   refresh: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await authService.refresh(req.tokens.refreshToken)
+      const result = await authService.refresh(req.tokens!.refreshToken)
       res.cookie('refreshToken', result.rawRefreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       res.status(200).json(result.response)
     } catch (err) {
-      res.clearCookie('refreshToken')
       next(err)
     }
   },
   logout: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await authService.logout(req.tokens.refreshToken)
+      const result = await authService.logout(req.tokens!.refreshToken)
       res.clearCookie('refreshToken')
       res.status(200).json(result.response)
     } catch (err) {

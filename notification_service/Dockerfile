@@ -9,7 +9,7 @@ FROM base AS dev
 ENV NODE_ENV=development
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
 
@@ -19,22 +19,20 @@ CMD ["npm", "run", "dev"]
 
 # --- Build stage for production ---
 FROM base AS builder
-ENV NODE_ENV=production
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 COPY . .
-RUN npm run build || true
+RUN npm run build
 
 # --- Prod target ---
 FROM base AS prod
 ENV NODE_ENV=production
 
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
-COPY --from=builder /app/src ./src
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3002

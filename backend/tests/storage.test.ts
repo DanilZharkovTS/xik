@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { storage } from '../src/modules/media/storage.js'
+import { storage, publicAssetUrl } from '../src/modules/media/storage.js'
 
 let dir = ''
 
@@ -17,6 +17,10 @@ const useTempDir = async () => {
 }
 
 describe('сховище зображень на диску', () => {
+  it('existing assets use the configured public domain instead of a stored localhost URL', () => {
+    vi.stubEnv('MEDIA_URL', 'https://api.example.com/media/')
+    expect(publicAssetUrl({ key: 'articles/a.png', url: 'http://localhost:5001/media/articles/a.png' })).toBe('https://api.example.com/media/articles/a.png')
+  })
   it('пише файл у папку й повертає публічну адресу', async () => {
     await useTempDir()
     vi.stubEnv('MEDIA_URL', 'https://api.example.com/media/')

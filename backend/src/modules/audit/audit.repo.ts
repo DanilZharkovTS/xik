@@ -13,6 +13,7 @@ export type AuditAction =
   | 'target_released'
   | 'template_deleted'
   | 'targets_transferred'
+  | 'user_role_changed'
 
 export interface AuditRecord {
   actorUserId: string

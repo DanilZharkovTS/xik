@@ -16,6 +16,14 @@ model Test {
   id Int @id @default(autoincrement())
   content String @db.VarChar(10)
 }
+
+// Deduplicates Stripe events and retains notifications until delivery succeeds.
+model BillingEvent {
+  id String @id
+  processedAt DateTime @default(now())
+  notification Json?
+  notificationSentAt DateTime?
+}
 //enums
 
 enum UserLocale {
@@ -166,6 +174,7 @@ model UserSession {
   user User @relation(fields: [userId], references: [id])
 
   refreshTokens RefreshToken[]
+  @@index([userId])
 }
 
 model RefreshToken {
@@ -179,6 +188,8 @@ model RefreshToken {
   revokedAt DateTime?
 
   session UserSession @relation(fields: [sessionId], references: [id])
+  @@index([tokenHash])
+  @@index([sessionId])
 }
 
 model Product {

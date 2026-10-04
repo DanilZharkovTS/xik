@@ -77,9 +77,10 @@ export const sessionRepo = {
   createRefresh: async (
     sessionId: string,
     tokenHash: string,
-    expiresAt: Date
+    expiresAt: Date,
+    db: DbClient = prisma
   ) => {
-    const refresh = await prisma.refreshToken.create({
+    const refresh = await db.refreshToken.create({
       data: {
         sessionId,
         tokenHash,
@@ -99,8 +100,8 @@ export const sessionRepo = {
     })
     return refreshToken
   },
-  findRefreshWithSessionAndUserByToken: async (token: string) => {
-    const refreshToken = await prisma.refreshToken.findFirst({
+  findRefreshWithSessionAndUserByToken: async (token: string, db: DbClient = prisma) => {
+    const refreshToken = await db.refreshToken.findFirst({
       where: {
         tokenHash: token,
       },
@@ -120,6 +121,13 @@ export const sessionRepo = {
       },
     })
     return refresh
+  },
+  consumeRefresh: async (refreshId: string, db: DbClient) => {
+    const { count } = await db.refreshToken.updateMany({
+      where: { id: refreshId, revokedAt: null, expiresAt: { gt: new Date() } },
+      data: { revokedAt: new Date() },
+    })
+    return count === 1
   },
   //////////////
   //shared

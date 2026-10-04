@@ -4,7 +4,7 @@ import sharp from 'sharp'
 import { prisma } from '../../shared/database/prisma.js'
 import { ApiError } from '../../shared/utils/ApiError.js'
 import type { TokenPayload } from '../auth/auth.types.js'
-import { storage } from './storage.js'
+import { storage, publicAssetUrl } from './storage.js'
 
 // Завантажити можна до 25 МБ: завеликі зображення стискаються автоматично.
 // Після стиснення файл не має перевищувати 8 МБ (так буває лише з GIF, його не чіпаємо: він може бути анімований).
@@ -134,6 +134,7 @@ export const mediaService = {
 export const toAssetDto = (asset: {
   id: string
   url: string
+  key?: string
   mime: string
   size: number
   width: number
@@ -141,7 +142,7 @@ export const toAssetDto = (asset: {
   createdAt: Date
 }) => ({
   id: asset.id,
-  url: asset.url,
+  url: publicAssetUrl(asset),
   mime: asset.mime,
   size: asset.size,
   width: asset.width,

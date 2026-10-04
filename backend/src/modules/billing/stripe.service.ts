@@ -4,7 +4,7 @@ import { stripe } from './stripe.js'
 export const stripeService = {
   getStripeCheckoutUrl: async (
     product: Product,
-    metadata,
+    metadata: { userId: string; productId: string },
     locale: 'en' | 'es' | 'uk' = 'en'
   ) => {
     // Англійська без префікса, es і uk з префіксом: так само, як адреси сайту.
@@ -16,7 +16,7 @@ export const stripeService = {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: product.stripePriceId,
+          price: product.stripePriceId!,
           quantity: 1,
         },
       ],
@@ -25,6 +25,7 @@ export const stripeService = {
       success_url: `${process.env.FRONTEND_URL}${prefix}/success`,
       cancel_url: `${process.env.FRONTEND_URL}${prefix || '/'}`,
       metadata,
+      subscription_data: { metadata },
     })
 
     return session.url
