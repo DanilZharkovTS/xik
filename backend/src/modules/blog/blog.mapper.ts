@@ -31,7 +31,9 @@ export const toTaxonomyDto = (row: TaxonomyRow, lang: ContentLocale) => ({
   name: localizedName(row.names, lang),
 })
 
-export const toTaxonomyAdminDto = (row: TaxonomyRow & { sortOrder?: number }) => ({
+export const toTaxonomyAdminDto = (
+  row: TaxonomyRow & { sortOrder?: number }
+) => ({
   id: row.id,
   slug: row.slug,
   names: row.names as Record<string, string>,
@@ -40,7 +42,15 @@ export const toTaxonomyAdminDto = (row: TaxonomyRow & { sortOrder?: number }) =>
 
 export type PublicBlock =
   | Exclude<Block, { type: 'image' | 'video' | 'product' }>
-  | { id: string; type: 'image'; url: string; width: number; height: number; alt: string; caption: string | null }
+  | {
+      id: string
+      type: 'image'
+      url: string
+      width: number
+      height: number
+      alt: string
+      caption: string | null
+    }
   | ({ id: string; type: 'video'; caption: string | null } & ParsedVideo)
   | { id: string; type: 'product'; product: ReturnType<typeof toCatalogDto> }
 
@@ -57,17 +67,42 @@ export const resolveBlocks = (
       case 'image': {
         const asset = assets.get(block.assetId)
         return asset
-          ? [{ id: block.id, type: 'image' as const, url: publicAssetUrl(asset), width: asset.width, height: asset.height, alt: block.alt, caption: block.caption ?? null }]
+          ? [
+              {
+                id: block.id,
+                type: 'image' as const,
+                url: publicAssetUrl(asset),
+                width: asset.width,
+                height: asset.height,
+                alt: block.alt,
+                caption: block.caption ?? null,
+              },
+            ]
           : []
       }
       case 'video': {
         const video = parseVideoUrl(block.url)
-        return video ? [{ id: block.id, type: 'video' as const, caption: block.caption ?? null, ...video }] : []
+        return video
+          ? [
+              {
+                id: block.id,
+                type: 'video' as const,
+                caption: block.caption ?? null,
+                ...video,
+              },
+            ]
+          : []
       }
       case 'product': {
         const product = products.get(block.productId)
         return product && !product.archivedAt
-          ? [{ id: block.id, type: 'product' as const, product: toCatalogDto(product, lang) }]
+          ? [
+              {
+                id: block.id,
+                type: 'product' as const,
+                product: toCatalogDto(product, lang),
+              },
+            ]
           : []
       }
       default:
