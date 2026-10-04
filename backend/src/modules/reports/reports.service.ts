@@ -23,7 +23,12 @@ export const reportTimeZone = (): string => {
 
 type Counts = Record<ReportEventType, number>
 
-const emptyCounts = (): Counts => ({ first: 0, repeat: 0, reply: 0, publication: 0 })
+const emptyCounts = (): Counts => ({
+  first: 0,
+  repeat: 0,
+  reply: 0,
+  publication: 0,
+})
 
 const sum = (counts: Counts): number =>
   REPORT_EVENT_TYPES.reduce((total, type) => total + counts[type], 0)
@@ -35,8 +40,10 @@ const withTotals = (counts: Counts) => ({
   total: sum(counts),
 })
 
-const byTotalDesc = <T extends { total: number }>(rows: T[], label: (row: T) => string) =>
-  rows.sort((a, b) => b.total - a.total || label(a).localeCompare(label(b)))
+const byTotalDesc = <T extends { total: number }>(
+  rows: T[],
+  label: (row: T) => string
+) => rows.sort((a, b) => b.total - a.total || label(a).localeCompare(label(b)))
 
 interface Scope {
   // Продукт, до якого звужено звіт; без нього адмін бачить усі продукти.
@@ -47,7 +54,11 @@ interface Scope {
 }
 
 export const reportsService = {
-  build: async (query: ReportQueryDto, scope: Scope, now: Date = new Date()) => {
+  build: async (
+    query: ReportQueryDto,
+    scope: Scope,
+    now: Date = new Date()
+  ) => {
     const timeZone = reportTimeZone()
     const date = query.date ?? todayIn(timeZone, now)
     const range = resolveRange({
@@ -66,15 +77,20 @@ export const reportsService = {
       userId: scope.userId,
     }
 
-    const [bucketRows, channelRows, moderatorRows, productRows] = await Promise.all([
-      reportsRepo.countsByBucketAndType(filter, range.granularity),
-      reportsRepo.countsByChannelAndType(filter),
-      scope.includeModerators ? reportsRepo.countsByModeratorAndType(filter) : [],
-      scope.includeProducts ? reportsRepo.countsByProductAndType(filter) : [],
-    ])
+    const [bucketRows, channelRows, moderatorRows, productRows] =
+      await Promise.all([
+        reportsRepo.countsByBucketAndType(filter, range.granularity),
+        reportsRepo.countsByChannelAndType(filter),
+        scope.includeModerators
+          ? reportsRepo.countsByModeratorAndType(filter)
+          : [],
+        scope.includeProducts ? reportsRepo.countsByProductAndType(filter) : [],
+      ])
 
     const totals = emptyCounts()
-    const series = new Map(bucketsOf(range).map((bucket) => [bucket, emptyCounts()]))
+    const series = new Map(
+      bucketsOf(range).map((bucket) => [bucket, emptyCounts()])
+    )
 
     for (const row of bucketRows) {
       totals[row.type] += row.count
@@ -96,7 +112,10 @@ export const reportsService = {
       const groups = new Map<string, { name: string; counts: Counts }>()
 
       for (const row of rows) {
-        const entry = groups.get(row.id) ?? { name: row.name, counts: emptyCounts() }
+        const entry = groups.get(row.id) ?? {
+          name: row.name,
+          counts: emptyCounts(),
+        }
         entry.counts[row.type] += row.count
         groups.set(row.id, entry)
       }
@@ -149,7 +168,11 @@ export const reportsService = {
     }
   },
   // Для звіту по продукту: адмін може звузити до одного модератора, модератор бачить лише своє.
-  forProduct: async (actor: TokenPayload, productId: string, query: ReportQueryDto) => {
+  forProduct: async (
+    actor: TokenPayload,
+    productId: string,
+    query: ReportQueryDto
+  ) => {
     const isAdmin = actor.role === 'admin'
 
     return reportsService.build(query, {
@@ -167,7 +190,8 @@ export const reportsService = {
         select: { id: true },
       })
 
-      if (!product) throw ApiError(404, 'PRODUCT_NOT_FOUND', 'Product not found')
+      if (!product)
+        throw ApiError(404, 'PRODUCT_NOT_FOUND', 'Product not found')
     }
 
     return reportsService.build(query, {
