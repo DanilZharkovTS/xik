@@ -1,9 +1,13 @@
-import { NextFunction, Request, Response } from "express"
-import { ApiError } from "../../shared/utils/ApiError.js"
-import { stripe } from "./stripe.js"
+import { NextFunction, Request, Response } from 'express'
+import { ApiError } from '../../shared/utils/ApiError.js'
+import { stripe } from './stripe.js'
 
 export const billingMiddlewares = {
-  validateWebhookSignature: async (req: Request, res: Response, next: NextFunction) => {
+  validateWebhookSignature: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       console.log('--- Incoming webhook request received! ---')
       const signature = req.headers['stripe-signature']
@@ -19,7 +23,10 @@ export const billingMiddlewares = {
         process.env.STRIPE_WEBHOOK_SECRET!
       )
 
-      console.log('Webhook signature verified successfully! Event type:', event.type)
+      console.log(
+        'Webhook signature verified successfully! Event type:',
+        event.type
+      )
       req.validData = { body: event }
       next()
     } catch (err) {
