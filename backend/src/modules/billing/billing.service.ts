@@ -186,118 +186,26 @@ const buildBillingContext = async (
   }
 }
 
-// 1. Ошибка списания средств
-const handlePaymentFailed = async (): Promise<NoticeEndpoint> => {
-  return 'payment-attempt-failed'
-}
-
-// 2. Подписка завершена / аннулирована (terminal: canceled, unpaid, paused и т.д.)
-const handleSubscriptionTerminated = async (
-  ctx: BillingContext
-): Promise<NoticeEndpoint | undefined> => {
-  const { tx, existing, event, now } = ctx
-  if (!existing) return
-
-  await tx.userLibrary.update({
-    where: { id: existing.id },
-    data: {
-      canceledAt: existing.canceledAt ?? now,
-      accessExpiresAt:
-        existing.accessExpiresAt && existing.accessExpiresAt < now
-          ? existing.accessExpiresAt
-          : now,
-    },
-  })
-
-  if (event.type === 'customer.subscription.deleted') {
-    return 'delete-subscription'
-  }
-}
-
-// 3. Успешная оплата (чекаут или оплаченный инвойс)
-const handlePaymentSuccess = async (
-  ctx: BillingContext
-): Promise<NoticeEndpoint | undefined> => {
-  const {
-    tx,
-    event,
-    subscription,
-    subscriptionId,
-    userId,
-    productId,
-    existing,
-    scheduledCancellation,
-    now,
-  } = ctx
-
-  const paidUntil = calculatePaidUntil(event, subscription, subscriptionId)
-  const accessExpiresAt =
-    existing?.accessExpiresAt && existing.accessExpiresAt > paidUntil
-      ? existing.accessExpiresAt
-      : paidUntil
-
-  const canceledAt = scheduledCancellation
-    ? (existing?.canceledAt ?? now)
-    : null
-
-  await tx.userLibrary.upsert({
-    where: { stripeSubscriptionId: subscriptionId },
-    create: {
-      userId,
-      productId,
-      stripeSubscriptionId: subscriptionId,
-      subscriptionId,
-      accessExpiresAt,
-      canceledAt,
-    },
-    update: { accessExpiresAt, canceledAt },
-  })
-
-  if (!existing) {
-    return 'subscription-started'
-  }
-}
-
-// 4. Обновление подписки (например, запланированная отмена в конце периода)
-const handleSubscriptionUpdated = async (
-  ctx: BillingContext
-): Promise<NoticeEndpoint | undefined> => {
-  const { tx, existing, scheduledCancellation, now } = ctx
-  if (!existing) return
-
-  // A renewal becomes accessible only after payment, not on subscription.updated.
-  await tx.userLibrary.update({
-    where: { id: existing.id },
-    data: {
-      canceledAt: scheduledCancellation ? (existing.canceledAt ?? now) : null,
-    },
-  })
-
-  if (scheduledCancellation && !existing.canceledAt) {
-    return 'cancel-subscription'
-  }
-}
-
-// Диспетчер выбора хэндлера
+// Webhook event dispatcher
 const dispatchWebhook = async (
   ctx: BillingContext
 ): Promise<NoticeEndpoint | undefined> => {
   if (ctx.event.type === 'invoice.payment_failed') {
-    return handlePaymentFailed()
+    return billingService.handlePaymentFailed(ctx)
   }
 
   if (ctx.terminal) {
-    return handleSubscriptionTerminated(ctx)
+    return billingService.handleSubscriptionTerminated(ctx)
   }
 
   if (
     ctx.event.type === 'invoice.paid' ||
     ctx.event.type.startsWith('checkout.session.')
   ) {
-    return handlePaymentSuccess(ctx)
+    return billingService.handlePaymentSuccess(ctx)
   }
 
-  return handleSubscriptionUpdated(ctx)
+  return billingService.handleSubscriptionUpdated(ctx)
 }
 
 const saveBillingNotice = async (
@@ -443,5 +351,97 @@ export const billingService = {
     )
 
     await deliverNotification(event.id)
+  },
+
+  // 1. Failed payment attempt
+  handlePaymentFailed: async (ctx: BillingContext): Promise<NoticeEndpoint> => {
+    return 'payment-attempt-failed'
+  },
+
+  // 2. Subscription terminated / revoked (terminal statuses: canceled, unpaid, paused, etc.)
+  handleSubscriptionTerminated: async (
+    ctx: BillingContext
+  ): Promise<NoticeEndpoint | undefined> => {
+    const { tx, existing, event, now } = ctx
+    if (!existing) return
+
+    await tx.userLibrary.update({
+      where: { id: existing.id },
+      data: {
+        canceledAt: existing.canceledAt ?? now,
+        accessExpiresAt:
+          existing.accessExpiresAt && existing.accessExpiresAt < now
+            ? existing.accessExpiresAt
+            : now,
+      },
+    })
+
+    if (event.type === 'customer.subscription.deleted') {
+      return 'delete-subscription'
+    }
+  },
+
+  // 3. Successful payment (checkout session or paid invoice)
+  handlePaymentSuccess: async (
+    ctx: BillingContext
+  ): Promise<NoticeEndpoint | undefined> => {
+    const {
+      tx,
+      event,
+      subscription,
+      subscriptionId,
+      userId,
+      productId,
+      existing,
+      scheduledCancellation,
+      now,
+    } = ctx
+
+    const paidUntil = calculatePaidUntil(event, subscription, subscriptionId)
+    const accessExpiresAt =
+      existing?.accessExpiresAt && existing.accessExpiresAt > paidUntil
+        ? existing.accessExpiresAt
+        : paidUntil
+
+    const canceledAt = scheduledCancellation
+      ? (existing?.canceledAt ?? now)
+      : null
+
+    await tx.userLibrary.upsert({
+      where: { stripeSubscriptionId: subscriptionId },
+      create: {
+        userId,
+        productId,
+        stripeSubscriptionId: subscriptionId,
+        subscriptionId,
+        accessExpiresAt,
+        canceledAt,
+      },
+      update: { accessExpiresAt, canceledAt },
+    })
+
+    if (!existing) {
+      return 'subscription-started'
+    }
+  },
+
+  // 4. Subscription updated (e.g. scheduled cancellation at period end)
+  handleSubscriptionUpdated: async (
+    ctx: BillingContext
+  ): Promise<NoticeEndpoint | undefined> => {
+    const { tx, existing, scheduledCancellation, now } = ctx
+    if (!existing) return
+
+    // A renewal becomes accessible only after payment, not on subscription.updated.
+    await tx.userLibrary.update({
+      where: { id: existing.id },
+      data: {
+        canceledAt: scheduledCancellation ? (existing.canceledAt ?? now) : null,
+      },
+    })
+
+    if (scheduledCancellation && !existing.canceledAt) {
+      return 'cancel-subscription'
+    }
   },
 }
