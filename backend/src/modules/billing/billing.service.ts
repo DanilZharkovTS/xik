@@ -1,5 +1,10 @@
 import type Stripe from 'stripe'
 import { Prisma } from '../../generated/prisma/client.js'
+import type {
+  UserModel as User,
+  ProductModel as Product,
+  UserLibraryModel as UserLibrary,
+} from '../../generated/prisma/models.js'
 import { prisma } from '../../shared/database/prisma.js'
 import { ApiError } from '../../shared/utils/ApiError.js'
 import type { TokenPayload } from '../auth/auth.types.js'
@@ -8,26 +13,49 @@ import type { CheckoutSessionDto } from './billing.schema.js'
 import { stripeService } from './stripe.service.js'
 import { stripe } from './stripe.js'
 
+type NoticeEndpoint =
+  | 'subscription-started'
+  | 'cancel-subscription'
+  | 'delete-subscription'
+  | 'payment-attempt-failed'
+
 type Notice = {
-  endpoint:
-    | 'subscription-started'
-    | 'cancel-subscription'
-    | 'delete-subscription'
-    | 'payment-attempt-failed'
+  endpoint: NoticeEndpoint
   body: { to: string; productName: string; userName: string; locale: string }
 }
+
+interface BillingContext {
+  tx: Prisma.TransactionClient
+  event: Stripe.Event
+  subscriptionId: string
+  subscription: Stripe.Subscription
+  existing: UserLibrary | null
+  userId: string
+  productId: string
+  user: User
+  product: Product
+  now: Date
+  terminal: boolean
+  scheduledCancellation: boolean
+}
+
 const objectId = (
   value: string | { id: string } | null | undefined
 ): string | null => (typeof value === 'string' ? value : (value?.id ?? null))
 
 const subscriptionOf = (event: Stripe.Event): string | null => {
-  if (event.type.startsWith('customer.subscription.'))
+  if (event.type.startsWith('customer.subscription.')) {
     return (event.data.object as Stripe.Subscription).id
-  if (event.type.startsWith('checkout.session.'))
+  }
+
+  if (event.type.startsWith('checkout.session.')) {
     return objectId((event.data.object as Stripe.Checkout.Session).subscription)
+  }
+
   const invoice = event.data.object as Stripe.Invoice & {
     subscription?: string | Stripe.Subscription | null
   }
+
   return objectId(
     invoice.parent?.subscription_details?.subscription ?? invoice.subscription
   )
@@ -41,6 +69,259 @@ const handled = new Set([
   'customer.subscription.updated',
   'customer.subscription.deleted',
 ])
+
+const isUnpaidCheckout = (event: Stripe.Event): boolean => {
+  if (!event.type.startsWith('checkout.session.')) return false
+
+  const session = event.data.object as Stripe.Checkout.Session
+  return (
+    session.payment_status !== 'paid' &&
+    session.payment_status !== 'no_payment_required'
+  )
+}
+
+const calculatePaidUntil = (
+  event: Stripe.Event,
+  subscription: Stripe.Subscription,
+  subscriptionId: string
+): Date => {
+  const ends = (
+    event.type === 'invoice.paid'
+      ? (event.data.object as Stripe.Invoice).lines.data
+          .filter(
+            (line) =>
+              objectId(
+                line.parent?.subscription_item_details?.subscription ??
+                  line.subscription
+              ) === subscriptionId
+          )
+          .map((line) => line.period.end)
+      : subscription.items.data.map((item) => item.current_period_end)
+  ).filter((end) => Number.isFinite(end) && end > 0)
+
+  if (ends.length === 0) {
+    throw ApiError(
+      502,
+      'BILLING_PERIOD_MISSING',
+      'Subscription has no billing period'
+    )
+  }
+
+  return new Date(Math.max(...ends) * 1000)
+}
+
+const buildBillingContext = async (
+  tx: Prisma.TransactionClient,
+  event: Stripe.Event,
+  subscriptionId: string
+): Promise<BillingContext | null> => {
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+  const existing = await tx.userLibrary.findUnique({
+    where: { stripeSubscriptionId: subscriptionId },
+  })
+
+  const checkoutMetadata = event.type.startsWith('checkout.session.')
+    ? (event.data.object as Stripe.Checkout.Session).metadata
+    : null
+
+  const userId =
+    subscription.metadata.userId ?? checkoutMetadata?.userId ?? existing?.userId
+
+  const productId =
+    subscription.metadata.productId ??
+    checkoutMetadata?.productId ??
+    existing?.productId
+
+  // Other subscriptions on the same Stripe account do not belong to this application.
+  if (!userId || !productId) return null
+
+  const [user, product] = await Promise.all([
+    tx.user.findUnique({ where: { id: userId } }),
+    tx.product.findUnique({ where: { id: productId } }),
+  ])
+
+  if (!user || !product) {
+    throw ApiError(
+      409,
+      'BILLING_REFERENCE_MISSING',
+      'Subscription references an unknown user or product'
+    )
+  }
+
+  if (
+    existing &&
+    (existing.userId !== userId || existing.productId !== productId)
+  ) {
+    throw ApiError(
+      409,
+      'BILLING_REFERENCE_MISMATCH',
+      'Subscription ownership does not match'
+    )
+  }
+
+  const now = new Date()
+  const terminal = [
+    'canceled',
+    'unpaid',
+    'incomplete_expired',
+    'paused',
+  ].includes(subscription.status)
+
+  const scheduledCancellation =
+    subscription.cancel_at_period_end || subscription.cancel_at != null
+
+  return {
+    tx,
+    event,
+    subscriptionId,
+    subscription,
+    existing,
+    userId,
+    productId,
+    user,
+    product,
+    now,
+    terminal,
+    scheduledCancellation,
+  }
+}
+
+// 1. Ошибка списания средств
+const handlePaymentFailed = async (): Promise<NoticeEndpoint> => {
+  return 'payment-attempt-failed'
+}
+
+// 2. Подписка завершена / аннулирована (terminal: canceled, unpaid, paused и т.д.)
+const handleSubscriptionTerminated = async (
+  ctx: BillingContext
+): Promise<NoticeEndpoint | undefined> => {
+  const { tx, existing, event, now } = ctx
+  if (!existing) return
+
+  await tx.userLibrary.update({
+    where: { id: existing.id },
+    data: {
+      canceledAt: existing.canceledAt ?? now,
+      accessExpiresAt:
+        existing.accessExpiresAt && existing.accessExpiresAt < now
+          ? existing.accessExpiresAt
+          : now,
+    },
+  })
+
+  if (event.type === 'customer.subscription.deleted') {
+    return 'delete-subscription'
+  }
+}
+
+// 3. Успешная оплата (чекаут или оплаченный инвойс)
+const handlePaymentSuccess = async (
+  ctx: BillingContext
+): Promise<NoticeEndpoint | undefined> => {
+  const {
+    tx,
+    event,
+    subscription,
+    subscriptionId,
+    userId,
+    productId,
+    existing,
+    scheduledCancellation,
+    now,
+  } = ctx
+
+  const paidUntil = calculatePaidUntil(event, subscription, subscriptionId)
+  const accessExpiresAt =
+    existing?.accessExpiresAt && existing.accessExpiresAt > paidUntil
+      ? existing.accessExpiresAt
+      : paidUntil
+
+  const canceledAt = scheduledCancellation
+    ? (existing?.canceledAt ?? now)
+    : null
+
+  await tx.userLibrary.upsert({
+    where: { stripeSubscriptionId: subscriptionId },
+    create: {
+      userId,
+      productId,
+      stripeSubscriptionId: subscriptionId,
+      subscriptionId,
+      accessExpiresAt,
+      canceledAt,
+    },
+    update: { accessExpiresAt, canceledAt },
+  })
+
+  if (!existing) {
+    return 'subscription-started'
+  }
+}
+
+// 4. Обновление подписки (например, запланированная отмена в конце периода)
+const handleSubscriptionUpdated = async (
+  ctx: BillingContext
+): Promise<NoticeEndpoint | undefined> => {
+  const { tx, existing, scheduledCancellation, now } = ctx
+  if (!existing) return
+
+  // A renewal becomes accessible only after payment, not on subscription.updated.
+  await tx.userLibrary.update({
+    where: { id: existing.id },
+    data: {
+      canceledAt: scheduledCancellation ? (existing.canceledAt ?? now) : null,
+    },
+  })
+
+  if (scheduledCancellation && !existing.canceledAt) {
+    return 'cancel-subscription'
+  }
+}
+
+// Диспетчер выбора хэндлера
+const dispatchWebhook = async (
+  ctx: BillingContext
+): Promise<NoticeEndpoint | undefined> => {
+  if (ctx.event.type === 'invoice.payment_failed') {
+    return handlePaymentFailed()
+  }
+
+  if (ctx.terminal) {
+    return handleSubscriptionTerminated(ctx)
+  }
+
+  if (
+    ctx.event.type === 'invoice.paid' ||
+    ctx.event.type.startsWith('checkout.session.')
+  ) {
+    return handlePaymentSuccess(ctx)
+  }
+
+  return handleSubscriptionUpdated(ctx)
+}
+
+const saveBillingNotice = async (
+  tx: Prisma.TransactionClient,
+  eventId: string,
+  endpoint: NoticeEndpoint,
+  user: User,
+  product: Product
+): Promise<void> => {
+  const notice: Notice = {
+    endpoint,
+    body: {
+      to: user.email,
+      userName: user.name,
+      productName: product.name,
+      locale: user.locale,
+    },
+  }
+
+  await tx.billingEvent.update({
+    where: { id: eventId },
+    data: { notification: notice as unknown as Prisma.InputJsonValue },
+  })
+}
 
 // Delivery is retried on Stripe redelivery. Resend also receives a stable idempotency key.
 const deliverNotification = async (eventId: string): Promise<void> => {
@@ -136,15 +417,7 @@ export const billingService = {
     const subscriptionId = subscriptionOf(event)
     if (!subscriptionId) return
 
-    if (event.type.startsWith('checkout.session.')) {
-      const session = event.data.object as Stripe.Checkout.Session
-      if (
-        session.payment_status !== 'paid' &&
-        session.payment_status !== 'no_payment_required'
-      ) {
-        return
-      }
-    }
+    if (isUnpaidCheckout(event)) return
 
     await prisma.$transaction(
       async (tx) => {
@@ -158,168 +431,12 @@ export const billingService = {
         })
         if (claimed.count === 0) return
 
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-        const existing = await tx.userLibrary.findUnique({
-          where: { stripeSubscriptionId: subscriptionId },
-        })
+        const ctx = await buildBillingContext(tx, event, subscriptionId)
+        if (!ctx) return
 
-        const checkoutMetadata = event.type.startsWith('checkout.session.')
-          ? (event.data.object as Stripe.Checkout.Session).metadata
-          : null
-
-        const userId =
-          subscription.metadata.userId ??
-          checkoutMetadata?.userId ??
-          existing?.userId
-
-        const productId =
-          subscription.metadata.productId ??
-          checkoutMetadata?.productId ??
-          existing?.productId
-
-        // Other subscriptions on the same Stripe account do not belong to this application.
-        if (!userId || !productId) return
-
-        const [user, product] = await Promise.all([
-          tx.user.findUnique({ where: { id: userId } }),
-          tx.product.findUnique({ where: { id: productId } }),
-        ])
-
-        if (!user || !product) {
-          throw ApiError(
-            409,
-            'BILLING_REFERENCE_MISSING',
-            'Subscription references an unknown user or product'
-          )
-        }
-
-        if (
-          existing &&
-          (existing.userId !== userId || existing.productId !== productId)
-        ) {
-          throw ApiError(
-            409,
-            'BILLING_REFERENCE_MISMATCH',
-            'Subscription ownership does not match'
-          )
-        }
-
-        const now = new Date()
-        const terminal = [
-          'canceled',
-          'unpaid',
-          'incomplete_expired',
-          'paused',
-        ].includes(subscription.status)
-
-        const scheduledCancellation =
-          subscription.cancel_at_period_end || subscription.cancel_at != null
-
-        let endpoint: Notice['endpoint'] | undefined
-
-        if (event.type === 'invoice.payment_failed') {
-          endpoint = 'payment-attempt-failed'
-        } else if (terminal) {
-          if (existing) {
-            await tx.userLibrary.update({
-              where: { id: existing.id },
-              data: {
-                canceledAt: existing.canceledAt ?? now,
-                accessExpiresAt:
-                  existing.accessExpiresAt && existing.accessExpiresAt < now
-                    ? existing.accessExpiresAt
-                    : now,
-              },
-            })
-
-            if (event.type === 'customer.subscription.deleted') {
-              endpoint = 'delete-subscription'
-            }
-          }
-        } else if (
-          event.type === 'invoice.paid' ||
-          event.type.startsWith('checkout.session.')
-        ) {
-          // A late invoice pays its own period, never the subscription's newer unpaid period.
-          const ends = (
-            event.type === 'invoice.paid'
-              ? (event.data.object as Stripe.Invoice).lines.data
-                  .filter(
-                    (line) =>
-                      objectId(
-                        line.parent?.subscription_item_details?.subscription ??
-                          line.subscription
-                      ) === subscriptionId
-                  )
-                  .map((line) => line.period.end)
-              : subscription.items.data.map((item) => item.current_period_end)
-          ).filter((end) => Number.isFinite(end) && end > 0)
-
-          if (ends.length === 0) {
-            throw ApiError(
-              502,
-              'BILLING_PERIOD_MISSING',
-              'Subscription has no billing period'
-            )
-          }
-
-          const paidUntil = new Date(Math.max(...ends) * 1000)
-          const accessExpiresAt =
-            existing?.accessExpiresAt && existing.accessExpiresAt > paidUntil
-              ? existing.accessExpiresAt
-              : paidUntil
-
-          const canceledAt = scheduledCancellation
-            ? (existing?.canceledAt ?? now)
-            : null
-
-          await tx.userLibrary.upsert({
-            where: { stripeSubscriptionId: subscriptionId },
-            create: {
-              userId,
-              productId,
-              stripeSubscriptionId: subscriptionId,
-              subscriptionId,
-              accessExpiresAt,
-              canceledAt,
-            },
-            update: { accessExpiresAt, canceledAt },
-          })
-
-          if (!existing) {
-            endpoint = 'subscription-started'
-          }
-        } else if (existing) {
-          // A renewal becomes accessible only after payment, not on subscription.updated.
-          await tx.userLibrary.update({
-            where: { id: existing.id },
-            data: {
-              canceledAt: scheduledCancellation
-                ? (existing.canceledAt ?? now)
-                : null,
-            },
-          })
-
-          if (scheduledCancellation && !existing.canceledAt) {
-            endpoint = 'cancel-subscription'
-          }
-        }
-
+        const endpoint = await dispatchWebhook(ctx)
         if (endpoint) {
-          const notice: Notice = {
-            endpoint,
-            body: {
-              to: user.email,
-              userName: user.name,
-              productName: product.name,
-              locale: user.locale,
-            },
-          }
-
-          await tx.billingEvent.update({
-            where: { id: event.id },
-            data: { notification: notice as unknown as Prisma.InputJsonValue },
-          })
+          await saveBillingNotice(tx, event.id, endpoint, ctx.user, ctx.product)
         }
       },
       { maxWait: 15_000, timeout: 60_000 }
