@@ -19,7 +19,9 @@ export const billingController = {
   },
   stripeWebhook: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log('--- billingController.stripeWebhook called ---')
+      console.log(
+        `--- billingController.stripeWebhook: ${req.validData!.body.type} (${req.validData!.body.id}) ---`
+      )
       await billingService.handleWebhookEvent(req.validData!.body)
       res.status(200).json({ message: 'success' })
     } catch (err) {

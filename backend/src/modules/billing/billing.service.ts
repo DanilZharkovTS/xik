@@ -100,6 +100,9 @@ const calculatePaidUntil = (
   ).filter((end) => Number.isFinite(end) && end > 0)
 
   if (ends.length === 0) {
+    console.error(
+      `[BillingWebhook] No billing period end found for subscription ${subscriptionId} in event ${event.id}`
+    )
     throw ApiError(
       502,
       'BILLING_PERIOD_MISSING',
@@ -133,7 +136,12 @@ const buildBillingContext = async (
     existing?.productId
 
   // Other subscriptions on the same Stripe account do not belong to this application.
-  if (!userId || !productId) return null
+  if (!userId || !productId) {
+    console.warn(
+      `[BillingWebhook] Subscription ${subscriptionId} lacks application metadata (userId: ${userId}, productId: ${productId}), skipping`
+    )
+    return null
+  }
 
   const [user, product] = await Promise.all([
     tx.user.findUnique({ where: { id: userId } }),
@@ -141,6 +149,9 @@ const buildBillingContext = async (
   ])
 
   if (!user || !product) {
+    console.error(
+      `[BillingWebhook] Reference missing for subscription ${subscriptionId}: user=${Boolean(user)} (id: ${userId}), product=${Boolean(product)} (id: ${productId})`
+    )
     throw ApiError(
       409,
       'BILLING_REFERENCE_MISSING',
@@ -152,6 +163,9 @@ const buildBillingContext = async (
     existing &&
     (existing.userId !== userId || existing.productId !== productId)
   ) {
+    console.error(
+      `[BillingWebhook] Ownership mismatch for subscription ${subscriptionId}: existing=(userId: ${existing.userId}, productId: ${existing.productId}) vs incoming=(userId: ${userId}, productId: ${productId})`
+    )
     throw ApiError(
       409,
       'BILLING_REFERENCE_MISMATCH',
@@ -169,6 +183,10 @@ const buildBillingContext = async (
 
   const scheduledCancellation =
     subscription.cancel_at_period_end || subscription.cancel_at != null
+
+  console.log(
+    `[BillingWebhook] Context built for subscription ${subscriptionId}: user=${user.email}, product=${product.name}, status=${subscription.status}, terminal=${terminal}, scheduledCancellation=${scheduledCancellation}`
+  )
 
   return {
     tx,
@@ -190,6 +208,10 @@ const buildBillingContext = async (
 const dispatchWebhook = async (
   ctx: BillingContext
 ): Promise<NoticeEndpoint | undefined> => {
+  console.log(
+    `[BillingWebhook] Dispatching event ${ctx.event.id} (${ctx.event.type}) for subscription ${ctx.subscriptionId}`
+  )
+
   if (ctx.event.type === 'invoice.payment_failed') {
     return billingService.handlePaymentFailed(ctx)
   }
@@ -215,6 +237,10 @@ const saveBillingNotice = async (
   user: User,
   product: Product
 ): Promise<void> => {
+  console.log(
+    `[BillingWebhook] Scheduling notice '${endpoint}' for event ${eventId} (recipient: ${user.email})`
+  )
+
   const notice: Notice = {
     endpoint,
     body: {
@@ -241,19 +267,38 @@ const deliverNotification = async (eventId: string): Promise<void> => {
         where: { id: eventId },
       })
 
-      if (!record?.notification || record.notificationSentAt) return
+      if (!record?.notification) {
+        console.log(
+          `[BillingWebhook] No notification payload found for event ${eventId}, skipping delivery`
+        )
+        return
+      }
+
+      if (record.notificationSentAt) {
+        console.log(
+          `[BillingWebhook] Notification for event ${eventId} was already sent at ${record.notificationSentAt.toISOString()}, skipping delivery`
+        )
+        return
+      }
 
       const notice = record.notification as unknown as Notice
       const base = process.env.NOTIFICATIONS_SERVICE_URL
       const secret = process.env.NOTIFICATIONS_SERVICE_SECRET
 
       if (!base || !secret) {
+        console.error(
+          `[BillingWebhook] Notifications service credentials not configured (url: ${Boolean(base)}, secret: ${Boolean(secret)})`
+        )
         throw ApiError(
           503,
           'NOTIFICATIONS_UNAVAILABLE',
           'Notifications are not configured'
         )
       }
+
+      console.log(
+        `[BillingWebhook] Delivering notification '${notice.endpoint}' to ${notice.body.to} for event ${eventId}...`
+      )
 
       const response = await fetch(
         `${base.replace(/\/$/, '')}/api/email/${notice.endpoint}`,
@@ -270,6 +315,9 @@ const deliverNotification = async (eventId: string): Promise<void> => {
       )
 
       if (!response.ok) {
+        console.error(
+          `[BillingWebhook] Notification request failed with status ${response.status} for event ${eventId}`
+        )
         throw ApiError(
           502,
           'NOTIFICATION_FAILED',
@@ -281,6 +329,10 @@ const deliverNotification = async (eventId: string): Promise<void> => {
         where: { id: eventId },
         data: { notificationSentAt: new Date() },
       })
+
+      console.log(
+        `[BillingWebhook] Notification '${notice.endpoint}' delivered successfully for event ${eventId}`
+      )
     },
     { maxWait: 15_000, timeout: 20_000 }
   )
@@ -315,17 +367,39 @@ export const billingService = {
   },
 
   handleWebhookEvent: async (event: Stripe.Event): Promise<void> => {
-    if (!handled.has(event.type)) return
+    console.log(
+      `[BillingWebhook] Received event: ${event.type} (id: ${event.id})`
+    )
+
+    if (!handled.has(event.type)) {
+      console.log(
+        `[BillingWebhook] Event type '${event.type}' is not handled, skipping (id: ${event.id})`
+      )
+      return
+    }
 
     if (await prisma.billingEvent.findUnique({ where: { id: event.id } })) {
+      console.log(
+        `[BillingWebhook] Event ${event.id} already exists in database; retrying pending notification delivery`
+      )
       await deliverNotification(event.id)
       return
     }
 
     const subscriptionId = subscriptionOf(event)
-    if (!subscriptionId) return
+    if (!subscriptionId) {
+      console.warn(
+        `[BillingWebhook] No subscription ID found in event ${event.id} (${event.type}), skipping`
+      )
+      return
+    }
 
-    if (isUnpaidCheckout(event)) return
+    if (isUnpaidCheckout(event)) {
+      console.log(
+        `[BillingWebhook] Checkout session for event ${event.id} is unpaid, skipping`
+      )
+      return
+    }
 
     await prisma.$transaction(
       async (tx) => {
@@ -337,24 +411,42 @@ export const billingService = {
           data: { id: event.id },
           skipDuplicates: true,
         })
-        if (claimed.count === 0) return
+        if (claimed.count === 0) {
+          console.log(
+            `[BillingWebhook] Event ${event.id} was claimed concurrently by another transaction, skipping`
+          )
+          return
+        }
 
         const ctx = await buildBillingContext(tx, event, subscriptionId)
-        if (!ctx) return
+        if (!ctx) {
+          console.warn(
+            `[BillingWebhook] Could not build billing context for event ${event.id}, skipping`
+          )
+          return
+        }
 
         const endpoint = await dispatchWebhook(ctx)
         if (endpoint) {
           await saveBillingNotice(tx, event.id, endpoint, ctx.user, ctx.product)
+        } else {
+          console.log(
+            `[BillingWebhook] No notification required for event ${event.id}`
+          )
         }
       },
       { maxWait: 15_000, timeout: 60_000 }
     )
 
     await deliverNotification(event.id)
+    console.log(`[BillingWebhook] Completed processing event ${event.id}`)
   },
 
   // 1. Failed payment attempt
   handlePaymentFailed: async (ctx: BillingContext): Promise<NoticeEndpoint> => {
+    console.log(
+      `[BillingWebhook] Executing handlePaymentFailed for subscription ${ctx.subscriptionId}`
+    )
     return 'payment-attempt-failed'
   },
 
@@ -363,18 +455,29 @@ export const billingService = {
     ctx: BillingContext
   ): Promise<NoticeEndpoint | undefined> => {
     const { tx, existing, event, now } = ctx
-    if (!existing) return
+    if (!existing) {
+      console.warn(
+        `[BillingWebhook] handleSubscriptionTerminated: no existing UserLibrary record found for subscription ${ctx.subscriptionId}`
+      )
+      return
+    }
+
+    const accessExpiresAt =
+      existing.accessExpiresAt && existing.accessExpiresAt < now
+        ? existing.accessExpiresAt
+        : now
 
     await tx.userLibrary.update({
       where: { id: existing.id },
       data: {
         canceledAt: existing.canceledAt ?? now,
-        accessExpiresAt:
-          existing.accessExpiresAt && existing.accessExpiresAt < now
-            ? existing.accessExpiresAt
-            : now,
+        accessExpiresAt,
       },
     })
+
+    console.log(
+      `[BillingWebhook] handleSubscriptionTerminated: revoked access for user ${ctx.userId} on product ${ctx.productId} (accessExpiresAt: ${accessExpiresAt.toISOString()})`
+    )
 
     if (event.type === 'customer.subscription.deleted') {
       return 'delete-subscription'
@@ -420,6 +523,10 @@ export const billingService = {
       update: { accessExpiresAt, canceledAt },
     })
 
+    console.log(
+      `[BillingWebhook] handlePaymentSuccess: access granted/renewed for user ${userId}, product ${productId} until ${accessExpiresAt.toISOString()} (isNew: ${!existing})`
+    )
+
     if (!existing) {
       return 'subscription-started'
     }
@@ -430,7 +537,12 @@ export const billingService = {
     ctx: BillingContext
   ): Promise<NoticeEndpoint | undefined> => {
     const { tx, existing, scheduledCancellation, now } = ctx
-    if (!existing) return
+    if (!existing) {
+      console.warn(
+        `[BillingWebhook] handleSubscriptionUpdated: no existing UserLibrary record found for subscription ${ctx.subscriptionId}`
+      )
+      return
+    }
 
     // A renewal becomes accessible only after payment, not on subscription.updated.
     await tx.userLibrary.update({
@@ -439,6 +551,10 @@ export const billingService = {
         canceledAt: scheduledCancellation ? (existing.canceledAt ?? now) : null,
       },
     })
+
+    console.log(
+      `[BillingWebhook] handleSubscriptionUpdated: updated cancellation status for user ${ctx.userId}, product ${ctx.productId} (scheduledCancellation: ${scheduledCancellation})`
+    )
 
     if (scheduledCancellation && !existing.canceledAt) {
       return 'cancel-subscription'
