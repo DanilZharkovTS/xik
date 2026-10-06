@@ -12,6 +12,7 @@ import { productsRepo } from '../products/products.repo.js'
 import type { CheckoutSessionDto } from './billing.schema.js'
 import { stripeService } from './stripe.service.js'
 import { stripe } from './stripe.js'
+import { libraryRepo } from '../library/library.repo.js'
 
 type NoticeEndpoint =
   | 'subscription-started'
@@ -559,5 +560,23 @@ export const billingService = {
     if (scheduledCancellation && !existing.canceledAt) {
       return 'cancel-subscription'
     }
+  },
+  cancelSubscription: async (user: TokenPayload, subscriptionId: string) => {
+    const libraryItem = await libraryRepo.findBySubscription(subscriptionId)
+
+    if (!libraryItem) {
+      throw ApiError(404, 'NOT_FOUND', 'Library item not found')
+    }
+    if (libraryItem.userId !== user.id) {
+      throw ApiError(
+        403,
+        'FORBIDDEN',
+        'You are not authorized to cancel this subscription'
+      )
+    }
+
+    await stripeService.cancelSubscription(subscriptionId)
+
+    return { response: { success: true } }
   },
 }

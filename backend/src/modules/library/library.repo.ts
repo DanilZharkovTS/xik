@@ -17,6 +17,13 @@ export const libraryRepo = {
     })
     return libraryItem
   },
+  findBySubscription: async (subscriptionId: string) => {
+    return prisma.userLibrary.findUnique({
+      where: {
+        subscriptionId,
+      },
+    })
+  },
   updateLibraryItemExpiresAt: async (data: RenewLibraryAccessDto) => {
     const libraryItem = await prisma.userLibrary.update({
       where: {

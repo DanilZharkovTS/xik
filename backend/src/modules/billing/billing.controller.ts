@@ -29,4 +29,19 @@ export const billingController = {
       next(err)
     }
   },
+  cancelSubscription: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const result = await billingService.cancelSubscription(
+        req.user,
+        req.validData!.params.subscriptionId
+      )
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
 }
