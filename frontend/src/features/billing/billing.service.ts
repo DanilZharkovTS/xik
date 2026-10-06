@@ -4,7 +4,16 @@ const withToken = (token: string) => ({ headers: { Authorization: `Bearer ${toke
 
 export const billingService = {
   cancelSubscription: async (subscriptionId: string, token: string): Promise<{ success: boolean }> => {
-    const res = await api.delete(`/billing/subscriptions/${subscriptionId}`, withToken(token))
+    const res = await api.post(`/billing/subscriptions/${subscriptionId}`, {}, withToken(token))
+    return res.data
+  },
+
+  restoreSubscription: async (subscriptionId: string, token: string): Promise<{ success: boolean }> => {
+    const res = await api.post(
+      `/billing/subscriptions/${subscriptionId}/restore-canceled`,
+      {},
+      withToken(token),
+    )
     return res.data
   },
 }

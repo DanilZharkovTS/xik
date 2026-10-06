@@ -50,5 +50,8 @@ export const accountService = {
   },
 
   cancelSubscription: async (subscriptionId: string, token: string): Promise<{ success: boolean }> =>
-    (await api.delete(`/billing/subscriptions/${subscriptionId}`, withToken(token))).data,
+    (await api.post(`/billing/subscriptions/${subscriptionId}`, {}, withToken(token))).data,
+
+  restoreSubscription: async (subscriptionId: string, token: string): Promise<{ success: boolean }> =>
+    (await api.post(`/billing/subscriptions/${subscriptionId}/restore-canceled`, {}, withToken(token))).data,
 }

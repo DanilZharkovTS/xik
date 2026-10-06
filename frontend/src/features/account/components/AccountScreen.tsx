@@ -19,6 +19,7 @@ import { TextField } from '@/src/shared/ui/text-field'
 import { accountService } from '../account.service'
 import type { LibraryItem, SavedProduct } from '../account.service'
 import { CancelSubscriptionButton } from './CancelSubscriptionButton'
+import { RestoreSubscriptionButton } from './RestoreSubscriptionButton'
 
 type Tab = 'subs' | 'saved' | 'profile'
 
@@ -149,6 +150,22 @@ export function AccountScreen(): ReactElement {
                             current?.map((entry) =>
                               entry.id === item.id
                                 ? { ...entry, status: 'canceled', canceledAt: new Date().toISOString() }
+                                : entry,
+                            ) ?? null,
+                          )
+                        }}
+                      />
+                    </div>
+                  )}
+                  {item.status === 'canceled' && (item.subscriptionId || item.id) && (
+                    <div className="mt-3 flex justify-end">
+                      <RestoreSubscriptionButton
+                        subscriptionId={item.subscriptionId ?? item.id}
+                        onRestored={() => {
+                          setLibrary((current) =>
+                            current?.map((entry) =>
+                              entry.id === item.id
+                                ? { ...entry, status: 'active', canceledAt: null }
                                 : entry,
                             ) ?? null,
                           )
