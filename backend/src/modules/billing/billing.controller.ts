@@ -44,4 +44,19 @@ export const billingController = {
       next(err)
     }
   },
+  restoreSubscription: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const result = await billingService.restoreSubscription(
+        req.user,
+        req.validData!.params.subscriptionId
+      )
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
 }

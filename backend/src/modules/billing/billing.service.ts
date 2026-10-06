@@ -575,12 +575,38 @@ export const billingService = {
       )
     }
 
-    await stripeService.cancelSubscription(libraryItem.subscriptionId)
+    if (!libraryItem.stripeSubscriptionId) {
+      throw ApiError(400, 'BAD_REQUEST', 'Item is not an active subscription')
+    }
 
-    await prisma.userLibrary.update({
-      where: { id: libraryItem.id },
-      data: { canceledAt: new Date() },
-    })
+    await stripeService.cancelSubscription(libraryItem.stripeSubscriptionId)
+
+    await libraryRepo.cancelById(subscriptionId)
+
+    return { response: { success: true } }
+  },
+  restoreSubscription: async (user: TokenPayload, subscriptionId: string) => {
+    const libraryItem = await libraryRepo.findById(subscriptionId)
+
+    if (!libraryItem) {
+      throw ApiError(404, 'NOT_FOUND', 'Library item not found')
+    }
+    if (libraryItem.userId !== user.id) {
+      throw ApiError(
+        403,
+        'FORBIDDEN',
+        'You are not authorized to restore this subscription'
+      )
+    }
+    if (!libraryItem.canceledAt) {
+      throw ApiError(400, 'BAD_REQUEST', 'Subscription is not canceled')
+    }
+    if (!libraryItem.stripeSubscriptionId) {
+      throw ApiError(400, 'BAD_REQUEST', 'Item is not an active subscription')
+    }
+
+    await stripeService.restoreSubscription(libraryItem.stripeSubscriptionId)
+    await libraryRepo.restoreCanceledById(subscriptionId)
 
     return { response: { success: true } }
   },

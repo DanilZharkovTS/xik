@@ -16,11 +16,18 @@ router.post(
   billingController.redirectToCkeckout
 )
 
-router.delete(
+router.post(
   '/subscriptions/:subscriptionId',
   authMiddleware.verifyAccess,
   validateParams('subscriptionId'),
   billingController.cancelSubscription
+)
+
+router.post(
+  '/subscriptions/:subscriptionId/restore-canceled',
+  authMiddleware.verifyAccess,
+  validateParams('subscriptionId'),
+  billingController.restoreSubscription
 )
 
 export default router

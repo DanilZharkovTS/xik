@@ -35,6 +35,28 @@ export const libraryRepo = {
     })
     return libraryItem
   },
+  restoreCanceledById: async (id: string) => {
+    return prisma.userLibrary.update({
+      where: {
+        id,
+        canceledAt: { not: null },
+      },
+      data: {
+        canceledAt: null,
+      },
+    })
+  },
+  cancelById: async (id: string) => {
+    const libraryItem = await prisma.userLibrary.update({
+      where: {
+        id,
+      },
+      data: {
+        canceledAt: new Date(),
+      },
+    })
+    return libraryItem
+  },
   cancelBySubscription: async (subscriptionId: string) => {
     const libraryItem = await prisma.userLibrary.update({
       where: {
