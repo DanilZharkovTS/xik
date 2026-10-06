@@ -1,6 +1,7 @@
 # XIK Production Release Checklist
 
-Use this checklist after the local quality gate passes. Do not mark external
+Use this frontend release checklist after [the repository checkpoint](../../docs/verification-policy.md)
+passes. These release requirements do not apply after every local edit. Do not mark external
 steps complete based only on local output.
 
 ## Before deployment
@@ -60,8 +61,10 @@ steps complete based only on local output.
       has been separately approved.
 - [ ] Recheck low-power mobile behavior and idle CPU on production.
 
-## Deferred product systems
+## Product systems
 
-- [ ] Keep payments, licensing, authentication, accounts, CMS, databases, and
-      analytics out of the release until each has an approved implementation
-      phase.
+- [ ] Enable implemented payments, authentication, accounts, CMS and database
+      features only with their required verification and production configuration.
+      Do not treat historical public-site QA as acceptance of these systems.
+- [ ] Keep unimplemented licensing/analytics features out of the release until
+      their implementation and acceptance are explicitly authorized.

@@ -1,3 +1,7 @@
+Repository-wide verification is owned by [../AGENTS.md](../AGENTS.md); use
+[../docs/verification-policy.md](../docs/verification-policy.md) to choose focused
+checks and full checkpoints. The Next.js rules below remain mandatory.
+
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 

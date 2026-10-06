@@ -86,7 +86,7 @@ a dedicated database, never at real data.
 | Report equals the event table for each period; admin sees a per-moderator breakdown | `tests/reports.test.ts` (DST and midnight boundaries) |
 | A deactivated moderator cannot sign in and the open session ends | `tests/access.test.ts` |
 | Products are added and removed one by one; revoked access fails on the next request; transfer keeps history and is audited | `tests/access.test.ts`, `tests/transfer.test.ts` |
-| All automated tests pass on Postgres | `npm test` (378 tests) |
+| All automated tests pass on Postgres | Backend `npm test`; counts depend on the revision. See [verification policy](verification-policy.md) for scope and prerequisites. |
 | Manual check on mobile (390px) and desktop | Checklist below |
 
 Manual check (390px and 1280px, both themes), signed in as admin and as a moderator:
