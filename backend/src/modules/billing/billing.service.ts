@@ -574,11 +574,8 @@ export const billingService = {
         'You are not authorized to cancel this subscription'
       )
     }
-    if (!libraryItem.stripeSubscriptionId) {
-      throw ApiError(400, 'BAD_REQUEST', 'Item is not an active subscription')
-    }
 
-    await stripeService.cancelSubscription(libraryItem.stripeSubscriptionId)
+    await stripeService.cancelSubscription(libraryItem.subscriptionId)
 
     await prisma.userLibrary.update({
       where: { id: libraryItem.id },
