@@ -17,10 +17,10 @@ export const libraryRepo = {
     })
     return libraryItem
   },
-  findBySubscription: async (subscriptionId: string) => {
+  findById: async (id: string) => {
     return prisma.userLibrary.findUnique({
       where: {
-        subscriptionId,
+        id,
       },
     })
   },

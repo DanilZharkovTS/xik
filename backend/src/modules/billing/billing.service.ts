@@ -562,7 +562,7 @@ export const billingService = {
     }
   },
   cancelSubscription: async (user: TokenPayload, subscriptionId: string) => {
-    const libraryItem = await libraryRepo.findBySubscription(subscriptionId)
+    const libraryItem = await libraryRepo.findById(subscriptionId)
 
     if (!libraryItem) {
       throw ApiError(404, 'NOT_FOUND', 'Library item not found')
@@ -574,8 +574,11 @@ export const billingService = {
         'You are not authorized to cancel this subscription'
       )
     }
+    if (!libraryItem.stripeSubscriptionId) {
+      throw ApiError(400, 'BAD_REQUEST', 'Item is not an active subscription')
+    }
 
-    await stripeService.cancelSubscription(subscriptionId)
+    await stripeService.cancelSubscription(libraryItem.stripeSubscriptionId)
 
     await prisma.userLibrary.update({
       where: { id: libraryItem.id },
