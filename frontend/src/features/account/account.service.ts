@@ -15,6 +15,7 @@ export interface AccountProfile {
 
 export interface LibraryItem {
   id: string
+  subscriptionId?: string | null
   status: LibraryStatus
   accessExpiresAt: string | null
   canceledAt: string | null
@@ -47,4 +48,7 @@ export const accountService = {
     const res = await api.post(`/products/${productId}/save`, {}, withToken(token))
     return Boolean(res.data.saved)
   },
+
+  cancelSubscription: async (subscriptionId: string, token: string): Promise<{ success: boolean }> =>
+    (await api.delete(`/billing/subscriptions/${subscriptionId}`, withToken(token))).data,
 }

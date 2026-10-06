@@ -18,6 +18,7 @@ import { Segmented } from '@/src/shared/ui/segmented'
 import { TextField } from '@/src/shared/ui/text-field'
 import { accountService } from '../account.service'
 import type { LibraryItem, SavedProduct } from '../account.service'
+import { CancelSubscriptionButton } from './CancelSubscriptionButton'
 
 type Tab = 'subs' | 'saved' | 'profile'
 
@@ -139,6 +140,22 @@ export function AccountScreen(): ReactElement {
                       .filter(Boolean)
                       .join(' · ')}
                   </p>
+                  {item.status === 'active' && (item.subscriptionId || item.id) && (
+                    <div className="mt-3 flex justify-end">
+                      <CancelSubscriptionButton
+                        subscriptionId={item.subscriptionId ?? item.id}
+                        onCanceled={() => {
+                          setLibrary((current) =>
+                            current?.map((entry) =>
+                              entry.id === item.id
+                                ? { ...entry, status: 'canceled', canceledAt: new Date().toISOString() }
+                                : entry,
+                            ) ?? null,
+                          )
+                        }}
+                      />
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
