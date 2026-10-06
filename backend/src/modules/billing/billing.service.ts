@@ -577,6 +577,11 @@ export const billingService = {
 
     await stripeService.cancelSubscription(subscriptionId)
 
+    await prisma.userLibrary.update({
+      where: { id: libraryItem.id },
+      data: { canceledAt: new Date() },
+    })
+
     return { response: { success: true } }
   },
 }
