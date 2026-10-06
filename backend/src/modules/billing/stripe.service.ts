@@ -30,4 +30,14 @@ export const stripeService = {
 
     return session.url
   },
+  cancelSubscription: async (stripeSubscriptionId: string) => {
+    await stripe.subscriptions.update(stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    })
+  },
+  restoreSubscription: async (stripeSubscriptionId: string) => {
+    await stripe.subscriptions.update(stripeSubscriptionId, {
+      cancel_at_period_end: false,
+    })
+  },
 }
