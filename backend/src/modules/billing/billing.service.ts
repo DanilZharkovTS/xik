@@ -13,16 +13,29 @@ import type { CheckoutSessionDto } from './billing.schema.js'
 import { stripeService } from './stripe.service.js'
 import { stripe } from './stripe.js'
 import { libraryRepo } from '../library/library.repo.js'
+import { licenseService } from '../license/license.service.js'
 
 type NoticeEndpoint =
   | 'subscription-started'
+  | 'send-device-key'
   | 'cancel-subscription'
   | 'delete-subscription'
   | 'payment-attempt-failed'
 
+interface NoticePayload {
+  endpoint: NoticeEndpoint
+  deviceKey?: string
+}
+
 type Notice = {
   endpoint: NoticeEndpoint
-  body: { to: string; productName: string; userName: string; locale: string }
+  body: {
+    to: string
+    productName: string
+    userName: string
+    locale: string
+    deviceKey?: string
+  }
 }
 
 interface BillingContext {
@@ -190,7 +203,7 @@ const buildBillingContext = async (
 // Webhook event dispatcher
 const dispatchWebhook = async (
   ctx: BillingContext
-): Promise<NoticeEndpoint | undefined> => {
+): Promise<NoticePayload | undefined> => {
   if (ctx.event.type === 'invoice.payment_failed') {
     return billingService.handlePaymentFailed(ctx)
   }
@@ -212,17 +225,18 @@ const dispatchWebhook = async (
 const saveBillingNotice = async (
   tx: Prisma.TransactionClient,
   eventId: string,
-  endpoint: NoticeEndpoint,
+  payload: NoticePayload,
   user: User,
   product: Product
 ): Promise<void> => {
   const notice: Notice = {
-    endpoint,
+    endpoint: payload.endpoint,
     body: {
       to: user.email,
       userName: user.name,
       productName: product.name,
       locale: user.locale,
+      deviceKey: payload.deviceKey,
     },
   }
 
@@ -343,9 +357,9 @@ export const billingService = {
         const ctx = await buildBillingContext(tx, event, subscriptionId)
         if (!ctx) return
 
-        const endpoint = await dispatchWebhook(ctx)
-        if (endpoint) {
-          await saveBillingNotice(tx, event.id, endpoint, ctx.user, ctx.product)
+        const payload = await dispatchWebhook(ctx)
+        if (payload?.endpoint) {
+          await saveBillingNotice(tx, event.id, payload, ctx.user, ctx.product)
         }
       },
       { maxWait: 15_000, timeout: 60_000 }
@@ -355,14 +369,16 @@ export const billingService = {
   },
 
   // 1. Failed payment attempt
-  handlePaymentFailed: async (ctx: BillingContext): Promise<NoticeEndpoint> => {
-    return 'payment-attempt-failed'
+  handlePaymentFailed: async (ctx: BillingContext): Promise<NoticePayload> => {
+    return {
+      endpoint: 'payment-attempt-failed',
+    }
   },
 
   // 2. Subscription terminated / revoked (terminal statuses: canceled, unpaid, paused, etc.)
   handleSubscriptionTerminated: async (
     ctx: BillingContext
-  ): Promise<NoticeEndpoint | undefined> => {
+  ): Promise<NoticePayload | undefined> => {
     const { tx, existing, event, now } = ctx
     if (!existing) return
 
@@ -380,14 +396,16 @@ export const billingService = {
     })
 
     if (event.type === 'customer.subscription.deleted') {
-      return 'delete-subscription'
+      return {
+        endpoint: 'delete-subscription',
+      }
     }
   },
 
   // 3. Successful payment (checkout session or paid invoice)
   handlePaymentSuccess: async (
     ctx: BillingContext
-  ): Promise<NoticeEndpoint | undefined> => {
+  ): Promise<NoticePayload | undefined> => {
     const {
       tx,
       event,
@@ -423,15 +441,31 @@ export const billingService = {
       update: { accessExpiresAt, canceledAt },
     })
 
+    const license = await licenseService.getLicense({
+      email: ctx.user.email,
+      product_id: ctx.product.id,
+      plan: `pro_${ctx.product.billingPeriod}`,
+      plan_tier: 'pro',
+      max_devices: 1,
+      expires_at: accessExpiresAt,
+    })
     if (!existing) {
-      return 'subscription-started'
+      return {
+        endpoint: 'subscription-started',
+        deviceKey: license.key,
+      }
+    } else {
+      return {
+        endpoint: 'send-device-key',
+        deviceKey: license.key,
+      }
     }
   },
 
   // 4. Subscription updated (e.g. scheduled cancellation at period end)
   handleSubscriptionUpdated: async (
     ctx: BillingContext
-  ): Promise<NoticeEndpoint | undefined> => {
+  ): Promise<NoticePayload | undefined> => {
     const { tx, existing, scheduledCancellation, now } = ctx
     if (!existing) return
 
@@ -444,7 +478,9 @@ export const billingService = {
     })
 
     if (scheduledCancellation && !existing.canceledAt) {
-      return 'cancel-subscription'
+      return {
+        endpoint: 'cancel-subscription',
+      }
     }
   },
   cancelSubscription: async (user: TokenPayload, subscriptionId: string) => {
