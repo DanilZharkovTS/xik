@@ -85,7 +85,8 @@ export const COPY: Record<EmailKind, Record<EmailLocale, Copy>> = {
         'You can manage your subscription settings and billing details directly in your account at any time. If you ever have questions, we are here to help!',
       ],
       callout: { tone: 'info', html: ({ product }) => `<strong>Full access unlocked:</strong><br />You now have unrestricted access to all features and updates of ${product}.` },
-      text: (d) => `Thank you for subscribing to ${d.productName}! Your payment was successful, and your subscription is now active.\n\nYou have full access to all features and updates. You can manage your subscription in your account.\n\nEnjoy using ${d.productName}!`,
+      text: (d) =>
+        `Thank you for subscribing to ${d.productName}! Your payment was successful, and your subscription is now active.${d.deviceKey ? `\n\nYour device key:\n${d.deviceKey}\n\nKeep this key private. Do not share it with anyone.` : ''}\n\nYou have full access to all features and updates. You can manage your subscription in your account.\n\nEnjoy using ${d.productName}!`,
     },
     es: {
       subject: (d) => `XIK — ¡Bienvenido! Su suscripción a ${d.productName} está activa 🎉`,
@@ -96,7 +97,8 @@ export const COPY: Record<EmailKind, Record<EmailLocale, Copy>> = {
         'Puede gestionar su suscripción y los datos de facturación en su cuenta cuando quiera. Si tiene alguna pregunta, estamos para ayudarle.',
       ],
       callout: { tone: 'info', html: ({ product }) => `<strong>Acceso completo desbloqueado:</strong><br />Ya tiene acceso a todas las funciones y actualizaciones de ${product}.` },
-      text: (d) => `¡Gracias por suscribirse a ${d.productName}! El pago se ha realizado correctamente y su suscripción ya está activa.\n\nTiene acceso completo a todas las funciones y actualizaciones. Puede gestionar su suscripción en su cuenta.\n\n¡Que disfrute de ${d.productName}!`,
+      text: (d) =>
+        `¡Gracias por suscribirse a ${d.productName}! El pago se ha realizado correctamente y su suscripción ya está activa.${d.deviceKey ? `\n\nSu clave de dispositivo:\n${d.deviceKey}\n\nMantenga esta clave en privado. No la comparta con nadie.` : ''}\n\nTiene acceso completo a todas las funciones y actualizaciones. Puede gestionar su suscripción en su cuenta.\n\n¡Que disfrute de ${d.productName}!`,
     },
     uk: {
       subject: (d) => `XIK — Вітаємо! Підписка на ${d.productName} активна 🎉`,
@@ -107,7 +109,8 @@ export const COPY: Record<EmailKind, Record<EmailLocale, Copy>> = {
         'Керувати підпискою та платіжними даними можна будь-коли у своєму кабінеті. Якщо виникнуть запитання, ми поруч.',
       ],
       callout: { tone: 'info', html: ({ product }) => `<strong>Повний доступ відкрито:</strong><br />Тепер вам доступні всі функції й оновлення ${product}.` },
-      text: (d) => `Дякуємо, що підписалися на ${d.productName}! Оплата пройшла успішно, і підписка вже активна.\n\nВам доступні всі функції й оновлення. Керувати підпискою можна у своєму кабінеті.\n\nГарного користування ${d.productName}!`,
+      text: (d) =>
+        `Дякуємо, що підписалися на ${d.productName}! Оплата пройшла успішно, і підписка вже активна.${d.deviceKey ? `\n\nВаш ключ пристрою:\n${d.deviceKey}\n\nЗберігайте цей ключ у таємниці. Нікому його не передавайте.` : ''}\n\nВам доступні всі функції й оновлення. Керувати підпискою можна у своєму кабінеті.\n\nГарного користування ${d.productName}!`,
     },
   },
   subscriptionCanceled: {

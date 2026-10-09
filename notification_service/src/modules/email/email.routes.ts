@@ -12,6 +12,12 @@ import {
 const router = Router()
 
 router.post(
+  '/send-device-key',
+  validateBody(sendDeviceKeyEmailSchema),
+  emailController.sendDeviceKey
+)
+
+router.post(
   '/device-key',
   validateBody(sendDeviceKeyEmailSchema),
   emailController.sendDeviceKey

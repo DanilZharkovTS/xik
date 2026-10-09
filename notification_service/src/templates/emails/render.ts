@@ -44,7 +44,7 @@ export function renderEmail(kind: EmailKind, localeInput: unknown, data: EmailDa
     : ''
 
   const keyBlock =
-    kind === 'deviceKey' && data.deviceKey
+    data.deviceKey
       ? `<div style="margin: 0 0 24px; padding: 16px; background-color: #fafafa; border: 1px solid #e5e5e5; border-radius: 8px;"><div style="margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #737373;">${common.deviceKeyLabel}</div><div style="font-family: monospace; font-size: 14px; word-break: break-all; color: #171717;">${escapeHtml(data.deviceKey)}</div></div>`
       : ''
 

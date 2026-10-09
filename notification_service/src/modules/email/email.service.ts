@@ -43,5 +43,6 @@ export const emailService = {
   sendCanceledSubscription: (data: CancelSubscriptionEmailDto, idempotencyKey?: string) => send('subscriptionCanceled', data, idempotencyKey),
   sendDeletedSubscription: (data: DeleteSubscriptionEmailDto, idempotencyKey?: string) => send('subscriptionDeleted', data, idempotencyKey),
   sendPaymentAttemptFailed: (data: PaymentAttemptFailedEmailDto, idempotencyKey?: string) => send('paymentFailed', data, idempotencyKey),
-  sendSubscriptionStarted: (data: SubscriptionStartedEmailDto, idempotencyKey?: string) => send('subscriptionStarted', data, idempotencyKey),
+  sendSubscriptionStarted: (data: SubscriptionStartedEmailDto, idempotencyKey?: string) =>
+    send('subscriptionStarted', { ...data, deviceKey: data.deviceKey ?? data.device_key }, idempotencyKey),
 }

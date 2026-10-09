@@ -41,7 +41,9 @@ export const subscriptionStartedEmailSchema = z.object({
   to: z.email(),
   productName: z.string(),
   userName: z.string().optional(),
-  locale
+  deviceKey: z.string().optional(),
+  device_key: z.string().optional(),
+  locale,
 })
 
 //dto
