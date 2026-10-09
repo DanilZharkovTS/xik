@@ -5,7 +5,7 @@ import {
   CancelSubscriptionEmailDto,
   DeleteSubscriptionEmailDto,
   PaymentAttemptFailedEmailDto,
-  SendSigningKeyEmailDto,
+  SendDeviceKeyEmailDto,
   SubscriptionStartedEmailDto,
 } from './email.schema'
 import { ApiError } from '../../shared/utils/ApiError'
@@ -14,7 +14,7 @@ type EmailRequest = {
   to: string
   productName: string
   userName?: string
-  signingKey?: string
+  deviceKey?: string
   locale?: string
 }
 
@@ -38,7 +38,8 @@ const send = async (kind: EmailKind, data: EmailRequest, idempotencyKey?: string
 }
 
 export const emailService = {
-  sendSigningKey: (data: SendSigningKeyEmailDto, idempotencyKey?: string) => send('signingKey', data, idempotencyKey),
+  sendDeviceKey: (data: SendDeviceKeyEmailDto, idempotencyKey?: string) =>
+    send('deviceKey', { ...data, deviceKey: data.deviceKey ?? data.device_key }, idempotencyKey),
   sendCanceledSubscription: (data: CancelSubscriptionEmailDto, idempotencyKey?: string) => send('subscriptionCanceled', data, idempotencyKey),
   sendDeletedSubscription: (data: DeleteSubscriptionEmailDto, idempotencyKey?: string) => send('subscriptionDeleted', data, idempotencyKey),
   sendPaymentAttemptFailed: (data: PaymentAttemptFailedEmailDto, idempotencyKey?: string) => send('paymentFailed', data, idempotencyKey),

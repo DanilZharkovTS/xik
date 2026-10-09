@@ -5,16 +5,16 @@ import {
   cancelSubscriptionEmailSchema,
   deleteSubscriptionEmailSchema,
   paymentAttemptFailedEmailSchema,
-  sendSigningKeyEmailSchema,
+  sendDeviceKeyEmailSchema,
   subscriptionStartedEmailSchema,
 } from './email.schema'
 
 const router = Router()
 
 router.post(
-  '/signing-key',
-  validateBody(sendSigningKeyEmailSchema),
-  emailController.sendSigningKey
+  '/device-key',
+  validateBody(sendDeviceKeyEmailSchema),
+  emailController.sendDeviceKey
 )
 
 router.post(

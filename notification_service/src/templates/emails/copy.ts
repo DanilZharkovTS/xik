@@ -4,7 +4,7 @@ export type EmailLocale = 'en' | 'es' | 'uk'
 export const EMAIL_LOCALES: readonly EmailLocale[] = ['en', 'es', 'uk']
 
 export type EmailKind =
-  | 'signingKey'
+  | 'deviceKey'
   | 'subscriptionStarted'
   | 'subscriptionCanceled'
   | 'subscriptionDeleted'
@@ -13,7 +13,7 @@ export type EmailKind =
 export interface EmailData {
   userName?: string
   productName: string
-  signingKey?: string
+  deviceKey?: string
 }
 
 type Tone = 'info' | 'warn' | 'danger' | 'neutral'
@@ -33,46 +33,46 @@ interface Common {
   hello: (name: string) => string
   fallbackName: string
   sentBy: string
-  signingKeyLabel: string
+  deviceKeyLabel: string
   signature: string
 }
 
 export const COMMON: Record<EmailLocale, Common> = {
-  en: { hello: (n) => `Hi ${n},`, fallbackName: 'there', sentBy: 'This email was sent by XIK.', signingKeyLabel: 'Signing key', signature: '— XIK' },
-  es: { hello: (n) => `Hola, ${n}:`, fallbackName: 'cliente', sentBy: 'Este correo lo ha enviado XIK.', signingKeyLabel: 'Clave de firma', signature: '— XIK' },
-  uk: { hello: (n) => `Вітаємо, ${n}!`, fallbackName: 'друже', sentBy: 'Цей лист надіслано від XIK.', signingKeyLabel: 'Ключ підпису', signature: '— XIK' },
+  en: { hello: (n) => `Hi ${n},`, fallbackName: 'there', sentBy: 'This email was sent by XIK.', deviceKeyLabel: 'Device key', signature: '— XIK' },
+  es: { hello: (n) => `Hola, ${n}:`, fallbackName: 'cliente', sentBy: 'Este correo lo ha enviado XIK.', deviceKeyLabel: 'Clave de dispositivo', signature: '— XIK' },
+  uk: { hello: (n) => `Вітаємо, ${n}!`, fallbackName: 'друже', sentBy: 'Цей лист надіслано від XIK.', deviceKeyLabel: 'Ключ пристрою', signature: '— XIK' },
 }
 
 const p = (s: string) => `<strong style="color: #171717;">${s}</strong>`
 
 export const COPY: Record<EmailKind, Record<EmailLocale, Copy>> = {
-  signingKey: {
+  deviceKey: {
     en: {
-      subject: () => 'XIK — Your signing key',
-      title: 'Your XIK signing key',
-      heading: 'Your signing key',
-      paragraphs: ({ product }) => [`Here is your signing key for ${p(product)}.`],
+      subject: () => 'XIK — Your device key',
+      title: 'Your XIK device key',
+      heading: 'Your device key',
+      paragraphs: ({ product }) => [`Here is your device key for ${p(product)}.`],
       callout: { tone: 'warn', html: () => '<strong>Keep this key private.</strong> Do not share it with anyone.' },
-      footerNote: 'If you did not request this signing key, you can safely ignore this email.',
-      text: (d) => `Here is your signing key for ${d.productName}:\n\n${d.signingKey}\n\nKeep this key private. Do not share it with anyone.\n\nIf you did not request this signing key, you can safely ignore this email.`,
+      footerNote: 'If you did not request this device key, you can safely ignore this email.',
+      text: (d) => `Here is your device key for ${d.productName}:\n\n${d.deviceKey}\n\nKeep this key private. Do not share it with anyone.\n\nIf you did not request this device key, you can safely ignore this email.`,
     },
     es: {
-      subject: () => 'XIK — Su clave de firma',
-      title: 'Su clave de firma de XIK',
-      heading: 'Su clave de firma',
-      paragraphs: ({ product }) => [`Esta es su clave de firma para ${p(product)}.`],
+      subject: () => 'XIK — Su clave de dispositivo',
+      title: 'Su clave de dispositivo de XIK',
+      heading: 'Su clave de dispositivo',
+      paragraphs: ({ product }) => [`Esta es su clave de dispositivo para ${p(product)}.`],
       callout: { tone: 'warn', html: () => '<strong>Mantenga esta clave en privado.</strong> No la comparta con nadie.' },
-      footerNote: 'Si no solicitó esta clave de firma, puede ignorar este correo.',
-      text: (d) => `Esta es su clave de firma para ${d.productName}:\n\n${d.signingKey}\n\nMantenga esta clave en privado. No la comparta con nadie.\n\nSi no solicitó esta clave de firma, puede ignorar este correo.`,
+      footerNote: 'Si no solicitó esta clave de dispositivo, puede ignorar este correo.',
+      text: (d) => `Esta es su clave de dispositivo para ${d.productName}:\n\n${d.deviceKey}\n\nMantenga esta clave en privado. No la comparta con nadie.\n\nSi no solicitó esta clave de dispositivo, puede ignorar este correo.`,
     },
     uk: {
-      subject: () => 'XIK — Ваш ключ підпису',
-      title: 'Ваш ключ підпису XIK',
-      heading: 'Ваш ключ підпису',
-      paragraphs: ({ product }) => [`Ось ваш ключ підпису для ${p(product)}.`],
+      subject: () => 'XIK — Ваш ключ пристрою',
+      title: 'Ваш ключ пристрою XIK',
+      heading: 'Ваш ключ пристрою',
+      paragraphs: ({ product }) => [`Ось ваш ключ пристрою для ${p(product)}.`],
       callout: { tone: 'warn', html: () => '<strong>Зберігайте цей ключ у таємниці.</strong> Нікому його не передавайте.' },
-      footerNote: 'Якщо ви не запитували цей ключ підпису, просто проігноруйте лист.',
-      text: (d) => `Ось ваш ключ підпису для ${d.productName}:\n\n${d.signingKey}\n\nЗберігайте цей ключ у таємниці. Нікому його не передавайте.\n\nЯкщо ви не запитували цей ключ підпису, просто проігноруйте лист.`,
+      footerNote: 'Якщо ви не запитували цей ключ пристрою, просто проігноруйте лист.',
+      text: (d) => `Ось ваш ключ пристрою для ${d.productName}:\n\n${d.deviceKey}\n\nЗберігайте цей ключ у таємниці. Нікому його не передавайте.\n\nЯкщо ви не запитували цей ключ пристрою, просто проігноруйте лист.`,
     },
   },
   subscriptionStarted: {

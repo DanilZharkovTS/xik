@@ -2,9 +2,9 @@ import { Request, Response, NextFunction } from 'express'
 import { emailService } from './email.service'
 
 export const emailController = { 
-  sendSigningKey: async (req: Request, res: Response, next: NextFunction) => {
+  sendDeviceKey: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await emailService.sendSigningKey(req.body, req.get('idempotency-key'))
+      const result = await emailService.sendDeviceKey(req.body, req.get('idempotency-key'))
       res.status(200).json(result)
     } catch (err) {
       next(err)
