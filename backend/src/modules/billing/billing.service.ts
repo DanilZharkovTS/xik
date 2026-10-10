@@ -428,19 +428,6 @@ export const billingService = {
       ? (existing?.canceledAt ?? now)
       : null
 
-    await tx.userLibrary.upsert({
-      where: { stripeSubscriptionId: subscriptionId },
-      create: {
-        userId,
-        productId,
-        stripeSubscriptionId: subscriptionId,
-        subscriptionId,
-        accessExpiresAt,
-        canceledAt,
-      },
-      update: { accessExpiresAt, canceledAt },
-    })
-
     const license = await licenseService.getLicense({
       email: ctx.user.email,
       product_id: ctx.product.id,
@@ -449,6 +436,27 @@ export const billingService = {
       max_devices: 1,
       expires_at: accessExpiresAt,
     })
+
+    await tx.userLibrary.upsert({
+      where: { stripeSubscriptionId: subscriptionId },
+      create: {
+        userId,
+        productId,
+        stripeSubscriptionId: subscriptionId,
+        subscriptionId,
+        licenseId: license.id,
+        licenseKey: license.key,
+        accessExpiresAt,
+        canceledAt,
+      },
+      update: {
+        accessExpiresAt,
+        canceledAt,
+        licenseId: license.id,
+        licenseKey: license.key,
+      },
+    })
+    
     if (!existing) {
       return {
         endpoint: 'subscription-started',
