@@ -4,6 +4,11 @@ import { CreateLicenseDto } from './license.types.js'
 export const licenseService = {
   getLicense: async (data: CreateLicenseDto) => {
     try {
+      console.log(
+        '[LicenseService] Requesting license from:',
+        `${process.env.LICENSE_SERVICE_URL}/admin/licenses`,
+        data
+      )
       const license = await fetch(
         `${process.env.LICENSE_SERVICE_URL}/admin/licenses`,
         {
@@ -17,9 +22,11 @@ export const licenseService = {
       )
 
       const result = await license.json()
+      console.log(`[LicenseService] Response (${license.status}):`, result)
 
       return result
     } catch (err) {
+      console.error('[LicenseService] Failed to get license:', err)
       throw ApiError(
         502,
         'LICENSE_SERVICE_UNREACHABLE',

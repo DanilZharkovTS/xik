@@ -267,7 +267,7 @@ model UserLibrary {
   productId String
   subscriptionId String?
   stripeSubscriptionId String?
-  licenseId String?
+  licenseId Int?
   licenseKey String?
 
   accessExpiresAt DateTime?
