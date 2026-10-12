@@ -1,4 +1,3 @@
-
 export type UserRole = 'user' | 'admin' | 'moderator'
 
 export interface User {
@@ -8,7 +7,7 @@ export interface User {
   name: string
 
   role: UserRole
-  
+
   created_at: Date
 }
 

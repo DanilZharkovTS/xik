@@ -14,11 +14,15 @@ const writableFields = (data: Partial<CreateProductDto>) => ({
   ...(data.name !== undefined && { name: data.name }),
   ...(data.kind !== undefined && { kind: data.kind }),
   ...(data.status !== undefined && { status: data.status }),
-  ...(data.shortDescription !== undefined && { shortDescription: data.shortDescription }),
+  ...(data.shortDescription !== undefined && {
+    shortDescription: data.shortDescription,
+  }),
   ...(data.description !== undefined && { description: data.description }),
   ...(data.categories !== undefined && { categories: data.categories }),
   ...(data.features !== undefined && { features: data.features }),
-  ...(data.categoryLabel !== undefined && { categoryLabel: data.categoryLabel }),
+  ...(data.categoryLabel !== undefined && {
+    categoryLabel: data.categoryLabel,
+  }),
   ...(data.tagline !== undefined && { tagline: data.tagline }),
   ...(data.highlights !== undefined && { highlights: data.highlights }),
   ...(data.capabilities !== undefined && {
@@ -32,7 +36,9 @@ const writableFields = (data: Partial<CreateProductDto>) => ({
   ...(data.sortOrder !== undefined && { sortOrder: data.sortOrder }),
   ...(data.price !== undefined && { price: data.price }),
   ...(data.currency !== undefined && { currency: data.currency }),
-  ...(data.billingPeriod !== undefined && { billingPeriod: data.billingPeriod }),
+  ...(data.billingPeriod !== undefined && {
+    billingPeriod: data.billingPeriod,
+  }),
   ...(data.showPrice !== undefined && { showPrice: data.showPrice }),
   ...(data.translations !== undefined && {
     translations: data.translations as Prisma.InputJsonValue,
@@ -90,7 +96,11 @@ export const productsRepo = {
     })
     return product
   },
-  setArchivedAt: async (id: string, archivedAt: Date | null, db: DbClient = prisma) => {
+  setArchivedAt: async (
+    id: string,
+    archivedAt: Date | null,
+    db: DbClient = prisma
+  ) => {
     const product = await db.product.update({
       where: { id },
       data: { archivedAt },

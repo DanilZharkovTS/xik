@@ -8,7 +8,9 @@ export const libraryController = {
     next: NextFunction
   ) => {
     try {
-      const result = await libraryService.grantLibraryAccess(req.validData!.body)
+      const result = await libraryService.grantLibraryAccess(
+        req.validData!.body
+      )
       res.status(200).json(result.response)
     } catch (err) {
       next(err)
@@ -20,7 +22,9 @@ export const libraryController = {
     next: NextFunction
   ) => {
     try {
-      const result = await libraryService.renewLibraryAccess(req.validData!.body)
+      const result = await libraryService.renewLibraryAccess(
+        req.validData!.body
+      )
       res.status(200).json(result.response)
     } catch (err) {
       next(err)

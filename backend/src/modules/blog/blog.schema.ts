@@ -8,14 +8,20 @@ const slug = z
   .trim()
   .min(1)
   .max(90)
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug may contain lowercase latin letters, digits and hyphens')
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    'Slug may contain lowercase latin letters, digits and hyphens'
+  )
 
 const taxonomySlug = z
   .string()
   .trim()
   .min(1)
   .max(60)
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug may contain lowercase latin letters, digits and hyphens')
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    'Slug may contain lowercase latin letters, digits and hyphens'
+  )
 
 export const translationInputSchema = z
   .object({
@@ -84,7 +90,9 @@ export const taxonomySchema = z.object({ slug: taxonomySlug, names }).strict()
 export const taxonomyUpdateSchema = z
   .object({ slug: taxonomySlug.optional(), names: names.optional() })
   .strict()
-  .refine((data) => data.slug !== undefined || data.names !== undefined, { message: 'Nothing to update' })
+  .refine((data) => data.slug !== undefined || data.names !== undefined, {
+    message: 'Nothing to update',
+  })
 
 export type TaxonomyDto = z.infer<typeof taxonomySchema>
 export type TaxonomyUpdateDto = z.infer<typeof taxonomyUpdateSchema>
@@ -97,10 +105,14 @@ export const publicListSchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(12),
 })
 
-export const publicLangSchema = z.object({ lang: z.enum(LOCALES).default('en') })
+export const publicLangSchema = z.object({
+  lang: z.enum(LOCALES).default('en'),
+})
 
 export const adminListSchema = z.object({
-  state: z.enum(['draft', 'published', 'scheduled', 'archived', 'all']).default('all'),
+  state: z
+    .enum(['draft', 'published', 'scheduled', 'archived', 'all'])
+    .default('all'),
   q: z.string().trim().max(100).optional(),
 })
 

@@ -34,7 +34,9 @@ const main = async () => {
   }
 
   if (!password || password.length < 8 || password.length > 72) {
-    throw new Error('ADMIN_PASSWORD (8-72 characters) is required for a new admin')
+    throw new Error(
+      'ADMIN_PASSWORD (8-72 characters) is required for a new admin'
+    )
   }
 
   const passwordHash = await bcrypt.hash(password, 10)

@@ -1,7 +1,12 @@
 import z from 'zod'
 import { isValidDate } from './reports.range.js'
 
-export const REPORT_EVENT_TYPES = ['first', 'repeat', 'reply', 'publication'] as const
+export const REPORT_EVENT_TYPES = [
+  'first',
+  'repeat',
+  'reply',
+  'publication',
+] as const
 
 export type ReportEventType = (typeof REPORT_EVENT_TYPES)[number]
 
@@ -14,10 +19,17 @@ const types = z
   .string()
   .optional()
   .transform((value) =>
-    value ? value.split(',').map((item) => item.trim()).filter(Boolean) : []
+    value
+      ? value
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : []
   )
   .pipe(z.array(z.enum(REPORT_EVENT_TYPES)))
-  .transform((list) => (list.length > 0 ? [...new Set(list)] : [...REPORT_EVENT_TYPES]))
+  .transform((list) =>
+    list.length > 0 ? [...new Set(list)] : [...REPORT_EVENT_TYPES]
+  )
 
 export const reportQuerySchema = z.object({
   period: z.enum(['day', 'week', 'month', 'year', 'custom']).default('day'),

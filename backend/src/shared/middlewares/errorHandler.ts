@@ -8,7 +8,10 @@ export const redact = (err: unknown): unknown => {
   if (!(err instanceof Error)) return err
 
   const clean = new Error(
-    err.message.replace(/(passwordHash|password|tokenHash)(["']?\s*[:=]\s*)(["'])[^"']*\3/gi, '$1$2$3[redacted]$3')
+    err.message.replace(
+      /(passwordHash|password|tokenHash)(["']?\s*[:=]\s*)(["'])[^"']*\3/gi,
+      '$1$2$3[redacted]$3'
+    )
   )
   clean.name = err.name
   clean.stack = err.stack?.replace(err.message, clean.message)
@@ -25,15 +28,19 @@ export const errorHandler = (
 
   // Помилки розбору тіла запиту (body-parser) це помилки клієнта, а не збій сервера.
   if (bodyError === 'entity.too.large') {
-    return res.status(413).json({ code: 'PAYLOAD_TOO_LARGE', message: 'Request body is too large' })
+    return res
+      .status(413)
+      .json({ code: 'PAYLOAD_TOO_LARGE', message: 'Request body is too large' })
   }
 
   if (bodyError === 'entity.parse.failed') {
-    return res.status(400).json({ code: 'BAD_REQUEST', message: 'Invalid request body' })
+    return res
+      .status(400)
+      .json({ code: 'BAD_REQUEST', message: 'Invalid request body' })
   }
 
   console.error(redact(err))
-  
+
   if (isApiError(err)) {
     return res.status(err.status).json({
       code: err.code,

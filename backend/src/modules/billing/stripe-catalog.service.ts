@@ -68,7 +68,9 @@ export const stripeCatalog = {
         return { stripeProductId: stripeProduct.id, stripePriceId: price.id }
       } catch (err) {
         // Не лишаємо у Stripe продукт без ціни, якого наша БД не знає.
-        await stripe.products.update(stripeProduct.id, { active: false }).catch(() => undefined)
+        await stripe.products
+          .update(stripeProduct.id, { active: false })
+          .catch(() => undefined)
         throw err
       }
     }),
@@ -79,7 +81,9 @@ export const stripeCatalog = {
     guard(async () => {
       await stripe.products.update(stripeProductId, {
         ...(data.name !== undefined && { name: data.name }),
-        ...(data.description !== undefined && { description: data.description }),
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
         ...(data.slug !== undefined && { metadata: { slug: data.slug } }),
       })
     }),

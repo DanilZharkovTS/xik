@@ -1,16 +1,16 @@
-import { Router } from "express";
-import authRoutes from "./modules/auth/auth.routes.js";
-import userRoutes from "./modules/user/user.routes.js";
-import productsRoutes from "./modules/products/products.routes.js";
-import billingRoutes from "./modules/billing/billing.routes.js";
-import libraryRoutes from "./modules/library/library.routes.js";
-import accountRoutes from "./modules/account/account.routes.js";
-import mediaRoutes from "./modules/media/media.routes.js";
-import blogRoutes from "./modules/blog/blog.routes.js";
-import teamRoutes from "./modules/team/team.routes.js";
-import accessRoutes from "./modules/access/access.routes.js";
-import outreachRoutes from "./modules/outreach/outreach.routes.js";
-import reportsRoutes from "./modules/reports/reports.routes.js";
+import { Router } from 'express'
+import authRoutes from './modules/auth/auth.routes.js'
+import userRoutes from './modules/user/user.routes.js'
+import productsRoutes from './modules/products/products.routes.js'
+import billingRoutes from './modules/billing/billing.routes.js'
+import libraryRoutes from './modules/library/library.routes.js'
+import accountRoutes from './modules/account/account.routes.js'
+import mediaRoutes from './modules/media/media.routes.js'
+import blogRoutes from './modules/blog/blog.routes.js'
+import teamRoutes from './modules/team/team.routes.js'
+import accessRoutes from './modules/access/access.routes.js'
+import outreachRoutes from './modules/outreach/outreach.routes.js'
+import reportsRoutes from './modules/reports/reports.routes.js'
 
 const router = Router()
 

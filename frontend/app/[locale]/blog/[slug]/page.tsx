@@ -11,11 +11,7 @@ import { createPageMetadata } from '@/src/shared/seo/create-page-metadata'
 import { truncate } from '@/src/shared/seo/truncate'
 
 // Статті не збираються під час білду (вони в БД): кешуються при першому запиті, скидаються тегом 'blog'.
-export const revalidate = 300
-
-export function generateStaticParams(): { slug: string }[] {
-  return []
-}
+export const dynamic = 'force-dynamic'
 
 type Props = { params: Promise<{ locale: string; slug: string }> }
 

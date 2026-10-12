@@ -38,17 +38,27 @@ const findVisible = async (
 }
 
 const forbid = () =>
-  ApiError(403, 'FORBIDDEN', 'Only the owner or an administrator can change this template')
+  ApiError(
+    403,
+    'FORBIDDEN',
+    'Only the owner or an administrator can change this template'
+  )
 
 export const templatesService = {
-  list: async (actor: TokenPayload, productId: string, dto: ListTemplatesDto) => {
+  list: async (
+    actor: TokenPayload,
+    productId: string,
+    dto: ListTemplatesDto
+  ) => {
     const templates = await templatesRepo.list({
       productId,
       status: dto.status,
       channel: dto.channel,
       // Свої архівні бачить кожен, чужі лише адмін.
       ownerUserId:
-        dto.status === 'archived' && actor.role !== 'admin' ? actor.id : undefined,
+        dto.status === 'archived' && actor.role !== 'admin'
+          ? actor.id
+          : undefined,
     })
 
     return {
@@ -59,7 +69,11 @@ export const templatesService = {
     const template = await findVisible(actor, productId, id)
     return { response: { template: toTemplateDto(template, actor) } }
   },
-  create: async (actor: TokenPayload, productId: string, dto: CreateTemplateDto) => {
+  create: async (
+    actor: TokenPayload,
+    productId: string,
+    dto: CreateTemplateDto
+  ) => {
     const template = await templatesRepo.create({
       productId,
       ownerUserId: actor.id,
@@ -81,7 +95,11 @@ export const templatesService = {
 
     if (!canEditTemplate(actor, template)) {
       if (template.status === 'archived') {
-        throw ApiError(409, 'TEMPLATE_ARCHIVED', 'Restore the template before editing it')
+        throw ApiError(
+          409,
+          'TEMPLATE_ARCHIVED',
+          'Restore the template before editing it'
+        )
       }
       throw forbid()
     }
@@ -108,7 +126,11 @@ export const templatesService = {
       next.body !== template.body
 
     if (isChanged) {
-      const isUpdated = await templatesRepo.updateIfVersion(id, dto.expectedVersion, next)
+      const isUpdated = await templatesRepo.updateIfVersion(
+        id,
+        dto.expectedVersion,
+        next
+      )
 
       if (!isUpdated) {
         const current = await templatesRepo.findById(productId, id)
@@ -117,7 +139,8 @@ export const templatesService = {
           status: 409,
           response: {
             code: 'STALE_VERSION',
-            message: 'The template was changed meanwhile. Review the latest version.',
+            message:
+              'The template was changed meanwhile. Review the latest version.',
             template: current ? toTemplateDto(current, actor) : undefined,
           },
         }
@@ -126,7 +149,10 @@ export const templatesService = {
 
     const updated = await templatesRepo.findById(productId, id)
 
-    return { status: 200, response: { template: toTemplateDto(updated!, actor) } }
+    return {
+      status: 200,
+      response: { template: toTemplateDto(updated!, actor) },
+    }
   },
   archive: async (actor: TokenPayload, productId: string, id: string) => {
     const template = await findVisible(actor, productId, id)
@@ -159,7 +185,11 @@ export const templatesService = {
     const template = await findVisible(actor, productId, id)
 
     if (!canDuplicateTemplate(actor, template)) {
-      throw ApiError(409, 'TEMPLATE_ARCHIVED', 'Restore the template before duplicating it')
+      throw ApiError(
+        409,
+        'TEMPLATE_ARCHIVED',
+        'Restore the template before duplicating it'
+      )
     }
 
     const copy = await templatesRepo.create({
@@ -208,7 +238,10 @@ export const templatesService = {
     return { response: { deleted: true } }
   },
   // Для подій: шаблон має бути активним у цьому продукті; фіксуємо його поточну версію.
-  resolveForEvent: async (productId: string, templateId: string | undefined) => {
+  resolveForEvent: async (
+    productId: string,
+    templateId: string | undefined
+  ) => {
     if (!templateId) return null
 
     const template = await templatesRepo.findById(productId, templateId)

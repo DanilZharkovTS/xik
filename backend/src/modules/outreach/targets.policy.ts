@@ -24,7 +24,5 @@ export const canMarkDoNotContact = (
   target: OwnedTarget
 ): boolean => canViewDetails(actor, target) && target.status === 'active'
 
-export const canRelease = (
-  actor: TokenPayload,
-  target: OwnedTarget
-): boolean => actor.role === 'admin' && target.status === 'do_not_contact'
+export const canRelease = (actor: TokenPayload, target: OwnedTarget): boolean =>
+  actor.role === 'admin' && target.status === 'do_not_contact'

@@ -28,11 +28,26 @@ const setup = async () => {
   return { admin, anna, ivan, productA, productB, tokens }
 }
 
-const check = (token: string, productId: string, value: string, channel?: string) =>
-  api().post('/api/outreach/check').set(inProduct(token, productId)).send({ value, channel })
+const check = (
+  token: string,
+  productId: string,
+  value: string,
+  channel?: string
+) =>
+  api()
+    .post('/api/outreach/check')
+    .set(inProduct(token, productId))
+    .send({ value, channel })
 
-const register = (token: string, productId: string, body: Record<string, unknown>) =>
-  api().post('/api/outreach/targets').set(inProduct(token, productId)).send(body)
+const register = (
+  token: string,
+  productId: string,
+  body: Record<string, unknown>
+) =>
+  api()
+    .post('/api/outreach/targets')
+    .set(inProduct(token, productId))
+    .send(body)
 
 describe('перевірка ідентифікатора', () => {
   it('вільний, поки ніхто не писав', async () => {
@@ -56,7 +71,11 @@ describe('перевірка ідентифікатора', () => {
       url: 'https://t.me/durov/1',
     }).expect(201)
 
-    const res = await check(tokens.anna, productA.id, 'https://telegram.me/DUROV/')
+    const res = await check(
+      tokens.anna,
+      productA.id,
+      'https://telegram.me/DUROV/'
+    )
 
     expect(res.body.status).toBe('mine')
     expect(res.body.target.displayName).toBe('Pavel')
@@ -91,9 +110,16 @@ describe('перевірка ідентифікатора', () => {
 
   it('адмін бачить повну історію чужої цілі', async () => {
     const { productA, tokens } = await setup()
-    await register(tokens.anna, productA.id, { value: 'company.com', comment: 'hi' }).expect(201)
+    await register(tokens.anna, productA.id, {
+      value: 'company.com',
+      comment: 'hi',
+    }).expect(201)
 
-    const res = await check(tokens.admin, productA.id, 'https://www.company.com/x')
+    const res = await check(
+      tokens.admin,
+      productA.id,
+      'https://www.company.com/x'
+    )
 
     expect(res.body.status).toBe('foreign')
     expect(res.body.target.events[0].comment).toBe('hi')
@@ -102,7 +128,9 @@ describe('перевірка ідентифікатора', () => {
 
   it('"не писати" видно всім, причина лише власнику й адміну', async () => {
     const { productA, tokens } = await setup()
-    const created = await register(tokens.anna, productA.id, { value: '@spammer1' })
+    const created = await register(tokens.anna, productA.id, {
+      value: '@spammer1',
+    })
     await prisma.outreachTarget.update({
       where: { id: created.body.target.id },
       data: { status: 'do_not_contact', statusReason: 'asked to stop' },
@@ -126,7 +154,10 @@ describe('перевірка ідентифікатора', () => {
 
     const manual = await check(tokens.anna, productA.id, 'durov', 'telegram')
     expect(manual.status).toBe(200)
-    expect(manual.body.normalized).toEqual({ channel: 'telegram', value: 'durov' })
+    expect(manual.body.normalized).toEqual({
+      channel: 'telegram',
+      value: 'durov',
+    })
 
     const wrong = await check(tokens.anna, productA.id, 'durov', 'email')
     expect(wrong.status).toBe(400)
@@ -147,14 +178,18 @@ describe('реєстрація першого звернення', () => {
     expect(targets).toHaveLength(1)
     expect(targets[0].ownerUserId).toBe(anna.id)
     expect(targets[0].firstContactedAt).not.toBeNull()
-    expect(await prisma.outreachEvent.count({ where: { type: 'first' } })).toBe(1)
+    expect(await prisma.outreachEvent.count({ where: { type: 'first' } })).toBe(
+      1
+    )
   })
 
   it('другий модератор не може забрати вже зареєстрований ідентифікатор', async () => {
     const { anna, productA, tokens } = await setup()
     await register(tokens.anna, productA.id, { value: '@durov' }).expect(201)
 
-    const res = await register(tokens.ivan, productA.id, { value: 't.me/DUROV' })
+    const res = await register(tokens.ivan, productA.id, {
+      value: 't.me/DUROV',
+    })
 
     expect(res.status).toBe(409)
     expect(res.body.code).toBe('ALREADY_REGISTERED')
@@ -165,7 +200,9 @@ describe('реєстрація першого звернення', () => {
     // Невдала спроба не лишає порожніх цілей і подій.
     expect(await prisma.outreachTarget.count()).toBe(1)
     expect(await prisma.outreachEvent.count()).toBe(1)
-    expect((await prisma.outreachTarget.findFirstOrThrow()).ownerUserId).toBe(anna.id)
+    expect((await prisma.outreachTarget.findFirstOrThrow()).ownerUserId).toBe(
+      anna.id
+    )
   })
 
   it('повторна реєстрація власником повертає 409 зі статусом "мій"', async () => {
@@ -231,10 +268,16 @@ describe('реєстрація першого звернення', () => {
 describe('кілька ідентифікаторів однієї цілі', () => {
   it('пошук за будь-яким знаходить ту саму ціль', async () => {
     const { productA, tokens } = await setup()
-    const created = await register(tokens.anna, productA.id, { value: '@acme_team' })
+    const created = await register(tokens.anna, productA.id, {
+      value: '@acme_team',
+    })
     const targetId = created.body.target.id
 
-    for (const value of ['hello@acme.com', 'https://www.linkedin.com/company/Acme/', 'blog.acme.com']) {
+    for (const value of [
+      'hello@acme.com',
+      'https://www.linkedin.com/company/Acme/',
+      'blog.acme.com',
+    ]) {
       await api()
         .post(`/api/outreach/targets/${targetId}/identifiers`)
         .set(inProduct(tokens.anna, productA.id))
@@ -242,7 +285,12 @@ describe('кілька ідентифікаторів однієї цілі', ()
         .expect(201)
     }
 
-    for (const value of ['acme.com', 'HELLO@acme.com', 'linkedin.com/company/acme', 't.me/acme_team']) {
+    for (const value of [
+      'acme.com',
+      'HELLO@acme.com',
+      'linkedin.com/company/acme',
+      't.me/acme_team',
+    ]) {
       const res = await check(tokens.anna, productA.id, value)
       expect(res.body.status).toBe('mine')
       expect(res.body.target.id).toBe(targetId)
@@ -256,7 +304,9 @@ describe('кілька ідентифікаторів однієї цілі', ()
 
   it('ідентифікатор іншої цілі додати не можна, видно чужого власника', async () => {
     const { productA, tokens } = await setup()
-    const mine = await register(tokens.anna, productA.id, { value: '@annas_target' })
+    const mine = await register(tokens.anna, productA.id, {
+      value: '@annas_target',
+    })
     await register(tokens.ivan, productA.id, { value: 'taken.com' }).expect(201)
 
     const res = await api()
@@ -272,7 +322,9 @@ describe('кілька ідентифікаторів однієї цілі', ()
 
   it('чужу ціль доповнити не можна (403), неіснуючу 404, "не писати" блокує', async () => {
     const { productA, tokens } = await setup()
-    const created = await register(tokens.anna, productA.id, { value: '@annas_target' })
+    const created = await register(tokens.anna, productA.id, {
+      value: '@annas_target',
+    })
     const id = created.body.target.id
     const add = (token: string, targetId: string) =>
       api()
@@ -283,7 +335,10 @@ describe('кілька ідентифікаторів однієї цілі', ()
     expect((await add(tokens.ivan, id)).status).toBe(403)
     expect((await add(tokens.anna, 'missing')).status).toBe(404)
 
-    await prisma.outreachTarget.update({ where: { id }, data: { status: 'do_not_contact' } })
+    await prisma.outreachTarget.update({
+      where: { id },
+      data: { status: 'do_not_contact' },
+    })
     expect((await add(tokens.anna, id)).status).toBe(409)
   })
 })
@@ -302,14 +357,24 @@ describe('ізоляція продуктів і доступ', () => {
 
   it('модератор продукту A не бачить і не змінює продукт B (403), невідомий 404', async () => {
     const { productA, productB, tokens } = await setup()
-    const created = await register(tokens.anna, productA.id, { value: '@durov' })
+    const created = await register(tokens.anna, productA.id, {
+      value: '@durov',
+    })
 
     expect((await check(tokens.anna, productB.id, '@durov')).status).toBe(403)
-    expect((await register(tokens.anna, productB.id, { value: '@x_user' })).status).toBe(403)
     expect(
-      (await api().get('/api/outreach/targets').set(inProduct(tokens.anna, productB.id))).status
+      (await register(tokens.anna, productB.id, { value: '@x_user' })).status
     ).toBe(403)
-    expect((await check(tokens.anna, 'unknown-product', '@durov')).status).toBe(404)
+    expect(
+      (
+        await api()
+          .get('/api/outreach/targets')
+          .set(inProduct(tokens.anna, productB.id))
+      ).status
+    ).toBe(403)
+    expect((await check(tokens.anna, 'unknown-product', '@durov')).status).toBe(
+      404
+    )
 
     // Ціль із продукту A недоступна, навіть якщо підставити її id в продукт, де доступ є.
     const other = await api()
@@ -335,8 +400,12 @@ describe('ізоляція продуктів і доступ', () => {
     await createUser('user', 'buyer@test.io')
     const buyer = await loginOk('buyer@test.io')
 
-    expect((await api().post('/api/outreach/check').send({ value: '@durov' })).status).toBe(401)
-    expect((await check(buyer.accessToken, productA.id, '@durov')).status).toBe(403)
+    expect(
+      (await api().post('/api/outreach/check').send({ value: '@durov' })).status
+    ).toBe(401)
+    expect((await check(buyer.accessToken, productA.id, '@durov')).status).toBe(
+      403
+    )
   })
 
   it('без заголовка продукту 400', async () => {
@@ -361,10 +430,11 @@ describe('мої цілі', () => {
       api().get('/api/outreach/targets').set(inProduct(token, productA.id))
 
     const mine = await list(tokens.anna)
-    expect(mine.body.targets.map((t: { displayName: string }) => t.displayName).sort()).toEqual([
-      'anna_one',
-      'anna_two',
-    ])
+    expect(
+      mine.body.targets
+        .map((t: { displayName: string }) => t.displayName)
+        .sort()
+    ).toEqual(['anna_one', 'anna_two'])
     expect(mine.body.nextCursor).toBeNull()
 
     const all = await list(tokens.admin)
@@ -374,14 +444,18 @@ describe('мої цілі', () => {
   it('пагінація за курсором без повторів', async () => {
     const { productA, tokens } = await setup()
     for (let i = 1; i <= 5; i++) {
-      await register(tokens.anna, productA.id, { value: `@target_${i}x` }).expect(201)
+      await register(tokens.anna, productA.id, {
+        value: `@target_${i}x`,
+      }).expect(201)
     }
 
     const seen: string[] = []
     let cursor: string | null = null
     let pages = 0
     do {
-      const res: { body: { targets: { id: string }[]; nextCursor: string | null } } = await api()
+      const res: {
+        body: { targets: { id: string }[]; nextCursor: string | null }
+      } = await api()
         .get('/api/outreach/targets')
         .query({ limit: 2, ...(cursor ? { lastId: cursor } : {}) })
         .set(inProduct(tokens.anna, productA.id))
@@ -396,21 +470,33 @@ describe('мої цілі', () => {
 
   it('чужу ціль за id не отримати: 403, власну 200', async () => {
     const { productA, tokens } = await setup()
-    const created = await register(tokens.anna, productA.id, { value: '@annas_one' })
+    const created = await register(tokens.anna, productA.id, {
+      value: '@annas_one',
+    })
     const url = `/api/outreach/targets/${created.body.target.id}`
 
-    expect((await api().get(url).set(inProduct(tokens.ivan, productA.id))).status).toBe(403)
-    expect((await api().get(url).set(inProduct(tokens.anna, productA.id))).status).toBe(200)
-    expect((await api().get(url).set(inProduct(tokens.admin, productA.id))).status).toBe(200)
+    expect(
+      (await api().get(url).set(inProduct(tokens.ivan, productA.id))).status
+    ).toBe(403)
+    expect(
+      (await api().get(url).set(inProduct(tokens.anna, productA.id))).status
+    ).toBe(200)
+    expect(
+      (await api().get(url).set(inProduct(tokens.admin, productA.id))).status
+    ).toBe(200)
   })
 
   it('дати віддаються в ISO 8601 з Z', async () => {
     const { productA, tokens } = await setup()
     await register(tokens.anna, productA.id, { value: '@iso_date' })
 
-    const res = await api().get('/api/outreach/targets').set(inProduct(tokens.anna, productA.id))
+    const res = await api()
+      .get('/api/outreach/targets')
+      .set(inProduct(tokens.anna, productA.id))
 
-    expect(res.body.targets[0].lastContactedAt).toMatch(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/)
+    expect(res.body.targets[0].lastContactedAt).toMatch(
+      /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/
+    )
   })
 })
 
@@ -420,11 +506,15 @@ describe('ліміт частоти', () => {
 
     const statuses: number[] = []
     for (let i = 0; i < 31; i++) {
-      statuses.push((await check(tokens.anna, productA.id, '@limit_user')).status)
+      statuses.push(
+        (await check(tokens.anna, productA.id, '@limit_user')).status
+      )
     }
 
     expect(statuses.slice(0, 30).every((s) => s === 200)).toBe(true)
     expect(statuses[30]).toBe(429)
-    expect((await check(tokens.ivan, productA.id, '@limit_user')).status).toBe(200)
+    expect((await check(tokens.ivan, productA.id, '@limit_user')).status).toBe(
+      200
+    )
   })
 })

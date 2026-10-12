@@ -13,7 +13,10 @@ const full = {
 export type ArticleFull = Prisma.ArticleGetPayload<{ include: typeof full }>
 
 // Видима на сайті: опублікована, дата настала, і є завершений переклад потрібною мовою.
-export const visibleWhere = (lang: ContentLocale, now: Date): Prisma.ArticleWhereInput => ({
+export const visibleWhere = (
+  lang: ContentLocale,
+  now: Date
+): Prisma.ArticleWhereInput => ({
   status: 'published',
   publishedAt: { lte: now },
   translations: { some: { locale: lang, isReady: true } },
@@ -24,9 +27,16 @@ export const blogRepo = {
     prisma.article.findUnique({ where: { id }, include: full }),
 
   findByPreviewToken: (token: string): Promise<ArticleFull | null> =>
-    prisma.article.findUnique({ where: { previewToken: token }, include: full }),
+    prisma.article.findUnique({
+      where: { previewToken: token },
+      include: full,
+    }),
 
-  findVisibleBySlug: (lang: ContentLocale, slug: string, now: Date): Promise<ArticleFull | null> =>
+  findVisibleBySlug: (
+    lang: ContentLocale,
+    slug: string,
+    now: Date
+  ): Promise<ArticleFull | null> =>
     prisma.article.findFirst({
       where: {
         ...visibleWhere(lang, now),
@@ -63,19 +73,31 @@ export const blogRepo = {
   },
 
   // Кандидати для "Читайте також": видимі статті зі спільними тегами (або будь-які, якщо тегів немає).
-  listRelatedCandidates: (lang: ContentLocale, articleId: string, tagIds: string[], now: Date) =>
+  listRelatedCandidates: (
+    lang: ContentLocale,
+    articleId: string,
+    tagIds: string[],
+    now: Date
+  ) =>
     prisma.article.findMany({
       where: {
         ...visibleWhere(lang, now),
         id: { not: articleId },
-        ...(tagIds.length > 0 ? { tags: { some: { id: { in: tagIds } } } } : {}),
+        ...(tagIds.length > 0
+          ? { tags: { some: { id: { in: tagIds } } } }
+          : {}),
       },
       include: full,
       orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
       take: 30,
     }),
 
-  listLatest: (lang: ContentLocale, excludeId: string, take: number, now: Date) =>
+  listLatest: (
+    lang: ContentLocale,
+    excludeId: string,
+    take: number,
+    now: Date
+  ) =>
     prisma.article.findMany({
       where: { ...visibleWhere(lang, now), id: { not: excludeId } },
       include: full,
@@ -95,10 +117,20 @@ export const blogRepo = {
     const where: Prisma.ArticleWhereInput = {
       ...(state === 'draft' ? { status: 'draft' } : {}),
       ...(state === 'archived' ? { status: 'archived' } : {}),
-      ...(state === 'published' ? { status: 'published', publishedAt: { lte: now } } : {}),
-      ...(state === 'scheduled' ? { status: 'published', publishedAt: { gt: now } } : {}),
+      ...(state === 'published'
+        ? { status: 'published', publishedAt: { lte: now } }
+        : {}),
+      ...(state === 'scheduled'
+        ? { status: 'published', publishedAt: { gt: now } }
+        : {}),
       ...(state === 'all' ? { status: { not: 'archived' as const } } : {}),
-      ...(q ? { translations: { some: { title: { contains: q, mode: 'insensitive' as const } } } } : {}),
+      ...(q
+        ? {
+            translations: {
+              some: { title: { contains: q, mode: 'insensitive' as const } },
+            },
+          }
+        : {}),
     }
 
     return prisma.article.findMany({
@@ -109,25 +141,36 @@ export const blogRepo = {
     })
   },
 
-  categories: () => prisma.articleCategory.findMany({ orderBy: [{ sortOrder: 'asc' }, { slug: 'asc' }] }),
+  categories: () =>
+    prisma.articleCategory.findMany({
+      orderBy: [{ sortOrder: 'asc' }, { slug: 'asc' }],
+    }),
   tags: () => prisma.articleTag.findMany({ orderBy: { slug: 'asc' } }),
 
   // Рубрики й теги з кількістю видимих статей цією мовою: на сайті показуються лише непорожні.
   categoriesWithCounts: (lang: ContentLocale, now: Date) =>
     prisma.articleCategory.findMany({
       orderBy: [{ sortOrder: 'asc' }, { slug: 'asc' }],
-      include: { _count: { select: { articles: { where: visibleWhere(lang, now) } } } },
+      include: {
+        _count: { select: { articles: { where: visibleWhere(lang, now) } } },
+      },
     }),
 
   tagsWithCounts: (lang: ContentLocale, now: Date) =>
     prisma.articleTag.findMany({
       orderBy: { slug: 'asc' },
-      include: { _count: { select: { articles: { where: visibleWhere(lang, now) } } } },
+      include: {
+        _count: { select: { articles: { where: visibleWhere(lang, now) } } },
+      },
     }),
 
   assetsByIds: (ids: string[]) =>
-    ids.length === 0 ? Promise.resolve([]) : prisma.mediaAsset.findMany({ where: { id: { in: ids } } }),
+    ids.length === 0
+      ? Promise.resolve([])
+      : prisma.mediaAsset.findMany({ where: { id: { in: ids } } }),
 
   productsByIds: (ids: string[]) =>
-    ids.length === 0 ? Promise.resolve([]) : prisma.product.findMany({ where: { id: { in: ids } } }),
+    ids.length === 0
+      ? Promise.resolve([])
+      : prisma.product.findMany({ where: { id: { in: ids } } }),
 }

@@ -10,9 +10,18 @@ export const loginLimiter = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   keyGenerator: (req) => {
-    const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : ''
+    const email =
+      typeof req.body?.email === 'string'
+        ? req.body.email.trim().toLowerCase()
+        : ''
     return email || ipKeyGenerator(req.ip ?? '')
   },
   handler: (req, res, next) =>
-    next(ApiError(429, 'RATE_LIMITED', 'Too many failed sign-in attempts, try again in a few minutes')),
+    next(
+      ApiError(
+        429,
+        'RATE_LIMITED',
+        'Too many failed sign-in attempts, try again in a few minutes'
+      )
+    ),
 })

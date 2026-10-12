@@ -32,7 +32,10 @@ export const productsController = {
   },
   findProducts: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await productsService.findProducts(req.validData!.query, req.user)
+      const result = await productsService.findProducts(
+        req.validData!.query,
+        req.user
+      )
       res.status(200).json(result.response)
     } catch (err) {
       next(err)

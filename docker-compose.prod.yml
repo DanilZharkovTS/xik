@@ -7,8 +7,14 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-xik_db}
+    # Дані лежать у явній папці на сервері. create_host_path: false — якщо папки
+    # немає, контейнер не стартує замість того, щоб мовчки створити порожню базу.
     volumes:
-      - ./docker/postgres/data:/var/lib/postgresql/data
+      - type: bind
+        source: /srv/xik/data/postgres
+        target: /var/lib/postgresql/data
+        bind:
+          create_host_path: false
     networks:
       - app-network
     healthcheck:
@@ -56,14 +62,18 @@ services:
       NOTIFICATIONS_SERVICE_SECRET: ${NOTIFICATIONS_SERVICE_SECRET}
       STRIPE_SECRET: ${STRIPE_SECRET}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
-      # Зображення статей лежать на сервері (том ./docker/media); MEDIA_URL це адреса API в браузері.
+      # Зображення статей лежать на сервері (/srv/xik/data/media); MEDIA_URL це адреса API в браузері.
       MEDIA_DIR: /data/media
       MEDIA_URL: ${MEDIA_URL:?Set MEDIA_URL to the public API media URL}
       REPORT_TIMEZONE: ${REPORT_TIMEZONE:-Europe/Kyiv}
       OUTREACH_RATE_LIMIT: ${OUTREACH_RATE_LIMIT:-30}
       LOGIN_RATE_LIMIT: ${LOGIN_RATE_LIMIT:-10}
     volumes:
-      - ./docker/media:/data/media
+      - type: bind
+        source: /srv/xik/data/media
+        target: /data/media
+        bind:
+          create_host_path: false
     depends_on:
       postgres:
         condition: service_healthy

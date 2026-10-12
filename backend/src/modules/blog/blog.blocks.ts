@@ -6,13 +6,24 @@ const link = z
   .string()
   .trim()
   .max(500)
-  .refine((value) => /^https?:\/\//i.test(value) || (value.startsWith('/') && !value.startsWith('//')), {
-    message: 'Link must start with https://, http:// or /',
-  })
+  .refine(
+    (value) =>
+      /^https?:\/\//i.test(value) ||
+      (value.startsWith('/') && !value.startsWith('//')),
+    {
+      message: 'Link must start with https://, http:// or /',
+    }
+  )
 
 const id = z.string().trim().min(1).max(40)
 
-const text = z.object({ id, type: z.literal('text'), text: z.string().trim().min(1).max(6000) }).strict()
+const text = z
+  .object({
+    id,
+    type: z.literal('text'),
+    text: z.string().trim().min(1).max(6000),
+  })
+  .strict()
 
 const heading = z
   .object({
@@ -42,7 +53,8 @@ const video = z
       .trim()
       .max(500)
       .refine((value) => parseVideoUrl(value) !== null, {
-        message: 'Unsupported video link (YouTube, Vimeo, TikTok, Facebook or X, https only)',
+        message:
+          'Unsupported video link (YouTube, Vimeo, TikTok, Facebook or X, https only)',
       }),
     caption: z.string().trim().max(200).optional(),
   })
@@ -68,7 +80,9 @@ const cta = z
   })
   .strict()
 
-const product = z.object({ id, type: z.literal('product'), productId: z.uuid() }).strict()
+const product = z
+  .object({ id, type: z.literal('product'), productId: z.uuid() })
+  .strict()
 
 // Код показується як є (екранується при відображенні); мова потрібна лише для підсвічування.
 const code = z
@@ -95,18 +109,34 @@ const callout = z
   })
   .strict()
 
-export const blockSchema = z.discriminatedUnion('type', [text, heading, image, video, quote, cta, product, code, callout])
+export const blockSchema = z.discriminatedUnion('type', [
+  text,
+  heading,
+  image,
+  video,
+  quote,
+  cta,
+  product,
+  code,
+  callout,
+])
 
 export const blocksSchema = z.array(blockSchema).max(200)
 
 export type Block = z.infer<typeof blockSchema>
 
 export const collectAssetIds = (blocks: Block[]): string[] => [
-  ...new Set(blocks.flatMap((block) => (block.type === 'image' ? [block.assetId] : []))),
+  ...new Set(
+    blocks.flatMap((block) => (block.type === 'image' ? [block.assetId] : []))
+  ),
 ]
 
 export const collectProductIds = (blocks: Block[]): string[] => [
-  ...new Set(blocks.flatMap((block) => (block.type === 'product' ? [block.productId] : []))),
+  ...new Set(
+    blocks.flatMap((block) =>
+      block.type === 'product' ? [block.productId] : []
+    )
+  ),
 ]
 
 // Розмітка тексту (**жирний**, *курсив*, [текст](посилання)) не рахується словами.

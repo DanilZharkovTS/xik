@@ -76,7 +76,11 @@ export const teamService = {
       // Зі старим паролем відкриті сесії більше не повинні діяти.
       await sessionRepo.revokeAllForUser(userId, tx)
       await auditRepo.record(
-        { actorUserId: admin.id, action: 'password_reset', targetUserId: userId },
+        {
+          actorUserId: admin.id,
+          action: 'password_reset',
+          targetUserId: userId,
+        },
         tx
       )
     })
@@ -225,7 +229,11 @@ export const teamService = {
     }
 
     if (to.deactivatedAt) {
-      throw ApiError(409, 'RECIPIENT_DEACTIVATED', 'The recipient account is deactivated')
+      throw ApiError(
+        409,
+        'RECIPIENT_DEACTIVATED',
+        'The recipient account is deactivated'
+      )
     }
 
     // Одержувач має працювати в цьому продукті, інакше він не побачить переданих цілей.
@@ -253,11 +261,19 @@ export const teamService = {
       )
 
       if (dto.targetIds && lockedIds.length !== new Set(dto.targetIds).size) {
-        throw ApiError(404, 'TARGETS_NOT_FOUND', 'Some targets do not belong to the source user')
+        throw ApiError(
+          404,
+          'TARGETS_NOT_FOUND',
+          'Some targets do not belong to the source user'
+        )
       }
 
       if (lockedIds.length === 0) {
-        throw ApiError(409, 'NOTHING_TO_TRANSFER', 'The source user has no targets in this product')
+        throw ApiError(
+          409,
+          'NOTHING_TO_TRANSFER',
+          'The source user has no targets in this product'
+        )
       }
 
       const now = new Date()

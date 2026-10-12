@@ -4,7 +4,7 @@ export type EmailLocale = 'en' | 'es' | 'uk'
 export const EMAIL_LOCALES: readonly EmailLocale[] = ['en', 'es', 'uk']
 
 export type EmailKind =
-  | 'signingKey'
+  | 'deviceKey'
   | 'subscriptionStarted'
   | 'subscriptionCanceled'
   | 'subscriptionDeleted'
@@ -13,7 +13,7 @@ export type EmailKind =
 export interface EmailData {
   userName?: string
   productName: string
-  signingKey?: string
+  deviceKey?: string
 }
 
 type Tone = 'info' | 'warn' | 'danger' | 'neutral'
@@ -33,46 +33,46 @@ interface Common {
   hello: (name: string) => string
   fallbackName: string
   sentBy: string
-  signingKeyLabel: string
+  deviceKeyLabel: string
   signature: string
 }
 
 export const COMMON: Record<EmailLocale, Common> = {
-  en: { hello: (n) => `Hi ${n},`, fallbackName: 'there', sentBy: 'This email was sent by XIK.', signingKeyLabel: 'Signing key', signature: '— XIK' },
-  es: { hello: (n) => `Hola, ${n}:`, fallbackName: 'cliente', sentBy: 'Este correo lo ha enviado XIK.', signingKeyLabel: 'Clave de firma', signature: '— XIK' },
-  uk: { hello: (n) => `Вітаємо, ${n}!`, fallbackName: 'друже', sentBy: 'Цей лист надіслано від XIK.', signingKeyLabel: 'Ключ підпису', signature: '— XIK' },
+  en: { hello: (n) => `Hi ${n},`, fallbackName: 'there', sentBy: 'This email was sent by XIK.', deviceKeyLabel: 'Device key', signature: '— XIK' },
+  es: { hello: (n) => `Hola, ${n}:`, fallbackName: 'cliente', sentBy: 'Este correo lo ha enviado XIK.', deviceKeyLabel: 'Clave de dispositivo', signature: '— XIK' },
+  uk: { hello: (n) => `Вітаємо, ${n}!`, fallbackName: 'друже', sentBy: 'Цей лист надіслано від XIK.', deviceKeyLabel: 'Ключ пристрою', signature: '— XIK' },
 }
 
 const p = (s: string) => `<strong style="color: #171717;">${s}</strong>`
 
 export const COPY: Record<EmailKind, Record<EmailLocale, Copy>> = {
-  signingKey: {
+  deviceKey: {
     en: {
-      subject: () => 'XIK — Your signing key',
-      title: 'Your XIK signing key',
-      heading: 'Your signing key',
-      paragraphs: ({ product }) => [`Here is your signing key for ${p(product)}.`],
+      subject: () => 'XIK — Your device key',
+      title: 'Your XIK device key',
+      heading: 'Your device key',
+      paragraphs: ({ product }) => [`Here is your device key for ${p(product)}.`],
       callout: { tone: 'warn', html: () => '<strong>Keep this key private.</strong> Do not share it with anyone.' },
-      footerNote: 'If you did not request this signing key, you can safely ignore this email.',
-      text: (d) => `Here is your signing key for ${d.productName}:\n\n${d.signingKey}\n\nKeep this key private. Do not share it with anyone.\n\nIf you did not request this signing key, you can safely ignore this email.`,
+      footerNote: 'If you did not request this device key, you can safely ignore this email.',
+      text: (d) => `Here is your device key for ${d.productName}:\n\n${d.deviceKey}\n\nKeep this key private. Do not share it with anyone.\n\nIf you did not request this device key, you can safely ignore this email.`,
     },
     es: {
-      subject: () => 'XIK — Su clave de firma',
-      title: 'Su clave de firma de XIK',
-      heading: 'Su clave de firma',
-      paragraphs: ({ product }) => [`Esta es su clave de firma para ${p(product)}.`],
+      subject: () => 'XIK — Su clave de dispositivo',
+      title: 'Su clave de dispositivo de XIK',
+      heading: 'Su clave de dispositivo',
+      paragraphs: ({ product }) => [`Esta es su clave de dispositivo para ${p(product)}.`],
       callout: { tone: 'warn', html: () => '<strong>Mantenga esta clave en privado.</strong> No la comparta con nadie.' },
-      footerNote: 'Si no solicitó esta clave de firma, puede ignorar este correo.',
-      text: (d) => `Esta es su clave de firma para ${d.productName}:\n\n${d.signingKey}\n\nMantenga esta clave en privado. No la comparta con nadie.\n\nSi no solicitó esta clave de firma, puede ignorar este correo.`,
+      footerNote: 'Si no solicitó esta clave de dispositivo, puede ignorar este correo.',
+      text: (d) => `Esta es su clave de dispositivo para ${d.productName}:\n\n${d.deviceKey}\n\nMantenga esta clave en privado. No la comparta con nadie.\n\nSi no solicitó esta clave de dispositivo, puede ignorar este correo.`,
     },
     uk: {
-      subject: () => 'XIK — Ваш ключ підпису',
-      title: 'Ваш ключ підпису XIK',
-      heading: 'Ваш ключ підпису',
-      paragraphs: ({ product }) => [`Ось ваш ключ підпису для ${p(product)}.`],
+      subject: () => 'XIK — Ваш ключ пристрою',
+      title: 'Ваш ключ пристрою XIK',
+      heading: 'Ваш ключ пристрою',
+      paragraphs: ({ product }) => [`Ось ваш ключ пристрою для ${p(product)}.`],
       callout: { tone: 'warn', html: () => '<strong>Зберігайте цей ключ у таємниці.</strong> Нікому його не передавайте.' },
-      footerNote: 'Якщо ви не запитували цей ключ підпису, просто проігноруйте лист.',
-      text: (d) => `Ось ваш ключ підпису для ${d.productName}:\n\n${d.signingKey}\n\nЗберігайте цей ключ у таємниці. Нікому його не передавайте.\n\nЯкщо ви не запитували цей ключ підпису, просто проігноруйте лист.`,
+      footerNote: 'Якщо ви не запитували цей ключ пристрою, просто проігноруйте лист.',
+      text: (d) => `Ось ваш ключ пристрою для ${d.productName}:\n\n${d.deviceKey}\n\nЗберігайте цей ключ у таємниці. Нікому його не передавайте.\n\nЯкщо ви не запитували цей ключ пристрою, просто проігноруйте лист.`,
     },
   },
   subscriptionStarted: {
@@ -85,7 +85,8 @@ export const COPY: Record<EmailKind, Record<EmailLocale, Copy>> = {
         'You can manage your subscription settings and billing details directly in your account at any time. If you ever have questions, we are here to help!',
       ],
       callout: { tone: 'info', html: ({ product }) => `<strong>Full access unlocked:</strong><br />You now have unrestricted access to all features and updates of ${product}.` },
-      text: (d) => `Thank you for subscribing to ${d.productName}! Your payment was successful, and your subscription is now active.\n\nYou have full access to all features and updates. You can manage your subscription in your account.\n\nEnjoy using ${d.productName}!`,
+      text: (d) =>
+        `Thank you for subscribing to ${d.productName}! Your payment was successful, and your subscription is now active.${d.deviceKey ? `\n\nYour device key:\n${d.deviceKey}\n\nKeep this key private. Do not share it with anyone.` : ''}\n\nYou have full access to all features and updates. You can manage your subscription in your account.\n\nEnjoy using ${d.productName}!`,
     },
     es: {
       subject: (d) => `XIK — ¡Bienvenido! Su suscripción a ${d.productName} está activa 🎉`,
@@ -96,7 +97,8 @@ export const COPY: Record<EmailKind, Record<EmailLocale, Copy>> = {
         'Puede gestionar su suscripción y los datos de facturación en su cuenta cuando quiera. Si tiene alguna pregunta, estamos para ayudarle.',
       ],
       callout: { tone: 'info', html: ({ product }) => `<strong>Acceso completo desbloqueado:</strong><br />Ya tiene acceso a todas las funciones y actualizaciones de ${product}.` },
-      text: (d) => `¡Gracias por suscribirse a ${d.productName}! El pago se ha realizado correctamente y su suscripción ya está activa.\n\nTiene acceso completo a todas las funciones y actualizaciones. Puede gestionar su suscripción en su cuenta.\n\n¡Que disfrute de ${d.productName}!`,
+      text: (d) =>
+        `¡Gracias por suscribirse a ${d.productName}! El pago se ha realizado correctamente y su suscripción ya está activa.${d.deviceKey ? `\n\nSu clave de dispositivo:\n${d.deviceKey}\n\nMantenga esta clave en privado. No la comparta con nadie.` : ''}\n\nTiene acceso completo a todas las funciones y actualizaciones. Puede gestionar su suscripción en su cuenta.\n\n¡Que disfrute de ${d.productName}!`,
     },
     uk: {
       subject: (d) => `XIK — Вітаємо! Підписка на ${d.productName} активна 🎉`,
@@ -107,7 +109,8 @@ export const COPY: Record<EmailKind, Record<EmailLocale, Copy>> = {
         'Керувати підпискою та платіжними даними можна будь-коли у своєму кабінеті. Якщо виникнуть запитання, ми поруч.',
       ],
       callout: { tone: 'info', html: ({ product }) => `<strong>Повний доступ відкрито:</strong><br />Тепер вам доступні всі функції й оновлення ${product}.` },
-      text: (d) => `Дякуємо, що підписалися на ${d.productName}! Оплата пройшла успішно, і підписка вже активна.\n\nВам доступні всі функції й оновлення. Керувати підпискою можна у своєму кабінеті.\n\nГарного користування ${d.productName}!`,
+      text: (d) =>
+        `Дякуємо, що підписалися на ${d.productName}! Оплата пройшла успішно, і підписка вже активна.${d.deviceKey ? `\n\nВаш ключ пристрою:\n${d.deviceKey}\n\nЗберігайте цей ключ у таємниці. Нікому його не передавайте.` : ''}\n\nВам доступні всі функції й оновлення. Керувати підпискою можна у своєму кабінеті.\n\nГарного користування ${d.productName}!`,
     },
   },
   subscriptionCanceled: {

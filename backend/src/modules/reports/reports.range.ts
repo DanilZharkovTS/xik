@@ -27,7 +27,9 @@ export const addDays = (date: string, days: number): string =>
 
 const firstOfMonth = (date: string, monthOffset = 0): string => {
   const d = toUtc(date)
-  return format(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + monthOffset, 1)))
+  return format(
+    new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + monthOffset, 1))
+  )
 }
 
 export const isValidDate = (value: string): boolean => {
@@ -47,9 +49,12 @@ export const todayIn = (timeZone: string, now: Date = new Date()): string =>
     day: '2-digit',
   }).format(now)
 
-export function resolveRange(
-  input: { period: Period; date: string; from?: string; to?: string }
-): DateRange {
+export function resolveRange(input: {
+  period: Period
+  date: string
+  from?: string
+  to?: string
+}): DateRange {
   const { period, date } = input
   let from: string
   let to: string
@@ -78,10 +83,18 @@ export function resolveRange(
     }
     case 'custom': {
       if (!input.from || !input.to) {
-        throw ApiError(400, 'RANGE_REQUIRED', 'Custom period needs both from and to')
+        throw ApiError(
+          400,
+          'RANGE_REQUIRED',
+          'Custom period needs both from and to'
+        )
       }
       if (input.from > input.to) {
-        throw ApiError(400, 'INVALID_RANGE', 'The start date is after the end date')
+        throw ApiError(
+          400,
+          'INVALID_RANGE',
+          'The start date is after the end date'
+        )
       }
       from = input.from
       to = addDays(input.to, 1)
@@ -118,7 +131,11 @@ export function bucketsOf(range: DateRange): string[] {
     return buckets
   }
 
-  for (let month = firstOfMonth(range.from); month < range.to; month = firstOfMonth(month, 1)) {
+  for (
+    let month = firstOfMonth(range.from);
+    month < range.to;
+    month = firstOfMonth(month, 1)
+  ) {
     buckets.push(month)
   }
   return buckets

@@ -14,9 +14,7 @@ export const templatesRepo = {
         productId: params.productId,
         status: params.status,
         // Універсальний шаблон підходить до будь-якого каналу.
-        ...(params.channel
-          ? { channel: { in: [params.channel, 'any'] } }
-          : {}),
+        ...(params.channel ? { channel: { in: [params.channel, 'any'] } } : {}),
         ...(params.ownerUserId ? { ownerUserId: params.ownerUserId } : {}),
       },
       include: ownerInclude,

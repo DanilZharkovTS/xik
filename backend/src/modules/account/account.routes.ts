@@ -1,6 +1,9 @@
 import { Router } from 'express'
 import { authMiddleware } from '../auth/auth.middleware.js'
-import { validateBody, validateQuery } from '../../shared/middlewares/helpers.js'
+import {
+  validateBody,
+  validateQuery,
+} from '../../shared/middlewares/helpers.js'
 import { langQuerySchema } from '../products/products.schema.js'
 import { updateAccountSchema } from './account.schema.js'
 import { accountController } from './account.controller.js'
@@ -11,8 +14,20 @@ const router = Router()
 router.use(authMiddleware.verifyAccess)
 
 router.get('/', accountController.getProfile)
-router.patch('/', validateBody(updateAccountSchema), accountController.updateProfile)
-router.get('/library', validateQuery(langQuerySchema), accountController.listLibrary)
-router.get('/saved', validateQuery(langQuerySchema), accountController.listSaved)
+router.patch(
+  '/',
+  validateBody(updateAccountSchema),
+  accountController.updateProfile
+)
+router.get(
+  '/library',
+  validateQuery(langQuerySchema),
+  accountController.listLibrary
+)
+router.get(
+  '/saved',
+  validateQuery(langQuerySchema),
+  accountController.listSaved
+)
 
 export default router

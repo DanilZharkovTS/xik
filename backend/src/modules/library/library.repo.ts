@@ -17,6 +17,13 @@ export const libraryRepo = {
     })
     return libraryItem
   },
+  findById: async (id: string) => {
+    return prisma.userLibrary.findUnique({
+      where: {
+        id,
+      },
+    })
+  },
   updateLibraryItemExpiresAt: async (data: RenewLibraryAccessDto) => {
     const libraryItem = await prisma.userLibrary.update({
       where: {
@@ -24,6 +31,28 @@ export const libraryRepo = {
       },
       data: {
         accessExpiresAt: data.accessExpiresAt,
+      },
+    })
+    return libraryItem
+  },
+  restoreCanceledById: async (id: string) => {
+    return prisma.userLibrary.update({
+      where: {
+        id,
+        canceledAt: { not: null },
+      },
+      data: {
+        canceledAt: null,
+      },
+    })
+  },
+  cancelById: async (id: string) => {
+    const libraryItem = await prisma.userLibrary.update({
+      where: {
+        id,
+      },
+      data: {
+        canceledAt: new Date(),
       },
     })
     return libraryItem

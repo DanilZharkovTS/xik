@@ -13,6 +13,9 @@ export const notifyCatalogChanged = (): void => {
     headers: { 'x-revalidate-secret': secret },
     signal: AbortSignal.timeout(5000),
   }).catch((err: unknown) => {
-    console.warn('Catalog revalidation failed:', err instanceof Error ? err.message : err)
+    console.warn(
+      'Catalog revalidation failed:',
+      err instanceof Error ? err.message : err
+    )
   })
 }

@@ -6,9 +6,17 @@ import { ApiError } from '../../shared/utils/ApiError.js'
 import type { TokenPayload } from '../auth/auth.types.js'
 import type { ContentLocale } from '../products/product.constants.js'
 import type { Product } from '../products/products.types.js'
-import { collectAssetIds, collectProductIds, readingMinutes } from './blog.blocks.js'
+import {
+  collectAssetIds,
+  collectProductIds,
+  readingMinutes,
+} from './blog.blocks.js'
 import type { Block } from './blog.blocks.js'
-import { resolveBlocks, toTaxonomyAdminDto, toTaxonomyDto } from './blog.mapper.js'
+import {
+  resolveBlocks,
+  toTaxonomyAdminDto,
+  toTaxonomyDto,
+} from './blog.mapper.js'
 import type { AssetRow } from './blog.mapper.js'
 import { blogRepo } from './blog.repo.js'
 import type { ArticleFull } from './blog.repo.js'
@@ -28,8 +36,14 @@ type TranslationRow = ArticleFull['translations'][number]
 
 // ---------- допоміжне ----------
 
-const isReady = (input: { title: string; excerpt: string; blocks: unknown[] }): boolean =>
-  input.title.trim() !== '' && input.excerpt.trim() !== '' && input.blocks.length > 0
+const isReady = (input: {
+  title: string
+  excerpt: string
+  blocks: unknown[]
+}): boolean =>
+  input.title.trim() !== '' &&
+  input.excerpt.trim() !== '' &&
+  input.blocks.length > 0
 
 const translationData = (input: TranslationInput) => ({
   slug: input.slug,
@@ -44,14 +58,24 @@ const translationData = (input: TranslationInput) => ({
   isReady: isReady(input),
 })
 
-const translationOf = (article: ArticleFull, lang: ContentLocale): TranslationRow | undefined =>
+const translationOf = (
+  article: ArticleFull,
+  lang: ContentLocale
+): TranslationRow | undefined =>
   article.translations.find((item) => item.locale === lang)
 
-const blocksOf = (translation: TranslationRow): Block[] => (translation.blocks ?? []) as Block[]
+const blocksOf = (translation: TranslationRow): Block[] =>
+  (translation.blocks ?? []) as Block[]
 
 // Слаги в адресі різні в кожній мові, тож мовний перемикач потребує слагів усіх готових перекладів.
-const alternatesOf = (article: ArticleFull): Partial<Record<ContentLocale, string>> =>
-  Object.fromEntries(article.translations.filter((item) => item.isReady).map((item) => [item.locale, item.slug]))
+const alternatesOf = (
+  article: ArticleFull
+): Partial<Record<ContentLocale, string>> =>
+  Object.fromEntries(
+    article.translations
+      .filter((item) => item.isReady)
+      .map((item) => [item.locale, item.slug])
+  )
 
 const loadResources = async (translations: TranslationRow[]) => {
   const blocks = translations.flatMap(blocksOf)
@@ -62,7 +86,9 @@ const loadResources = async (translations: TranslationRow[]) => {
 
   return {
     assets: new Map<string, AssetRow>(assets.map((asset) => [asset.id, asset])),
-    products: new Map<string, Product>((products as unknown as Product[]).map((product) => [product.id, product])),
+    products: new Map<string, Product>(
+      (products as unknown as Product[]).map((product) => [product.id, product])
+    ),
   }
 }
 
@@ -84,7 +110,12 @@ const toCard = (article: ArticleFull, lang: ContentLocale) => {
     publishedAt: article.publishedAt,
     updatedAt: article.updatedAt,
     cover: article.cover
-      ? { url: publicAssetUrl(article.cover), width: article.cover.width, height: article.cover.height, alt: translation.coverAlt ?? translation.title }
+      ? {
+          url: publicAssetUrl(article.cover),
+          width: article.cover.width,
+          height: article.cover.height,
+          alt: translation.coverAlt ?? translation.title,
+        }
       : null,
     category: article.category ? toTaxonomyDto(article.category, lang) : null,
     tags: article.tags.map((tag) => toTaxonomyDto(tag, lang)),
@@ -93,7 +124,11 @@ const toCard = (article: ArticleFull, lang: ContentLocale) => {
 
 // ---------- публічне ----------
 
-const toPublicArticle = async (article: ArticleFull, lang: ContentLocale, isPreview: boolean) => {
+const toPublicArticle = async (
+  article: ArticleFull,
+  lang: ContentLocale,
+  isPreview: boolean
+) => {
   const translation = translationOf(article, lang)!
   const { assets, products } = await loadResources([translation])
   const now = new Date()
@@ -102,17 +137,24 @@ const toPublicArticle = async (article: ArticleFull, lang: ContentLocale, isPrev
 
   if (!isPreview) {
     const tagIds = article.tags.map((tag) => tag.id)
-    const candidates = await blogRepo.listRelatedCandidates(lang, article.id, tagIds, now)
+    const candidates = await blogRepo.listRelatedCandidates(
+      lang,
+      article.id,
+      tagIds,
+      now
+    )
 
     // Спільні теги важать більше за свіжість; недобір добирається найновішими статтями.
-    const shared = (candidate: ArticleFull) => candidate.tags.filter((tag) => tagIds.includes(tag.id)).length
+    const shared = (candidate: ArticleFull) =>
+      candidate.tags.filter((tag) => tagIds.includes(tag.id)).length
     related = [...candidates].sort((a, b) => shared(b) - shared(a)).slice(0, 3)
 
     if (related.length < 3) {
       const latest = await blogRepo.listLatest(lang, article.id, 6, now)
       for (const item of latest) {
         if (related.length >= 3) break
-        if (!related.some((existing) => existing.id === item.id)) related.push(item)
+        if (!related.some((existing) => existing.id === item.id))
+          related.push(item)
       }
     }
   }
@@ -132,7 +174,13 @@ const toPublicArticle = async (article: ArticleFull, lang: ContentLocale, isPrev
 
 export const blogService = {
   listPublic: async (query: PublicListDto) => {
-    const { items, total } = await blogRepo.listVisible(query.lang, { tag: query.tag, category: query.category }, query.page, query.limit, new Date())
+    const { items, total } = await blogRepo.listVisible(
+      query.lang,
+      { tag: query.tag, category: query.category },
+      query.page,
+      query.limit,
+      new Date()
+    )
 
     return {
       response: {
@@ -149,14 +197,17 @@ export const blogService = {
 
     if (!article) throw ApiError(404, 'ARTICLE_NOT_FOUND', 'Article not found')
 
-    return { response: { article: await toPublicArticle(article, lang, false) } }
+    return {
+      response: { article: await toPublicArticle(article, lang, false) },
+    }
   },
 
   getPreview: async (token: string, lang: ContentLocale) => {
     const article = await blogRepo.findByPreviewToken(token)
     const translation = article ? translationOf(article, lang) : undefined
 
-    if (!article || !translation) throw ApiError(404, 'ARTICLE_NOT_FOUND', 'Article not found')
+    if (!article || !translation)
+      throw ApiError(404, 'ARTICLE_NOT_FOUND', 'Article not found')
 
     return { response: { article: await toPublicArticle(article, lang, true) } }
   },
@@ -170,8 +221,18 @@ export const blogService = {
 
     return {
       response: {
-        categories: categories.filter((row) => row._count.articles > 0).map((row) => ({ ...toTaxonomyDto(row, lang), count: row._count.articles })),
-        tags: tags.filter((row) => row._count.articles > 0).map((row) => ({ ...toTaxonomyDto(row, lang), count: row._count.articles })),
+        categories: categories
+          .filter((row) => row._count.articles > 0)
+          .map((row) => ({
+            ...toTaxonomyDto(row, lang),
+            count: row._count.articles,
+          })),
+        tags: tags
+          .filter((row) => row._count.articles > 0)
+          .map((row) => ({
+            ...toTaxonomyDto(row, lang),
+            count: row._count.articles,
+          })),
       },
     }
   },
@@ -189,7 +250,13 @@ export const blogService = {
           cover: article.cover ? { url: publicAssetUrl(article.cover) } : null,
           translations: article.translations
             .filter((item) => item.isReady)
-            .map((item) => ({ locale: item.locale, slug: item.slug, title: item.title, excerpt: item.excerpt, updatedAt: item.updatedAt })),
+            .map((item) => ({
+              locale: item.locale,
+              slug: item.slug,
+              title: item.title,
+              excerpt: item.excerpt,
+              updatedAt: item.updatedAt,
+            })),
         })),
       },
     }
@@ -214,9 +281,15 @@ export const blogService = {
             publishedAt: article.publishedAt,
             updatedAt: article.updatedAt,
             title: en?.title ?? '',
-            cover: article.cover ? { url: publicAssetUrl(article.cover) } : null,
-            category: article.category ? toTaxonomyDto(article.category, 'en') : null,
-            locales: LOCALES.filter((locale) => translationOf(article, locale)?.isReady),
+            cover: article.cover
+              ? { url: publicAssetUrl(article.cover) }
+              : null,
+            category: article.category
+              ? toTaxonomyDto(article.category, 'en')
+              : null,
+            locales: LOCALES.filter(
+              (locale) => translationOf(article, locale)?.isReady
+            ),
           }
         }),
       },
@@ -256,7 +329,12 @@ export const blogService = {
 
       return blogService.getAdmin(created.id)
     } catch (err) {
-      if (slugTaken(err)) throw ApiError(409, 'ARTICLE_SLUG_TAKEN', 'This slug is already used in this language')
+      if (slugTaken(err))
+        throw ApiError(
+          409,
+          'ARTICLE_SLUG_TAKEN',
+          'This slug is already used in this language'
+        )
       throw err
     }
   },
@@ -268,10 +346,15 @@ export const blogService = {
     await assertReferences(data)
 
     const status = data.status ?? existing.status
-    const publishedAt = resolvePublishedAt(status, data.publishedAt, existing.publishedAt)
+    const publishedAt = resolvePublishedAt(
+      status,
+      data.publishedAt,
+      existing.publishedAt
+    )
 
     // Англійський переклад після оновлення: нова версія або наявна.
-    const en = data.translations?.en ?? toInputFromRow(translationOf(existing, 'en'))
+    const en =
+      data.translations?.en ?? toInputFromRow(translationOf(existing, 'en'))
     if (status === 'published') assertPublishable(en)
 
     try {
@@ -281,9 +364,15 @@ export const blogService = {
           data: {
             status,
             publishedAt,
-            ...(data.coverAssetId !== undefined ? { coverAssetId: data.coverAssetId } : {}),
-            ...(data.categoryId !== undefined ? { categoryId: data.categoryId } : {}),
-            ...(data.tagIds ? { tags: { set: data.tagIds.map((tagId) => ({ id: tagId })) } } : {}),
+            ...(data.coverAssetId !== undefined
+              ? { coverAssetId: data.coverAssetId }
+              : {}),
+            ...(data.categoryId !== undefined
+              ? { categoryId: data.categoryId }
+              : {}),
+            ...(data.tagIds
+              ? { tags: { set: data.tagIds.map((tagId) => ({ id: tagId })) } }
+              : {}),
           },
         })
 
@@ -292,7 +381,9 @@ export const blogService = {
           if (input === undefined) continue
 
           if (input === null) {
-            await tx.articleTranslation.deleteMany({ where: { articleId: id, locale } })
+            await tx.articleTranslation.deleteMany({
+              where: { articleId: id, locale },
+            })
             continue
           }
 
@@ -304,7 +395,12 @@ export const blogService = {
         }
       })
     } catch (err) {
-      if (slugTaken(err)) throw ApiError(409, 'ARTICLE_SLUG_TAKEN', 'This slug is already used in this language')
+      if (slugTaken(err))
+        throw ApiError(
+          409,
+          'ARTICLE_SLUG_TAKEN',
+          'This slug is already used in this language'
+        )
       throw err
     }
 
@@ -312,7 +408,10 @@ export const blogService = {
   },
 
   rotatePreviewToken: async (id: string) => {
-    const article = await prisma.article.findUnique({ where: { id }, select: { id: true } })
+    const article = await prisma.article.findUnique({
+      where: { id },
+      select: { id: true },
+    })
     if (!article) throw ApiError(404, 'ARTICLE_NOT_FOUND', 'Article not found')
 
     const updated = await prisma.article.update({
@@ -327,7 +426,10 @@ export const blogService = {
   // ---------- рубрики й теги ----------
 
   listTaxonomyAdmin: async () => {
-    const [categories, tags] = await Promise.all([blogRepo.categories(), blogRepo.tags()])
+    const [categories, tags] = await Promise.all([
+      blogRepo.categories(),
+      blogRepo.tags(),
+    ])
 
     return {
       response: {
@@ -339,7 +441,9 @@ export const blogService = {
 
   createCategory: async (data: TaxonomyDto) => {
     try {
-      const row = await prisma.articleCategory.create({ data: { slug: data.slug, names: data.names } })
+      const row = await prisma.articleCategory.create({
+        data: { slug: data.slug, names: data.names },
+      })
       return { response: { category: toTaxonomyAdminDto(row) } }
     } catch (err) {
       throw taxonomyError(err)
@@ -366,7 +470,9 @@ export const blogService = {
 
   createTag: async (data: TaxonomyDto) => {
     try {
-      const row = await prisma.articleTag.create({ data: { slug: data.slug, names: data.names } })
+      const row = await prisma.articleTag.create({
+        data: { slug: data.slug, names: data.names },
+      })
       return { response: { tag: toTaxonomyAdminDto(row) } }
     } catch (err) {
       throw taxonomyError(err)
@@ -394,8 +500,15 @@ export const blogService = {
 
 // ---------- правила й перевірки ----------
 
-const stateOf = (article: { status: string; publishedAt: Date | null }, now: Date) =>
-  article.status === 'published' && article.publishedAt && article.publishedAt > now ? 'scheduled' : article.status
+const stateOf = (
+  article: { status: string; publishedAt: Date | null },
+  now: Date
+) =>
+  article.status === 'published' &&
+  article.publishedAt &&
+  article.publishedAt > now
+    ? 'scheduled'
+    : article.status
 
 // Публікація без дати означає "зараз". Чернетка зберігає дату як заплановану на майбутнє.
 const resolvePublishedAt = (
@@ -410,9 +523,15 @@ const resolvePublishedAt = (
   return value
 }
 
-const assertPublishable = (en: { title: string; excerpt: string; blocks: unknown[] } | null | undefined): void => {
+const assertPublishable = (
+  en: { title: string; excerpt: string; blocks: unknown[] } | null | undefined
+): void => {
   if (!en || !isReady(en)) {
-    throw ApiError(400, 'ARTICLE_NOT_PUBLISHABLE', 'The English version needs a title, an excerpt and at least one block to be published')
+    throw ApiError(
+      400,
+      'ARTICLE_NOT_PUBLISHABLE',
+      'The English version needs a title, an excerpt and at least one block to be published'
+    )
   }
 }
 
@@ -421,7 +540,8 @@ const toInputFromRow = (row: TranslationRow | undefined) =>
 
 const taxonomyError = (err: unknown) => {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    if (err.code === 'P2002') return ApiError(409, 'SLUG_TAKEN', 'This slug is already used')
+    if (err.code === 'P2002')
+      return ApiError(409, 'SLUG_TAKEN', 'This slug is already used')
     if (err.code === 'P2025') return ApiError(404, 'NOT_FOUND', 'Not found')
   }
 
@@ -429,30 +549,49 @@ const taxonomyError = (err: unknown) => {
 }
 
 // Усі посилання з тіла запиту (обкладинка, рубрика, теги, зображення й продукти в блоках) мають існувати.
-const assertReferences = async (
-  data: {
-    coverAssetId?: string | null
-    categoryId?: string | null
-    tagIds?: string[]
-    translations?: Partial<Record<ContentLocale, { blocks: Block[] } | null | undefined>>
-  }
-): Promise<void> => {
-  const blocks = LOCALES.flatMap((locale) => data.translations?.[locale]?.blocks ?? [])
-  const assetIds = [...new Set([...collectAssetIds(blocks), ...(data.coverAssetId ? [data.coverAssetId] : [])])]
+const assertReferences = async (data: {
+  coverAssetId?: string | null
+  categoryId?: string | null
+  tagIds?: string[]
+  translations?: Partial<
+    Record<ContentLocale, { blocks: Block[] } | null | undefined>
+  >
+}): Promise<void> => {
+  const blocks = LOCALES.flatMap(
+    (locale) => data.translations?.[locale]?.blocks ?? []
+  )
+  const assetIds = [
+    ...new Set([
+      ...collectAssetIds(blocks),
+      ...(data.coverAssetId ? [data.coverAssetId] : []),
+    ]),
+  ]
   const productIds = collectProductIds(blocks)
   const tagIds = data.tagIds ?? []
 
   const [assets, products, category, tags] = await Promise.all([
-    assetIds.length ? prisma.mediaAsset.count({ where: { id: { in: assetIds } } }) : 0,
-    productIds.length ? prisma.product.count({ where: { id: { in: productIds } } }) : 0,
-    data.categoryId ? prisma.articleCategory.count({ where: { id: data.categoryId } }) : 1,
-    tagIds.length ? prisma.articleTag.count({ where: { id: { in: tagIds } } }) : 0,
+    assetIds.length
+      ? prisma.mediaAsset.count({ where: { id: { in: assetIds } } })
+      : 0,
+    productIds.length
+      ? prisma.product.count({ where: { id: { in: productIds } } })
+      : 0,
+    data.categoryId
+      ? prisma.articleCategory.count({ where: { id: data.categoryId } })
+      : 1,
+    tagIds.length
+      ? prisma.articleTag.count({ where: { id: { in: tagIds } } })
+      : 0,
   ])
 
-  if (assets !== assetIds.length) throw ApiError(400, 'INVALID_REFERENCE', 'An image does not exist')
-  if (products !== productIds.length) throw ApiError(400, 'INVALID_REFERENCE', 'A product does not exist')
-  if (!category) throw ApiError(400, 'INVALID_REFERENCE', 'The category does not exist')
-  if (tags !== new Set(tagIds).size) throw ApiError(400, 'INVALID_REFERENCE', 'A tag does not exist')
+  if (assets !== assetIds.length)
+    throw ApiError(400, 'INVALID_REFERENCE', 'An image does not exist')
+  if (products !== productIds.length)
+    throw ApiError(400, 'INVALID_REFERENCE', 'A product does not exist')
+  if (!category)
+    throw ApiError(400, 'INVALID_REFERENCE', 'The category does not exist')
+  if (tags !== new Set(tagIds).size)
+    throw ApiError(400, 'INVALID_REFERENCE', 'A tag does not exist')
 }
 
 const toAdminArticle = async (article: ArticleFull) => {
@@ -468,7 +607,12 @@ const toAdminArticle = async (article: ArticleFull) => {
     updatedAt: article.updatedAt,
     previewToken: article.previewToken,
     cover: article.cover
-      ? { id: article.cover.id, url: publicAssetUrl(article.cover), width: article.cover.width, height: article.cover.height }
+      ? {
+          id: article.cover.id,
+          url: publicAssetUrl(article.cover),
+          width: article.cover.width,
+          height: article.cover.height,
+        }
       : null,
     categoryId: article.categoryId,
     tagIds: article.tags.map((tag) => tag.id),
@@ -490,6 +634,15 @@ const toAdminArticle = async (article: ArticleFull) => {
       ])
     ),
     // Для прев'ю зображень у редакторі: id -> адреса й розміри.
-    assets: Object.fromEntries([...assets.values()].map((asset) => [asset.id, { url: publicAssetUrl(asset), width: asset.width, height: asset.height }])),
+    assets: Object.fromEntries(
+      [...assets.values()].map((asset) => [
+        asset.id,
+        {
+          url: publicAssetUrl(asset),
+          width: asset.width,
+          height: asset.height,
+        },
+      ])
+    ),
   }
 }

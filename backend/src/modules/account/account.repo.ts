@@ -5,14 +5,28 @@ export const accountRepo = {
   findProfile: (id: string) =>
     prisma.user.findUnique({
       where: { id },
-      select: { id: true, email: true, name: true, role: true, locale: true, createdAt: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        locale: true,
+        createdAt: true,
+      },
     }),
 
   update: (id: string, data: UpdateAccountDto) =>
     prisma.user.update({
       where: { id },
       data,
-      select: { id: true, email: true, name: true, role: true, locale: true, createdAt: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        locale: true,
+        createdAt: true,
+      },
     }),
 
   // Покупки з продуктами. Архівний продукт лишається в історії, бо за нього могли платити.

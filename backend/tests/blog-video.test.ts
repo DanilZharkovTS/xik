@@ -18,25 +18,47 @@ describe('розпізнавання відео', () => {
   })
 
   it('YouTube Shorts вертикальні', () => {
-    expect(parseVideoUrl('https://www.youtube.com/shorts/dQw4w9WgXcQ')?.aspect).toBe('portrait')
+    expect(
+      parseVideoUrl('https://www.youtube.com/shorts/dQw4w9WgXcQ')?.aspect
+    ).toBe('portrait')
   })
 
   it('Vimeo, TikTok, Facebook, X', () => {
-    expect(parseVideoUrl('https://vimeo.com/123456789')).toMatchObject({ provider: 'vimeo', embedUrl: 'https://player.vimeo.com/video/123456789?dnt=1' })
-    expect(parseVideoUrl('https://vimeo.com/channels/staffpicks/123456789')?.provider).toBe('vimeo')
-    expect(parseVideoUrl('https://www.tiktok.com/@xik.app/video/7234567890123456789')).toMatchObject({
+    expect(parseVideoUrl('https://vimeo.com/123456789')).toMatchObject({
+      provider: 'vimeo',
+      embedUrl: 'https://player.vimeo.com/video/123456789?dnt=1',
+    })
+    expect(
+      parseVideoUrl('https://vimeo.com/channels/staffpicks/123456789')?.provider
+    ).toBe('vimeo')
+    expect(
+      parseVideoUrl('https://www.tiktok.com/@xik.app/video/7234567890123456789')
+    ).toMatchObject({
       provider: 'tiktok',
       embedUrl: 'https://www.tiktok.com/embed/v2/7234567890123456789',
       aspect: 'portrait',
     })
-    expect(parseVideoUrl('https://www.facebook.com/xik/videos/1234567890123/')).toMatchObject({ provider: 'facebook' })
-    expect(parseVideoUrl('https://www.facebook.com/watch/?v=1234567890123&extra=1')?.watchUrl).toBe('https://www.facebook.com/watch/?v=1234567890123')
-    expect(parseVideoUrl('https://fb.watch/abcDEF123/')).toMatchObject({ provider: 'facebook' })
-    expect(parseVideoUrl('https://x.com/xik/status/1234567890123456789')).toMatchObject({
-      provider: 'x',
-      embedUrl: 'https://platform.twitter.com/embed/Tweet.html?id=1234567890123456789',
+    expect(
+      parseVideoUrl('https://www.facebook.com/xik/videos/1234567890123/')
+    ).toMatchObject({ provider: 'facebook' })
+    expect(
+      parseVideoUrl('https://www.facebook.com/watch/?v=1234567890123&extra=1')
+        ?.watchUrl
+    ).toBe('https://www.facebook.com/watch/?v=1234567890123')
+    expect(parseVideoUrl('https://fb.watch/abcDEF123/')).toMatchObject({
+      provider: 'facebook',
     })
-    expect(parseVideoUrl('https://twitter.com/xik/status/1234567890123456789')?.provider).toBe('x')
+    expect(
+      parseVideoUrl('https://x.com/xik/status/1234567890123456789')
+    ).toMatchObject({
+      provider: 'x',
+      embedUrl:
+        'https://platform.twitter.com/embed/Tweet.html?id=1234567890123456789',
+    })
+    expect(
+      parseVideoUrl('https://twitter.com/xik/status/1234567890123456789')
+        ?.provider
+    ).toBe('x')
   })
 
   it('відхиляє чуже, небезпечне й неповне', () => {
@@ -59,7 +81,11 @@ describe('розпізнавання відео', () => {
   })
 
   it('у адресу вбудовування потрапляє лише побудоване з ідентифікатора', () => {
-    const video = parseVideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ&autoplay=1&evil=%22')!
-    expect(video.embedUrl).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
+    const video = parseVideoUrl(
+      'https://www.youtube.com/watch?v=dQw4w9WgXcQ&autoplay=1&evil=%22'
+    )!
+    expect(video.embedUrl).toBe(
+      'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ'
+    )
   })
 })

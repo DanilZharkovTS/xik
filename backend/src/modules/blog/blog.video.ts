@@ -16,7 +16,8 @@ export interface ParsedVideo {
 const YOUTUBE_ID = /^[\w-]{11}$/
 const DIGITS = /^\d{5,25}$/
 
-const hostOf = (url: URL): string => url.hostname.toLowerCase().replace(/^(www|m)\./, '')
+const hostOf = (url: URL): string =>
+  url.hostname.toLowerCase().replace(/^(www|m)\./, '')
 
 const youtube = (url: URL): ParsedVideo | null => {
   const host = hostOf(url)
@@ -29,7 +30,8 @@ const youtube = (url: URL): ParsedVideo | null => {
     const [, first, second] = url.pathname.split('/')
 
     if (first === 'watch') id = url.searchParams.get('v')
-    else if (first === 'embed' || first === 'live' || first === 'shorts') id = second ?? null
+    else if (first === 'embed' || first === 'live' || first === 'shorts')
+      id = second ?? null
 
     if (first === 'shorts') aspect = 'portrait'
   }
@@ -49,7 +51,10 @@ const vimeo = (url: URL): ParsedVideo | null => {
   const host = hostOf(url)
   if (host !== 'vimeo.com' && host !== 'player.vimeo.com') return null
 
-  const id = url.pathname.split('/').filter(Boolean).find((part) => /^\d{5,15}$/.test(part))
+  const id = url.pathname
+    .split('/')
+    .filter(Boolean)
+    .find((part) => /^\d{5,15}$/.test(part))
   if (!id) return null
 
   return {
@@ -87,7 +92,10 @@ const facebook = (url: URL): ParsedVideo | null => {
   const isVideo =
     host === 'fb.watch'
       ? path.length > 1
-      : /\/videos\/\d+/.test(path) || /^\/reel\/\d+/.test(path) || (/^\/watch\/?$/.test(path) && DIGITS.test(url.searchParams.get('v') ?? ''))
+      : /\/videos\/\d+/.test(path) ||
+        /^\/reel\/\d+/.test(path) ||
+        (/^\/watch\/?$/.test(path) &&
+          DIGITS.test(url.searchParams.get('v') ?? ''))
 
   if (!isVideo) return null
 
@@ -109,7 +117,9 @@ const x = (url: URL): ParsedVideo | null => {
   const host = hostOf(url)
   if (host !== 'x.com' && host !== 'twitter.com') return null
 
-  const match = url.pathname.match(/^\/[\w]{1,15}\/status\/(\d+)\/?/) ?? url.pathname.match(/^\/i\/status\/(\d+)\/?/)
+  const match =
+    url.pathname.match(/^\/[\w]{1,15}\/status\/(\d+)\/?/) ??
+    url.pathname.match(/^\/i\/status\/(\d+)\/?/)
   const id = match?.[1]
   if (!id || !DIGITS.test(id)) return null
 

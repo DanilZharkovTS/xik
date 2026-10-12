@@ -66,7 +66,11 @@ describe('team: створення модератора і пароль', () => 
     const created = await api()
       .post('/api/team/moderators')
       .set(auth(admin.accessToken))
-      .send({ email: 'New.Mod@test.io', name: 'New', password: 'secret-pass-1' })
+      .send({
+        email: 'New.Mod@test.io',
+        name: 'New',
+        password: 'secret-pass-1',
+      })
 
     expect(created.status).toBe(201)
     expect(created.body.moderator).toMatchObject({ email: 'New.Mod@test.io' })
@@ -77,7 +81,11 @@ describe('team: створення модератора і пароль', () => 
     const dup = await api()
       .post('/api/team/moderators')
       .set(auth(admin.accessToken))
-      .send({ email: 'new.mod@test.io', name: 'Dup', password: 'secret-pass-1' })
+      .send({
+        email: 'new.mod@test.io',
+        name: 'Dup',
+        password: 'secret-pass-1',
+      })
     expect(dup.status).toBe(409)
   })
 
@@ -102,7 +110,9 @@ describe('team: створення модератора і пароль', () => 
       .send({ password: 'brand-new-pass' })
     expect(res.status).toBe(200)
 
-    const old = await api().get('/api/me/products').set(auth(session.accessToken))
+    const old = await api()
+      .get('/api/me/products')
+      .set(auth(session.accessToken))
     expect(old.status).toBe(401)
     expect((await login('mod@test.io', 'password-123')).status).toBe(401)
     expect((await login('mod@test.io', 'brand-new-pass')).status).toBe(200)
@@ -228,7 +238,9 @@ describe('requireProduct і членства', () => {
     const rows = await prisma.productMembership.findMany()
     expect(rows).toHaveLength(1)
     expect(rows[0].revokedAt).not.toBeNull()
-    expect(rows[0].revokedById).toBe((await prisma.user.findFirstOrThrow({ where: { role: 'admin' } })).id)
+    expect(rows[0].revokedById).toBe(
+      (await prisma.user.findFirstOrThrow({ where: { role: 'admin' } })).id
+    )
 
     await grant().expect(201)
     expect((await probe(accessToken)).status).toBe(200)
@@ -305,10 +317,14 @@ describe('requireProduct і членства', () => {
       .delete(`/api/team/moderators/${moderator.id}/products/${other.id}`)
       .set(auth(admin.accessToken))
 
-    const res = await api().get('/api/team/moderators').set(auth(admin.accessToken))
+    const res = await api()
+      .get('/api/team/moderators')
+      .set(auth(admin.accessToken))
 
     expect(res.body.moderators).toHaveLength(1)
-    expect(res.body.moderators[0].products.map((p: { id: string }) => p.id)).toEqual([product.id])
+    expect(
+      res.body.moderators[0].products.map((p: { id: string }) => p.id)
+    ).toEqual([product.id])
     expect(res.body.moderators[0]).not.toHaveProperty('credentials')
   })
 })
@@ -317,14 +333,19 @@ describe('деактивація', () => {
   it('відкрита сесія завершується одразу, вхід і refresh заборонені', async () => {
     const { moderator, admin } = await setup()
     const session = await loginOk('mod@test.io')
-    expect((await api().get('/api/me/products').set(auth(session.accessToken))).status).toBe(200)
+    expect(
+      (await api().get('/api/me/products').set(auth(session.accessToken)))
+        .status
+    ).toBe(200)
 
     await api()
       .post(`/api/team/moderators/${moderator.id}/deactivate`)
       .set(auth(admin.accessToken))
       .expect(200)
 
-    const after = await api().get('/api/me/products').set(auth(session.accessToken))
+    const after = await api()
+      .get('/api/me/products')
+      .set(auth(session.accessToken))
     expect(after.status).toBe(401)
 
     expect((await login('mod@test.io')).status).toBe(401)
@@ -343,8 +364,14 @@ describe('деактивація', () => {
       .send({ productId: product.id })
       .expect(201)
 
-    await api().post(`/api/team/moderators/${moderator.id}/deactivate`).set(auth(admin.accessToken)).expect(200)
-    await api().post(`/api/team/moderators/${moderator.id}/activate`).set(auth(admin.accessToken)).expect(200)
+    await api()
+      .post(`/api/team/moderators/${moderator.id}/deactivate`)
+      .set(auth(admin.accessToken))
+      .expect(200)
+    await api()
+      .post(`/api/team/moderators/${moderator.id}/activate`)
+      .set(auth(admin.accessToken))
+      .expect(200)
 
     const { accessToken } = await loginOk('mod@test.io')
     const res = await api()
@@ -368,9 +395,14 @@ describe('роль береться з БД, а не з токена', () => {
   it('понижений адмін одразу втрачає права, хоч токен ще чинний', async () => {
     const { adminUser, admin } = await setup()
 
-    await prisma.user.update({ where: { id: adminUser.id }, data: { role: 'user' } })
+    await prisma.user.update({
+      where: { id: adminUser.id },
+      data: { role: 'user' },
+    })
 
-    const res = await api().get('/api/team/moderators').set(auth(admin.accessToken))
+    const res = await api()
+      .get('/api/team/moderators')
+      .set(auth(admin.accessToken))
     expect(res.status).toBe(403)
   })
 
@@ -378,14 +410,21 @@ describe('роль береться з БД, а не з токена', () => {
     await createUser('moderator', 'mod@test.io')
     const jwt = (await import('jsonwebtoken')).default
     const real = await loginOk('mod@test.io')
-    const payload = jwt.decode(real.accessToken) as { id: string; email: string; sessionId: string }
+    const payload = jwt.decode(real.accessToken) as {
+      id: string
+      email: string
+      sessionId: string
+    }
     const forged = jwt.sign({ ...payload, role: 'admin' }, 'wrong-secret')
 
     const res = await api().get('/api/team/moderators').set(auth(forged))
     expect(res.status).toBe(401)
 
     // Правильний підпис, але роль admin у payload: сервер усе одно бере роль із БД.
-    const signed = jwt.sign({ ...payload, role: 'admin' }, process.env.JWT_SECRET!)
+    const signed = jwt.sign(
+      { ...payload, role: 'admin' },
+      process.env.JWT_SECRET!
+    )
     const res2 = await api().get('/api/team/moderators').set(auth(signed))
     expect(res2.status).toBe(403)
   })
@@ -396,12 +435,24 @@ describe('аудит', () => {
     const { moderator, product, admin } = await setup()
     const a = auth(admin.accessToken)
 
-    await api().post(`/api/team/moderators/${moderator.id}/products`).set(a).send({ productId: product.id })
-    await api().delete(`/api/team/moderators/${moderator.id}/products/${product.id}`).set(a)
+    await api()
+      .post(`/api/team/moderators/${moderator.id}/products`)
+      .set(a)
+      .send({ productId: product.id })
+    await api()
+      .delete(`/api/team/moderators/${moderator.id}/products/${product.id}`)
+      .set(a)
     await api().post(`/api/team/moderators/${moderator.id}/deactivate`).set(a)
     await api().post(`/api/team/moderators/${moderator.id}/activate`).set(a)
 
-    const actions = (await prisma.auditEvent.findMany({ orderBy: { createdAt: 'asc' } })).map((e) => e.action)
-    expect(actions).toEqual(['product_granted', 'product_revoked', 'user_deactivated', 'user_activated'])
+    const actions = (
+      await prisma.auditEvent.findMany({ orderBy: { createdAt: 'asc' } })
+    ).map((e) => e.action)
+    expect(actions).toEqual([
+      'product_granted',
+      'product_revoked',
+      'user_deactivated',
+      'user_activated',
+    ])
   })
 })

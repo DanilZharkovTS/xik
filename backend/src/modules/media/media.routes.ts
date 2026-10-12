@@ -3,7 +3,11 @@ import type { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
 import { authMiddleware } from '../auth/auth.middleware.js'
 import { validateQuery } from '../../shared/middlewares/helpers.js'
-import { ACCEPTED_MIME, MAX_UPLOAD_BYTES, mediaService } from './media.service.js'
+import {
+  ACCEPTED_MIME,
+  MAX_UPLOAD_BYTES,
+  mediaService,
+} from './media.service.js'
 
 const router = Router()
 
@@ -25,7 +29,9 @@ router.post(
 
 router.get(
   '/',
-  validateQuery(z.object({ page: z.coerce.number().int().min(1).max(1000).default(1) })),
+  validateQuery(
+    z.object({ page: z.coerce.number().int().min(1).max(1000).default(1) })
+  ),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await mediaService.list(req.validData!.query.page)

@@ -11,7 +11,8 @@ const fake = vi.hoisted(() => {
     checkout: [] as Obj[],
     fail: new Set<string>(),
   }
-  const missing = () => Object.assign(new Error('No such object'), { code: 'resource_missing' })
+  const missing = () =>
+    Object.assign(new Error('No such object'), { code: 'resource_missing' })
   const guard = (op: string) => {
     if (state.fail.has(op)) throw new Error(`${op} failed`)
   }
@@ -114,7 +115,12 @@ const BODY = {
   categoryLabel: 'PropTech · Operations',
   highlights: ['Multi-tenant'],
   capabilities: [{ title: 'Dispatch', description: 'Auto-assign tasks.' }],
-  architecture: { stack: ['Next.js'], runtime: 'Docker', deployment: 'Cloud', latency: '<40ms' },
+  architecture: {
+    stack: ['Next.js'],
+    runtime: 'Docker',
+    deployment: 'Cloud',
+    latency: '<40ms',
+  },
   protocols: ['REST'],
   demoUrl: 'https://demo.example.com',
   sortOrder: 10,
@@ -140,7 +146,10 @@ const setup = async () => {
 }
 
 const create = (token: string, body: Record<string, unknown> = {}) =>
-  api().post('/api/products').set(auth(token)).send({ ...BODY, ...body })
+  api()
+    .post('/api/products')
+    .set(auth(token))
+    .send({ ...BODY, ...body })
 
 const patch = (token: string, id: string, body: Record<string, unknown>) =>
   api().patch(`/api/products/${id}`).set(auth(token)).send(body)
@@ -148,7 +157,8 @@ const patch = (token: string, id: string, body: Record<string, unknown>) =>
 const action = (token: string, id: string, path: string) =>
   api().post(`/api/products/${id}/${path}`).set(auth(token)).send({})
 
-const activeStripeProducts = () => [...fake.state.products.values()].filter((p) => p.active)
+const activeStripeProducts = () =>
+  [...fake.state.products.values()].filter((p) => p.active)
 
 describe('створення і зв’язок зі Stripe', () => {
   it('створює Stripe-продукт і ціну, id зберігаються 1 до 1', async () => {
@@ -180,7 +190,9 @@ describe('створення і зв’язок зі Stripe', () => {
       recurring: { interval: 'month' },
     })
 
-    const row = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
+    const row = await prisma.product.findUniqueOrThrow({
+      where: { id: product.id },
+    })
     expect(row.stripeProductId).toBe(product.stripeProductId)
     expect(row.stripePriceId).toBe(product.stripePriceId)
   })
@@ -188,19 +200,35 @@ describe('створення і зв’язок зі Stripe', () => {
   it('суми: копійки для USD, цілі одиниці для JPY, дробові ціни без похибки', async () => {
     const { tokens } = await setup()
 
-    const jpy = await create(tokens.admin, { slug: 'jpy', price: 5000, currency: 'JPY' })
+    const jpy = await create(tokens.admin, {
+      slug: 'jpy',
+      price: 5000,
+      currency: 'JPY',
+    })
     const cents = await create(tokens.admin, { slug: 'cents', price: 19.99 })
 
-    expect(fake.state.prices.get(jpy.body.product.stripePriceId)!.unit_amount).toBe(5000)
-    expect(fake.state.prices.get(cents.body.product.stripePriceId)!.unit_amount).toBe(1999)
+    expect(
+      fake.state.prices.get(jpy.body.product.stripePriceId)!.unit_amount
+    ).toBe(5000)
+    expect(
+      fake.state.prices.get(cents.body.product.stripePriceId)!.unit_amount
+    ).toBe(1999)
   })
 
   it('агент це той самий тип з іншим kind, у Stripe такий самий продукт', async () => {
     const { tokens } = await setup()
 
-    const res = await create(tokens.admin, { slug: 'voice-ai', kind: 'agent', status: 'build' })
+    const res = await create(tokens.admin, {
+      slug: 'voice-ai',
+      kind: 'agent',
+      status: 'build',
+    })
 
-    expect(res.body.product).toMatchObject({ kind: 'agent', status: 'build', isStripeLinked: true })
+    expect(res.body.product).toMatchObject({
+      kind: 'agent',
+      status: 'build',
+      isStripeLinked: true,
+    })
     expect(fake.state.products.size).toBe(1)
   })
 
@@ -241,7 +269,11 @@ describe('створення і зв’язок зі Stripe', () => {
   it('гонка з одним slug: виграє один, Stripe-обʼєкти програвшого деактивуються', async () => {
     const { tokens } = await setup()
 
-    const results = await Promise.all([create(tokens.admin), create(tokens.admin), create(tokens.admin)])
+    const results = await Promise.all([
+      create(tokens.admin),
+      create(tokens.admin),
+      create(tokens.admin),
+    ])
 
     expect(results.filter((r) => r.status === 201)).toHaveLength(1)
     expect(results.filter((r) => r.status === 409)).toHaveLength(2)
@@ -264,15 +296,18 @@ describe('створення і зв’язок зі Stripe', () => {
     [{ features: [] }],
     [{ demoUrl: 'javascript:alert(1)' }],
     [{ name: '' }],
-  ])('некоректні дані %j відхиляються без звернення до Stripe', async (override) => {
-    const { tokens } = await setup()
+  ])(
+    'некоректні дані %j відхиляються без звернення до Stripe',
+    async (override) => {
+      const { tokens } = await setup()
 
-    const res = await create(tokens.admin, override)
+      const res = await create(tokens.admin, override)
 
-    expect(res.status).toBe(400)
-    expect(fake.state.calls).toHaveLength(0)
-    expect(await prisma.product.count()).toBe(0)
-  })
+      expect(res.status).toBe(400)
+      expect(fake.state.calls).toHaveLength(0)
+      expect(await prisma.product.count()).toBe(0)
+    }
+  )
 
   it('лише адмін', async () => {
     const { tokens } = await setup()
@@ -309,7 +344,9 @@ describe('створення і зв’язок зі Stripe', () => {
 describe('відкат Stripe при збої запису в БД', () => {
   it('створення: БД не відповіла після успіху Stripe, Stripe-обʼєкти деактивуються', async () => {
     const { tokens } = await setup()
-    const spy = vi.spyOn(productsRepo, 'createProduct').mockRejectedValueOnce(new Error('db down'))
+    const spy = vi
+      .spyOn(productsRepo, 'createProduct')
+      .mockRejectedValueOnce(new Error('db down'))
 
     const res = await create(tokens.admin)
     spy.mockRestore()
@@ -317,15 +354,20 @@ describe('відкат Stripe при збої запису в БД', () => {
     expect(res.status).toBe(500)
     expect(await prisma.product.count()).toBe(0)
     expect(activeStripeProducts()).toHaveLength(0)
-    expect([...fake.state.prices.values()].every((price) => !price.active)).toBe(true)
+    expect(
+      [...fake.state.prices.values()].every((price) => !price.active)
+    ).toBe(true)
   })
 
   it('створення: унікальність slug порушена на запису (гонка), результат 409 і відкат у Stripe', async () => {
     const { tokens } = await setup()
-    const conflict = new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
-      code: 'P2002',
-      clientVersion: 'test',
-    })
+    const conflict = new Prisma.PrismaClientKnownRequestError(
+      'Unique constraint failed',
+      {
+        code: 'P2002',
+        clientVersion: 'test',
+      }
+    )
     vi.spyOn(productsRepo, 'createProduct').mockRejectedValueOnce(conflict)
 
     const res = await create(tokens.admin)
@@ -339,17 +381,26 @@ describe('відкат Stripe при збої запису в БД', () => {
   it('оновлення: збій БД після нової ціни, нова ціна вимикається, стара лишається, назва у Stripe повертається', async () => {
     const { tokens } = await setup()
     const product = (await create(tokens.admin)).body.product
-    vi.spyOn(productsRepo, 'updateProduct').mockRejectedValueOnce(new Error('db down'))
+    vi.spyOn(productsRepo, 'updateProduct').mockRejectedValueOnce(
+      new Error('db down')
+    )
 
-    const res = await patch(tokens.admin, product.id, { name: 'Renamed', price: 99 })
+    const res = await patch(tokens.admin, product.id, {
+      name: 'Renamed',
+      price: 99,
+    })
     vi.restoreAllMocks()
 
     expect(res.status).toBe(500)
-    const row = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
+    const row = await prisma.product.findUniqueOrThrow({
+      where: { id: product.id },
+    })
     expect(row.stripePriceId).toBe(product.stripePriceId)
     expect(fake.state.prices.get(product.stripePriceId)!.active).toBe(true)
     expect(fake.state.products.get(product.stripeProductId)!.name).toBe('Keyho')
-    const newPrices = [...fake.state.prices.values()].filter((price) => price.id !== product.stripePriceId)
+    const newPrices = [...fake.state.prices.values()].filter(
+      (price) => price.id !== product.stripePriceId
+    )
     expect(newPrices).toHaveLength(1)
     expect(newPrices[0].active).toBe(false)
   })
@@ -357,9 +408,13 @@ describe('відкат Stripe при збої запису в БД', () => {
   it('архівування: збій БД, Stripe-продукт вмикається назад', async () => {
     const { tokens } = await setup()
     const product = (await create(tokens.admin)).body.product
-    vi.spyOn(productsRepo, 'setArchivedAt').mockRejectedValueOnce(new Error('db down'))
+    vi.spyOn(productsRepo, 'setArchivedAt').mockRejectedValueOnce(
+      new Error('db down')
+    )
 
-    const res = await api().delete(`/api/products/${product.id}`).set(auth(tokens.admin))
+    const res = await api()
+      .delete(`/api/products/${product.id}`)
+      .set(auth(tokens.admin))
     vi.restoreAllMocks()
 
     expect(res.status).toBe(500)
@@ -378,7 +433,10 @@ describe('оновлення', () => {
   it('зміна назви й опису оновлює Stripe-продукт, нову ціну не створює', async () => {
     const { tokens, product } = await created()
 
-    const res = await patch(tokens.admin, product.id, { name: 'Keyho Pro', description: 'New text' })
+    const res = await patch(tokens.admin, product.id, {
+      name: 'Keyho Pro',
+      description: 'New text',
+    })
 
     expect(res.status).toBe(200)
     expect(res.body.product.name).toBe('Keyho Pro')
@@ -393,16 +451,21 @@ describe('оновлення', () => {
   it('зміна ціни: нова ціна у Stripe, стара деактивується, id в БД оновлюється', async () => {
     const { tokens, product } = await created()
 
-    const res = await patch(tokens.admin, product.id, { price: 39, billingPeriod: 'year' })
+    const res = await patch(tokens.admin, product.id, {
+      price: 39,
+      billingPeriod: 'year',
+    })
 
     expect(res.status).toBe(200)
     expect(res.body.product.price).toBe('39')
     expect(res.body.product.stripePriceId).not.toBe(product.stripePriceId)
-    expect(fake.state.prices.get(res.body.product.stripePriceId)).toMatchObject({
-      unit_amount: 3900,
-      recurring: { interval: 'year' },
-      active: true,
-    })
+    expect(fake.state.prices.get(res.body.product.stripePriceId)).toMatchObject(
+      {
+        unit_amount: 3900,
+        recurring: { interval: 'year' },
+        active: true,
+      }
+    )
     expect(fake.state.prices.get(product.stripePriceId)!.active).toBe(false)
     expect(res.body.product.stripeProductId).toBe(product.stripeProductId)
   })
@@ -410,17 +473,32 @@ describe('оновлення', () => {
   it('зміна лише видимості ціни чи сортування не чіпає Stripe', async () => {
     const { tokens, product } = await created()
 
-    const res = await patch(tokens.admin, product.id, { showPrice: false, sortOrder: 5, tagline: 'x' })
+    const res = await patch(tokens.admin, product.id, {
+      showPrice: false,
+      sortOrder: 5,
+      tagline: 'x',
+    })
 
     expect(res.status).toBe(200)
-    expect(res.body.product).toMatchObject({ showPrice: false, sortOrder: 5, tagline: 'x' })
+    expect(res.body.product).toMatchObject({
+      showPrice: false,
+      sortOrder: 5,
+      tagline: 'x',
+    })
     expect(fake.state.calls).toHaveLength(0)
   })
 
   it('часткове оновлення не скидає поля до значень за замовчуванням', async () => {
     const ctx = await setup()
     const agent = (
-      await create(ctx.tokens.admin, { slug: 'agent-1', kind: 'agent', status: 'beta', highlights: ['keep'], showPrice: false, sortOrder: 7 })
+      await create(ctx.tokens.admin, {
+        slug: 'agent-1',
+        kind: 'agent',
+        status: 'beta',
+        highlights: ['keep'],
+        showPrice: false,
+        sortOrder: 7,
+      })
     ).body.product
 
     const res = await patch(ctx.tokens.admin, agent.id, { name: 'Renamed' })
@@ -438,9 +516,17 @@ describe('оновлення', () => {
   it('null прибирає необов’язкові поля', async () => {
     const { tokens, product } = await created()
 
-    const res = await patch(tokens.admin, product.id, { architecture: null, tagline: null, demoUrl: null })
+    const res = await patch(tokens.admin, product.id, {
+      architecture: null,
+      tagline: null,
+      demoUrl: null,
+    })
 
-    expect(res.body.product).toMatchObject({ architecture: null, tagline: null, demoUrl: null })
+    expect(res.body.product).toMatchObject({
+      architecture: null,
+      tagline: null,
+      demoUrl: null,
+    })
   })
 
   it('збій Stripe при оновленні: 502, БД не змінена', async () => {
@@ -450,18 +536,26 @@ describe('оновлення', () => {
     const res = await patch(tokens.admin, product.id, { name: 'Nope' })
 
     expect(res.status).toBe(502)
-    expect((await prisma.product.findUniqueOrThrow({ where: { id: product.id } })).name).toBe('Keyho')
+    expect(
+      (await prisma.product.findUniqueOrThrow({ where: { id: product.id } }))
+        .name
+    ).toBe('Keyho')
   })
 
   it('збій створення нової ціни відкочує назву у Stripe і не змінює БД', async () => {
     const { tokens, product } = await created()
     fake.state.fail.add('prices.create')
 
-    const res = await patch(tokens.admin, product.id, { name: 'Renamed', price: 99 })
+    const res = await patch(tokens.admin, product.id, {
+      name: 'Renamed',
+      price: 99,
+    })
 
     expect(res.status).toBe(502)
     expect(fake.state.products.get(product.stripeProductId)!.name).toBe('Keyho')
-    const row = await prisma.product.findUniqueOrThrow({ where: { id: product.id } })
+    const row = await prisma.product.findUniqueOrThrow({
+      where: { id: product.id },
+    })
     expect(row.name).toBe('Keyho')
     expect(row.stripePriceId).toBe(product.stripePriceId)
   })
@@ -470,25 +564,45 @@ describe('оновлення', () => {
     const { tokens, product } = await created()
     await create(tokens.admin, { slug: 'other' }).expect(201)
 
-    expect((await patch(tokens.admin, product.id, { slug: 'other' })).body.code).toBe('SLUG_TAKEN')
-    expect((await patch(tokens.admin, 'missing', { name: 'x' })).status).toBe(404)
+    expect(
+      (await patch(tokens.admin, product.id, { slug: 'other' })).body.code
+    ).toBe('SLUG_TAKEN')
+    expect((await patch(tokens.admin, 'missing', { name: 'x' })).status).toBe(
+      404
+    )
 
     const unlinked = await prisma.product.create({
       data: {
-        slug: 'unlinked', name: 'U', shortDescription: 's', description: 'd', categories: ['business'],
-        features: ['f'], price: 5, currency: 'USD', billingPeriod: 'month',
+        slug: 'unlinked',
+        name: 'U',
+        shortDescription: 's',
+        description: 'd',
+        categories: ['business'],
+        features: ['f'],
+        price: 5,
+        currency: 'USD',
+        billingPeriod: 'month',
       },
     })
-    expect((await patch(tokens.admin, unlinked.id, { name: 'x' })).body.code).toBe('STRIPE_NOT_LINKED')
+    expect(
+      (await patch(tokens.admin, unlinked.id, { name: 'x' })).body.code
+    ).toBe('STRIPE_NOT_LINKED')
 
-    await api().delete(`/api/products/${product.id}`).set(auth(tokens.admin)).expect(200)
-    expect((await patch(tokens.admin, product.id, { name: 'x' })).body.code).toBe('PRODUCT_ARCHIVED')
+    await api()
+      .delete(`/api/products/${product.id}`)
+      .set(auth(tokens.admin))
+      .expect(200)
+    expect(
+      (await patch(tokens.admin, product.id, { name: 'x' })).body.code
+    ).toBe('PRODUCT_ARCHIVED')
   })
 
   it('лише адмін', async () => {
     const { tokens, product } = await created()
 
-    expect((await patch(tokens.mod, product.id, { name: 'x' })).status).toBe(403)
+    expect((await patch(tokens.mod, product.id, { name: 'x' })).status).toBe(
+      403
+    )
   })
 })
 
@@ -498,7 +612,8 @@ describe('архівування замість видалення', () => {
     const product = (await create(ctx.tokens.admin)).body.product
     return { ...ctx, product }
   }
-  const archive = (token: string, id: string) => api().delete(`/api/products/${id}`).set(auth(token))
+  const archive = (token: string, id: string) =>
+    api().delete(`/api/products/${id}`).set(auth(token))
 
   it('архів: Stripe-продукт вимикається, на сайті та в оплаті продукту більше немає', async () => {
     const { tokens, product } = await created()
@@ -509,8 +624,13 @@ describe('архівування замість видалення', () => {
     expect(res.body.product.archivedAt).toBeTruthy()
     expect(fake.state.products.get(product.stripeProductId)!.active).toBe(false)
     expect((await api().get('/api/products/keyho')).status).toBe(404)
-    expect((await api().get('/api/products/catalog')).body.products).toHaveLength(0)
-    const checkout = await api().post('/api/billing/checkout').set(auth(tokens.buyer)).send({ productId: product.id })
+    expect(
+      (await api().get('/api/products/catalog')).body.products
+    ).toHaveLength(0)
+    const checkout = await api()
+      .post('/api/billing/checkout')
+      .set(auth(tokens.buyer))
+      .send({ productId: product.id })
     expect(checkout.status).toBe(404)
     // Рядок лишається в БД: остаточно продукти не видаляються.
     expect(await prisma.product.count()).toBe(1)
@@ -520,10 +640,17 @@ describe('архівування замість видалення', () => {
     const { tokens, product } = await created()
     await create(tokens.admin, { slug: 'second' }).expect(201)
     await archive(tokens.admin, product.id).expect(200)
-    const list = (state: string) => api().get('/api/products/admin').query({ state }).set(auth(tokens.admin))
+    const list = (state: string) =>
+      api().get('/api/products/admin').query({ state }).set(auth(tokens.admin))
 
-    expect((await list('active')).body.products.map((p: { slug: string }) => p.slug)).toEqual(['second'])
-    expect((await list('archived')).body.products.map((p: { slug: string }) => p.slug)).toEqual(['keyho'])
+    expect(
+      (await list('active')).body.products.map((p: { slug: string }) => p.slug)
+    ).toEqual(['second'])
+    expect(
+      (await list('archived')).body.products.map(
+        (p: { slug: string }) => p.slug
+      )
+    ).toEqual(['keyho'])
   })
 
   it('журнал: архівний продукт зникає з перемикачів і не приймає роботу, історія лишається', async () => {
@@ -537,14 +664,34 @@ describe('архівування замість видалення', () => {
 
     await archive(tokens.admin, product.id).expect(200)
 
-    expect((await api().get('/api/me/products').set(auth(tokens.mod))).body.products).toEqual([])
-    expect((await api().get('/api/me/products').set(auth(tokens.admin))).body.products).toEqual([])
-    expect((await api().post('/api/outreach/check').set(inProduct(tokens.mod, product.id)).send({ value: '@x_user' })).status).toBe(404)
-    expect(await prisma.productMembership.count({ where: { productId: product.id } })).toBe(1)
-    expect(await prisma.outreachTarget.count({ where: { id: target.body.target.id } })).toBe(1)
+    expect(
+      (await api().get('/api/me/products').set(auth(tokens.mod))).body.products
+    ).toEqual([])
+    expect(
+      (await api().get('/api/me/products').set(auth(tokens.admin))).body
+        .products
+    ).toEqual([])
+    expect(
+      (
+        await api()
+          .post('/api/outreach/check')
+          .set(inProduct(tokens.mod, product.id))
+          .send({ value: '@x_user' })
+      ).status
+    ).toBe(404)
+    expect(
+      await prisma.productMembership.count({ where: { productId: product.id } })
+    ).toBe(1)
+    expect(
+      await prisma.outreachTarget.count({
+        where: { id: target.body.target.id },
+      })
+    ).toBe(1)
 
     await action(tokens.admin, product.id, 'restore').expect(200)
-    expect((await api().get('/api/me/products').set(auth(tokens.mod))).body.products).toHaveLength(1)
+    expect(
+      (await api().get('/api/me/products').set(auth(tokens.mod))).body.products
+    ).toHaveLength(1)
   })
 
   it('відновлення вмикає Stripe-продукт і повертає продукт на сайт', async () => {
@@ -562,9 +709,13 @@ describe('архівування замість видалення', () => {
   it('повторне архівування й відновлення активного: 409; невідомий 404; лише адмін', async () => {
     const { tokens, product } = await created()
 
-    expect((await action(tokens.admin, product.id, 'restore')).body.code).toBe('NOT_ARCHIVED')
+    expect((await action(tokens.admin, product.id, 'restore')).body.code).toBe(
+      'NOT_ARCHIVED'
+    )
     await archive(tokens.admin, product.id).expect(200)
-    expect((await archive(tokens.admin, product.id)).body.code).toBe('ALREADY_ARCHIVED')
+    expect((await archive(tokens.admin, product.id)).body.code).toBe(
+      'ALREADY_ARCHIVED'
+    )
     expect((await archive(tokens.admin, 'missing')).status).toBe(404)
     expect((await archive(tokens.mod, product.id)).status).toBe(403)
     expect((await action(tokens.mod, product.id, 'restore')).status).toBe(403)
@@ -577,7 +728,10 @@ describe('архівування замість видалення', () => {
     const res = await archive(tokens.admin, product.id)
 
     expect(res.status).toBe(502)
-    expect((await prisma.product.findUniqueOrThrow({ where: { id: product.id } })).archivedAt).toBeNull()
+    expect(
+      (await prisma.product.findUniqueOrThrow({ where: { id: product.id } }))
+        .archivedAt
+    ).toBeNull()
   })
 })
 
@@ -585,8 +739,15 @@ describe('синхронізація зі Stripe', () => {
   const unlinked = (extra: Record<string, unknown> = {}) =>
     prisma.product.create({
       data: {
-        slug: 'legacy', name: 'Legacy', shortDescription: 's', description: 'Legacy description',
-        categories: ['business'], features: ['f'], price: 15, currency: 'USD', billingPeriod: 'month',
+        slug: 'legacy',
+        name: 'Legacy',
+        shortDescription: 's',
+        description: 'Legacy description',
+        categories: ['business'],
+        features: ['f'],
+        price: 15,
+        currency: 'USD',
+        billingPeriod: 'month',
         ...extra,
       },
     })
@@ -600,9 +761,17 @@ describe('синхронізація зі Stripe', () => {
 
     expect(res.status).toBe(200)
     expect(res.body.repaired).toEqual(['product', 'price'])
-    expect(res.body.product).toMatchObject({ isStripeLinked: true, isPurchasable: true })
-    expect(fake.state.products.get(res.body.product.stripeProductId)!.metadata.productId).toBe(legacy.id)
-    expect(fake.state.prices.get(res.body.product.stripePriceId)!.unit_amount).toBe(1500)
+    expect(res.body.product).toMatchObject({
+      isStripeLinked: true,
+      isPurchasable: true,
+    })
+    expect(
+      fake.state.products.get(res.body.product.stripeProductId)!.metadata
+        .productId
+    ).toBe(legacy.id)
+    expect(
+      fake.state.prices.get(res.body.product.stripePriceId)!.unit_amount
+    ).toBe(1500)
   })
 
   it('повторна синхронізація нічого не створює', async () => {
@@ -622,13 +791,18 @@ describe('синхронізація зі Stripe', () => {
     const legacy = await unlinked()
     const linked = (await sync(tokens.admin, legacy.id)).body.product
     // Хтось змінив ціну в БД напряму: сума у Stripe більше не збігається.
-    await prisma.product.update({ where: { id: legacy.id }, data: { price: 25 } })
+    await prisma.product.update({
+      where: { id: legacy.id },
+      data: { price: 25 },
+    })
 
     const res = await sync(tokens.admin, legacy.id)
 
     expect(res.body.repaired).toEqual(['price'])
     expect(res.body.product.stripePriceId).not.toBe(linked.stripePriceId)
-    expect(fake.state.prices.get(res.body.product.stripePriceId)!.unit_amount).toBe(2500)
+    expect(
+      fake.state.prices.get(res.body.product.stripePriceId)!.unit_amount
+    ).toBe(2500)
     expect(fake.state.prices.get(linked.stripePriceId)!.active).toBe(false)
   })
 
@@ -648,19 +822,28 @@ describe('синхронізація зі Stripe', () => {
     const { tokens } = await setup()
     const legacy = await unlinked()
     const linked = (await sync(tokens.admin, legacy.id)).body.product
-    Object.assign(fake.state.products.get(linked.stripeProductId)!, { name: 'Stale', active: false })
+    Object.assign(fake.state.products.get(linked.stripeProductId)!, {
+      name: 'Stale',
+      active: false,
+    })
 
     const res = await sync(tokens.admin, legacy.id)
 
     expect(res.body.repaired).toEqual(['product-info'])
-    expect(fake.state.products.get(linked.stripeProductId)).toMatchObject({ name: 'Legacy', active: true })
+    expect(fake.state.products.get(linked.stripeProductId)).toMatchObject({
+      name: 'Legacy',
+      active: true,
+    })
   })
 
   it('частково привʼязаний (є продукт, немає ціни) отримує ціну', async () => {
     const { tokens } = await setup()
     const legacy = await unlinked()
     const linked = (await sync(tokens.admin, legacy.id)).body.product
-    await prisma.product.update({ where: { id: legacy.id }, data: { stripePriceId: null } })
+    await prisma.product.update({
+      where: { id: legacy.id },
+      data: { stripePriceId: null },
+    })
 
     const res = await sync(tokens.admin, legacy.id)
 
@@ -675,13 +858,18 @@ describe('синхронізація зі Stripe', () => {
     fake.state.fail.add('prices.create')
 
     expect((await sync(tokens.admin, legacy.id)).status).toBe(502)
-    expect((await prisma.product.findUniqueOrThrow({ where: { id: legacy.id } })).stripeProductId).toBeNull()
+    expect(
+      (await prisma.product.findUniqueOrThrow({ where: { id: legacy.id } }))
+        .stripeProductId
+    ).toBeNull()
     expect(activeStripeProducts()).toHaveLength(0)
 
     fake.state.fail.clear()
     expect((await sync(tokens.mod, legacy.id)).status).toBe(403)
     const archived = await unlinked({ slug: 'old', archivedAt: new Date() })
-    expect((await sync(tokens.admin, archived.id)).body.code).toBe('PRODUCT_ARCHIVED')
+    expect((await sync(tokens.admin, archived.id)).body.code).toBe(
+      'PRODUCT_ARCHIVED'
+    )
     expect((await sync(tokens.admin, 'missing')).status).toBe(404)
   })
 })
@@ -689,16 +877,37 @@ describe('синхронізація зі Stripe', () => {
 describe('публічний каталог і оплата', () => {
   it('каталог: фільтр за kind, порядок за sortOrder, без Stripe-id', async () => {
     const { tokens } = await setup()
-    await create(tokens.admin, { slug: 'b-product', name: 'B', sortOrder: 20 }).expect(201)
-    await create(tokens.admin, { slug: 'a-product', name: 'A', sortOrder: 10 }).expect(201)
-    await create(tokens.admin, { slug: 'an-agent', name: 'Agent', kind: 'agent', sortOrder: 5 }).expect(201)
+    await create(tokens.admin, {
+      slug: 'b-product',
+      name: 'B',
+      sortOrder: 20,
+    }).expect(201)
+    await create(tokens.admin, {
+      slug: 'a-product',
+      name: 'A',
+      sortOrder: 10,
+    }).expect(201)
+    await create(tokens.admin, {
+      slug: 'an-agent',
+      name: 'Agent',
+      kind: 'agent',
+      sortOrder: 5,
+    }).expect(201)
 
-    const products = await api().get('/api/products/catalog').query({ kind: 'product' })
-    const agents = await api().get('/api/products/catalog').query({ kind: 'agent' })
+    const products = await api()
+      .get('/api/products/catalog')
+      .query({ kind: 'product' })
+    const agents = await api()
+      .get('/api/products/catalog')
+      .query({ kind: 'agent' })
     const all = await api().get('/api/products/catalog')
 
-    expect(products.body.products.map((p: { slug: string }) => p.slug)).toEqual(['a-product', 'b-product'])
-    expect(agents.body.products.map((p: { slug: string }) => p.slug)).toEqual(['an-agent'])
+    expect(products.body.products.map((p: { slug: string }) => p.slug)).toEqual(
+      ['a-product', 'b-product']
+    )
+    expect(agents.body.products.map((p: { slug: string }) => p.slug)).toEqual([
+      'an-agent',
+    ])
     expect(all.body.products).toHaveLength(3)
     expect(JSON.stringify(all.body)).not.toMatch(/stripe|prod_|price_/i)
   })
@@ -711,19 +920,39 @@ describe('публічний каталог і оплата', () => {
     const hidden = (await api().get('/api/products/hidden')).body.product
     const visible = (await api().get('/api/products/visible')).body.product
 
-    expect(hidden).toMatchObject({ showPrice: false, price: null, currency: null, billingPeriod: null, isPurchasable: true })
-    expect(visible).toMatchObject({ showPrice: true, price: '29', currency: 'USD', billingPeriod: 'month', isPurchasable: true })
+    expect(hidden).toMatchObject({
+      showPrice: false,
+      price: null,
+      currency: null,
+      billingPeriod: null,
+      isPurchasable: true,
+    })
+    expect(visible).toMatchObject({
+      showPrice: true,
+      price: '29',
+      currency: 'USD',
+      billingPeriod: 'month',
+      isPurchasable: true,
+    })
     const catalog = (await api().get('/api/products/catalog')).body.products
-    expect(catalog.find((p: { slug: string }) => p.slug === 'hidden').price).toBeNull()
+    expect(
+      catalog.find((p: { slug: string }) => p.slug === 'hidden').price
+    ).toBeNull()
   })
 
   it('адмін бачить справжню ціну й Stripe-id незалежно від showPrice', async () => {
     const { tokens } = await setup()
     await create(tokens.admin, { slug: 'hidden', showPrice: false }).expect(201)
 
-    const list = (await api().get('/api/products/admin').set(auth(tokens.admin))).body.products
+    const list = (
+      await api().get('/api/products/admin').set(auth(tokens.admin))
+    ).body.products
 
-    expect(list[0]).toMatchObject({ price: '29', showPrice: false, isStripeLinked: true })
+    expect(list[0]).toMatchObject({
+      price: '29',
+      showPrice: false,
+      isStripeLinked: true,
+    })
     expect(list[0].stripeProductId).toMatch(/^prod_/)
   })
 
@@ -746,22 +975,39 @@ describe('публічний каталог і оплата', () => {
 
   it('оплата: Stripe Checkout з ціною продукту; без ціни у Stripe 409', async () => {
     const { tokens } = await setup()
-    const product = (await create(tokens.admin).then((r) => r.body.product)) as { id: string; stripePriceId: string }
+    const product = (await create(tokens.admin).then(
+      (r) => r.body.product
+    )) as { id: string; stripePriceId: string }
 
-    const ok = await api().post('/api/billing/checkout').set(auth(tokens.buyer)).send({ productId: product.id })
+    const ok = await api()
+      .post('/api/billing/checkout')
+      .set(auth(tokens.buyer))
+      .send({ productId: product.id })
 
     expect(ok.status).toBe(200)
     expect(ok.body.url).toBe('https://stripe.test/checkout')
-    expect(fake.state.checkout[0].line_items[0].price).toBe(product.stripePriceId)
+    expect(fake.state.checkout[0].line_items[0].price).toBe(
+      product.stripePriceId
+    )
     expect(fake.state.checkout[0].metadata.productId).toBe(product.id)
 
     const bare = await prisma.product.create({
       data: {
-        slug: 'bare', name: 'Bare', shortDescription: 's', description: 'd', categories: ['business'],
-        features: ['f'], price: 5, currency: 'USD', billingPeriod: 'month',
+        slug: 'bare',
+        name: 'Bare',
+        shortDescription: 's',
+        description: 'd',
+        categories: ['business'],
+        features: ['f'],
+        price: 5,
+        currency: 'USD',
+        billingPeriod: 'month',
       },
     })
-    const blocked = await api().post('/api/billing/checkout').set(auth(tokens.buyer)).send({ productId: bare.id })
+    const blocked = await api()
+      .post('/api/billing/checkout')
+      .set(auth(tokens.buyer))
+      .send({ productId: bare.id })
     expect(blocked.status).toBe(409)
     expect(blocked.body.code).toBe('NOT_PURCHASABLE')
   })
@@ -774,7 +1020,8 @@ describe('публічний каталог і оплата', () => {
 
 describe('імпорт статичного каталогу', () => {
   it('усі записи JSON проходять схему; продуктів і агентів очікувана кількість', async () => {
-    const { createProductSchema } = await import('../src/modules/products/products.schema.js')
+    const { createProductSchema } =
+      await import('../src/modules/products/products.schema.js')
 
     for (const item of catalog) {
       expect(createProductSchema.safeParse(item).success, item.slug).toBe(true)
@@ -785,27 +1032,47 @@ describe('імпорт статичного каталогу', () => {
   })
 
   it('кожен продукт каталогу має готові переклади es і uk', async () => {
-    const { availableLocales } = await import('../src/modules/products/products.mapper.js')
+    const { availableLocales } =
+      await import('../src/modules/products/products.mapper.js')
 
     for (const item of catalog) {
-      const translations = (item as { translations?: Record<string, { shortDescription?: string; description?: string }> }).translations ?? {}
+      const translations =
+        (
+          item as {
+            translations?: Record<
+              string,
+              { shortDescription?: string; description?: string }
+            >
+          }
+        ).translations ?? {}
       for (const lang of ['es', 'uk']) {
-        expect(translations[lang]?.shortDescription && translations[lang]?.description, `${item.slug}:${lang}`).toBeTruthy()
+        expect(
+          translations[lang]?.shortDescription &&
+            translations[lang]?.description,
+          `${item.slug}:${lang}`
+        ).toBeTruthy()
       }
     }
     expect(availableLocales).toBeTypeOf('function')
   })
 
   it('дописує переклади наявному продукту без перекладів і більше нічого не змінює', async () => {
-    const withoutTranslations = catalog.map(({ translations: _t, ...rest }: Record<string, unknown>) => rest)
+    const withoutTranslations = catalog.map(
+      ({ translations: _t, ...rest }: Record<string, unknown>) => rest
+    )
     await importCatalog(withoutTranslations, { useStripe: false })
-    await prisma.product.update({ where: { slug: 'keyho' }, data: { name: 'Edited in admin' } })
+    await prisma.product.update({
+      where: { slug: 'keyho' },
+      data: { name: 'Edited in admin' },
+    })
 
     const result = await importCatalog(catalog, { useStripe: false })
 
     expect(result.created).toEqual([])
     expect(result.translated).toHaveLength(15)
-    const keyho = await prisma.product.findUniqueOrThrow({ where: { slug: 'keyho' } })
+    const keyho = await prisma.product.findUniqueOrThrow({
+      where: { slug: 'keyho' },
+    })
     expect(keyho.name).toBe('Edited in admin')
     expect(Object.keys(keyho.translations as object)).toEqual(['es', 'uk'])
 
@@ -827,7 +1094,11 @@ describe('імпорт статичного каталогу', () => {
     expect(keyho).toMatchObject({ kind: 'product', showPrice: true })
     expect(keyho.price.toString()).toBe('29')
     const voice = rows.find((p) => p.slug === 'voice-ai')!
-    expect(voice).toMatchObject({ kind: 'agent', status: 'build', showPrice: false })
+    expect(voice).toMatchObject({
+      kind: 'agent',
+      status: 'build',
+      showPrice: false,
+    })
 
     const calls = fake.state.calls.length
     const again = await importCatalog(catalog, { useStripe: true })
@@ -843,7 +1114,9 @@ describe('імпорт статичного каталогу', () => {
 
     expect(result.created).toHaveLength(15)
     expect(fake.state.calls).toHaveLength(0)
-    const row = await prisma.product.findUniqueOrThrow({ where: { slug: 'rag' } })
+    const row = await prisma.product.findUniqueOrThrow({
+      where: { slug: 'rag' },
+    })
     expect(row.stripeProductId).toBeNull()
     const synced = await action(tokens.admin, row.id, 'stripe-sync')
     expect(synced.body.product.isStripeLinked).toBe(true)
@@ -860,7 +1133,9 @@ describe('імпорт статичного каталогу', () => {
   })
 
   it('некоректний запис потрапляє у failed, коректні створюються', async () => {
-    const result = await importCatalog([{ slug: 'Bad Slug' }, catalog[0]], { useStripe: false })
+    const result = await importCatalog([{ slug: 'Bad Slug' }, catalog[0]], {
+      useStripe: false,
+    })
 
     expect(result.failed.map((f) => f.slug)).toEqual(['Bad Slug'])
     expect(result.created).toEqual([catalog[0].slug])
@@ -869,19 +1144,28 @@ describe('імпорт статичного каталогу', () => {
   it('імпортовані продукти одразу видно в каталозі сайту по блоках', async () => {
     await importCatalog(catalog, { useStripe: true })
 
-    const products = (await api().get('/api/products/catalog').query({ kind: 'product' })).body.products
-    const agents = (await api().get('/api/products/catalog').query({ kind: 'agent' })).body.products
+    const products = (
+      await api().get('/api/products/catalog').query({ kind: 'product' })
+    ).body.products
+    const agents = (
+      await api().get('/api/products/catalog').query({ kind: 'agent' })
+    ).body.products
 
     expect(products).toHaveLength(6)
     expect(agents).toHaveLength(9)
     expect(products[0].slug).toBe('keyho')
-    expect(products.find((p: { slug: string }) => p.slug === 'keyho').price).toBe('29')
-    expect(agents.every((a: { price: string | null }) => a.price === null)).toBe(true)
+    expect(
+      products.find((p: { slug: string }) => p.slug === 'keyho').price
+    ).toBe('29')
+    expect(
+      agents.every((a: { price: string | null }) => a.price === null)
+    ).toBe(true)
   })
 })
 
 describe('сповіщення фронтенда про зміну каталогу', () => {
-  const fetchSpy = () => vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}'))
+  const fetchSpy = () =>
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}'))
   const revalidateCalls = (spy: ReturnType<typeof fetchSpy>) =>
     spy.mock.calls.filter(([url]) => String(url).endsWith('/api/revalidate'))
 
@@ -903,7 +1187,9 @@ describe('сповіщення фронтенда про зміну катало
     const calls = revalidateCalls(spy)
     expect(calls).toHaveLength(5)
     expect(String(calls[0][0])).toBe('http://frontend:3000/api/revalidate')
-    expect((calls[0][1] as RequestInit).headers).toMatchObject({ 'x-revalidate-secret': 'secret-1' })
+    expect((calls[0][1] as RequestInit).headers).toMatchObject({
+      'x-revalidate-secret': 'secret-1',
+    })
 
     spy.mockRestore()
     vi.unstubAllEnvs()
@@ -925,7 +1211,9 @@ describe('сповіщення фронтенда про зміну катало
   it('збій сповіщення не ламає запит адміна', async () => {
     vi.stubEnv('REVALIDATE_SECRET', 'secret-1')
     vi.stubEnv('FRONTEND_INTERNAL_URL', 'http://frontend:3000')
-    const spy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('connection refused'))
+    const spy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockRejectedValue(new Error('connection refused'))
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const { tokens } = await setup()
 
@@ -960,10 +1248,15 @@ describe('переклади (en/es/uk)', () => {
     const { tokens } = await setup()
     await create(tokens.admin, { translations: { es: ES } }).expect(201)
 
-    const es = (await api().get('/api/products/keyho').query({ lang: 'es' })).body.product
+    const es = (await api().get('/api/products/keyho').query({ lang: 'es' }))
+      .body.product
     const en = (await api().get('/api/products/keyho')).body.product
 
-    expect(es).toMatchObject({ name: 'Keyho ES', locale: 'es', availableLocales: ['en', 'es'] })
+    expect(es).toMatchObject({
+      name: 'Keyho ES',
+      locale: 'es',
+      availableLocales: ['en', 'es'],
+    })
     expect(es.features).toEqual(['Gestión de tareas'])
     expect(en).toMatchObject({ name: 'Keyho', locale: 'en' })
   })
@@ -972,7 +1265,8 @@ describe('переклади (en/es/uk)', () => {
     const { tokens } = await setup()
     await create(tokens.admin, { translations: { es: ES } }).expect(201)
 
-    const uk = (await api().get('/api/products/keyho').query({ lang: 'uk' })).body.product
+    const uk = (await api().get('/api/products/keyho').query({ lang: 'uk' }))
+      .body.product
 
     expect(uk.name).toBe('Keyho')
     expect(uk.availableLocales).not.toContain('uk')
@@ -980,9 +1274,12 @@ describe('переклади (en/es/uk)', () => {
 
   it('частковий переклад без опису не вважається доступним', async () => {
     const { tokens } = await setup()
-    await create(tokens.admin, { translations: { uk: { name: 'Кейхо' } } }).expect(201)
+    await create(tokens.admin, {
+      translations: { uk: { name: 'Кейхо' } },
+    }).expect(201)
 
-    const uk = (await api().get('/api/products/keyho').query({ lang: 'uk' })).body.product
+    const uk = (await api().get('/api/products/keyho').query({ lang: 'uk' }))
+      .body.product
 
     expect(uk.availableLocales).toEqual(['en'])
   })
@@ -991,7 +1288,9 @@ describe('переклади (en/es/uk)', () => {
     const { tokens } = await setup()
     await create(tokens.admin, { translations: { es: ES } }).expect(201)
 
-    const catalog = (await api().get('/api/products/catalog').query({ lang: 'es' })).body.products
+    const catalog = (
+      await api().get('/api/products/catalog').query({ lang: 'es' })
+    ).body.products
 
     expect(catalog[0].name).toBe('Keyho ES')
   })
@@ -1000,9 +1299,12 @@ describe('переклади (en/es/uk)', () => {
     const { tokens } = await setup()
     const created = (await create(tokens.admin)).body.product
 
-    await patch(tokens.admin, created.id, { translations: { es: ES } }).expect(200)
+    await patch(tokens.admin, created.id, { translations: { es: ES } }).expect(
+      200
+    )
 
-    const es = (await api().get('/api/products/keyho').query({ lang: 'es' })).body.product
+    const es = (await api().get('/api/products/keyho').query({ lang: 'es' }))
+      .body.product
     expect(es.name).toBe('Keyho ES')
   })
 
@@ -1010,17 +1312,33 @@ describe('переклади (en/es/uk)', () => {
     const { tokens } = await setup()
 
     await create(tokens.admin, { translations: { fr: ES } }).expect(400)
-    await create(tokens.admin, { translations: { es: { ...ES, price: 1 } } }).expect(400)
-    await create(tokens.admin, { translations: { es: { name: 'x'.repeat(61) } } }).expect(400)
+    await create(tokens.admin, {
+      translations: { es: { ...ES, price: 1 } },
+    }).expect(400)
+    await create(tokens.admin, {
+      translations: { es: { name: 'x'.repeat(61) } },
+    }).expect(400)
   })
 
   it('checkout передає мову у Stripe і локалізовані адреси повернення', async () => {
     const { tokens } = await setup()
     const product = (await create(tokens.admin)).body.product
 
-    await api().post('/api/billing/checkout').set(auth(tokens.buyer)).send({ productId: product.id, locale: 'es' }).expect(200)
-    await api().post('/api/billing/checkout').set(auth(tokens.buyer)).send({ productId: product.id, locale: 'uk' }).expect(200)
-    await api().post('/api/billing/checkout').set(auth(tokens.buyer)).send({ productId: product.id }).expect(200)
+    await api()
+      .post('/api/billing/checkout')
+      .set(auth(tokens.buyer))
+      .send({ productId: product.id, locale: 'es' })
+      .expect(200)
+    await api()
+      .post('/api/billing/checkout')
+      .set(auth(tokens.buyer))
+      .send({ productId: product.id, locale: 'uk' })
+      .expect(200)
+    await api()
+      .post('/api/billing/checkout')
+      .set(auth(tokens.buyer))
+      .send({ productId: product.id })
+      .expect(200)
 
     const [es, uk, en] = fake.state.checkout
     expect(es.locale).toBe('es')

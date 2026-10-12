@@ -24,17 +24,15 @@ const where = (filter: ReportFilter): Prisma.Sql => {
     Prisma.sql`"occurredAt" < ((${filter.to}::timestamp AT TIME ZONE ${filter.timeZone}) AT TIME ZONE 'UTC')`,
   ]
 
-  if (filter.productId) conditions.push(Prisma.sql`"productId" = ${filter.productId}`)
+  if (filter.productId)
+    conditions.push(Prisma.sql`"productId" = ${filter.productId}`)
   if (filter.userId) conditions.push(Prisma.sql`"userId" = ${filter.userId}`)
 
   return Prisma.join(conditions, ' AND ')
 }
 
 export const reportsRepo = {
-  countsByBucketAndType: (
-    filter: ReportFilter,
-    granularity: 'day' | 'month'
-  ) =>
+  countsByBucketAndType: (filter: ReportFilter, granularity: 'day' | 'month') =>
     prisma.$queryRaw<(CountRow & { bucket: string; type: ReportEventType })[]>`
       SELECT to_char(
                date_trunc(${granularity}, ("occurredAt" AT TIME ZONE 'UTC') AT TIME ZONE ${filter.timeZone}),
@@ -47,7 +45,9 @@ export const reportsRepo = {
       GROUP BY 1, 2
     `,
   countsByChannelAndType: (filter: ReportFilter) =>
-    prisma.$queryRaw<(CountRow & { channel: string | null; type: ReportEventType })[]>`
+    prisma.$queryRaw<
+      (CountRow & { channel: string | null; type: ReportEventType })[]
+    >`
       SELECT "channel", "type"::text AS "type", COUNT(*)::int AS "count"
       FROM "OutreachEvent"
       WHERE ${where(filter)}
