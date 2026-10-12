@@ -119,6 +119,9 @@ enum ProductBillingPeriod {
   year
 }
 
+enum ActionTokenType {
+  passwordReset
+}
 //models
 
 model User {
@@ -135,6 +138,7 @@ model User {
   deactivatedAt DateTime?
 
   credentials UserCredentials?
+  actionTokens ActionToken[]
   sessions UserSession[]
   savedProducts SavedProduct[]
   library UserLibrary[]
@@ -190,6 +194,23 @@ model RefreshToken {
   session UserSession @relation(fields: [sessionId], references: [id])
   @@index([tokenHash])
   @@index([sessionId])
+}
+
+model ActionToken {
+  id String @id @default(uuid())
+
+  userId String
+  tokenHash String @unique
+  type ActionTokenType
+  
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  usedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, type])
+  @@index([expiresAt])
 }
 
 model Product {
