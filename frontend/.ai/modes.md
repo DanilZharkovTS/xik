@@ -58,7 +58,8 @@ During coding:
 
 After coding:
 
-- run available lint, typecheck, tests, and build;
+- run affected verification from [the repository policy](../../docs/verification-policy.md);
+  use the full baseline at its defined checkpoints;
 - report changed files;
 - report real command results;
 - state any unexecuted checks.

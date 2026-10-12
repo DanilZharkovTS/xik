@@ -189,7 +189,8 @@ Arbitrary values are acceptable for genuine pixel-art details. Promote repeated 
 
 ## Quality checks
 
-Use available scripts:
+Select affected checks using [the repository verification policy](../../docs/verification-policy.md).
+These frontend scripts are available; they are not all mandatory after every edit:
 
 ```bash
 npm run lint
@@ -206,9 +207,9 @@ A task is complete when:
 
 - the requested behavior works;
 - architecture rules are respected;
-- types and lint pass;
-- relevant tests pass;
-- build passes;
+- affected types, lint, and tests pass according to the verification policy;
+- production build passes when required by impact or a checkpoint (unchanged
+  baseline evidence may be reused and must be labelled as previous evidence);
 - accessibility was considered;
 - unrelated files were not changed;
 - documentation was updated where necessary.

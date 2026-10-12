@@ -1,6 +1,8 @@
 # XIK Quality Assurance Record
 
-This document records the current repeatable local production checks.
+This document records historical local production checks; counts and measurements
+are not assertions about the current checkout. Verification scope and the current
+repository checkpoint are defined in [the repository policy](../../docs/verification-policy.md).
 It does not claim production deployment, external indexing, or field Core Web
 Vitals.
 
@@ -124,7 +126,8 @@ update.
 
 ## Local commands
 
-Run the complete gate with Node.js 24:
+Historical frontend gate commands with Node.js 24 are below. Use the repository
+policy for iteration scope and full stack prerequisites, including the seeded API:
 
 ```sh
 npm ci
