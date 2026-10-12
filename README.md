@@ -109,6 +109,26 @@ The production configuration is optimized for security, performance, and minimal
 - Automatic container restarts (`restart: always`).
 - Health checks ensure the database is ready before the backend starts.
 
+### Step 0. Prepare data directories
+
+Production data lives in explicit host directories, not in the repository checkout:
+
+| Data | Host path | Container path |
+| :--- | :--- | :--- |
+| PostgreSQL | `/srv/xik/data/postgres` | `/var/lib/postgresql/data` |
+| Article media | `/srv/xik/data/media` | `/data/media` |
+
+The mounts use `create_host_path: false`, so a missing directory stops the
+container instead of silently starting with an empty database. Create them once:
+
+```bash
+sudo mkdir -p /srv/xik/data/postgres /srv/xik/data/media
+```
+
+If a server already holds data under `./docker/postgres/data` or `./docker/media`,
+stop the stack and move those directories to the paths above before starting it;
+do not start it against the new empty directories. Back up both directories together.
+
 ### Step 1. Configure Environment Variables
 
 Create a root `.env` file from the provided template:
