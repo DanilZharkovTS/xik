@@ -43,6 +43,16 @@ export const resetPasswordSchema = z
     path: ['confirmNewPassword'],
   })
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'auth.err.currentPasswordRequired'),
+    newPassword: z.string().min(8, 'auth.err.passwordShort'),
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: 'auth.err.samePassword',
+    path: ['newPassword'],
+  })
+
 // DTO
 
 export type RegisterDto = z.infer<typeof registerSchema>
@@ -54,3 +64,5 @@ export type RequestPasswordResetDto = z.infer<
 >
 
 export type ResetPasswordDto = z.infer<typeof resetPasswordSchema>
+
+export type ChangePasswordDto = z.infer<typeof changePasswordSchema>

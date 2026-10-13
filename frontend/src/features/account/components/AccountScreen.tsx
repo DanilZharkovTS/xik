@@ -20,6 +20,7 @@ import { accountService } from '../account.service'
 import type { LibraryItem, SavedProduct } from '../account.service'
 import { CancelSubscriptionButton } from './CancelSubscriptionButton'
 import { RestoreSubscriptionButton } from './RestoreSubscriptionButton'
+import { ChangePasswordModal } from './ChangePasswordModal'
 
 type Tab = 'subs' | 'saved' | 'profile'
 
@@ -222,6 +223,7 @@ function ProfileTab(): ReactElement {
   const [name, setName] = useState(user?.name ?? '')
   const [isSaving, setIsSaving] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
 
   const save = async (patch: { name?: string; locale?: Locale }) => {
     if (!token) return
@@ -275,7 +277,29 @@ function ProfileTab(): ReactElement {
             {isSaving ? t('account.profile.saving') : t('account.profile.save')}
           </Button>
         </form>
+
+        <div className="pt-3 space-y-3 border-t border-[var(--l)]">
+          <TextField
+            label={t('account.profile.password')}
+            type="password"
+            value="••••••••••••"
+            readOnly
+            disabled
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setIsChangePasswordOpen(true)}
+          >
+            {t('account.profile.changePassword')}
+          </Button>
+        </div>
       </section>
+
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+      />
 
       <section className="space-y-2 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-3 md:p-4">
         <h2 className="text-sm text-[var(--m)]">{t('account.profile.language')}</h2>
