@@ -37,4 +37,24 @@ export const authRepo = {
     })
     return user
   },
+  findUserWithCredentialsById: async (id: string) => {
+    const user = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        credentials: true,
+      },
+    })
+    return user
+  },
+  updatePassword: async (userId: string, passwordHash: string) => {
+    return prisma.userCredentials.update({
+      where: { userId },
+      data: {
+        passwordHash,
+        passwordUpdatedAt: new Date(),
+      },
+    })
+  },
 }

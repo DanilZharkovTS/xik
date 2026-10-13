@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { authMiddleware } from './auth.middleware.js'
 import {
+  changePasswordSchema,
   loginSchema,
   registerSchema,
   requestPasswordResetSchema,
@@ -31,6 +32,13 @@ router.post(
   '/request-password-change',
   authMiddleware.verifyAccess,
   authController.requestPasswordChange
+)
+
+router.post(
+  '/password-change',
+  authMiddleware.verifyAccess,
+  validateBody(changePasswordSchema),
+  authController.changePassword
 )
 
 router.post(

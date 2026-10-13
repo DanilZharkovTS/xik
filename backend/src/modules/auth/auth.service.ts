@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import { authRepo } from './repos/auth.repo.js'
 import {
+  ChangePasswordDto,
   LoginDto,
   RegisterDto,
   RequestPasswordResetDto,
@@ -183,6 +184,31 @@ export const authService = {
     )
 
     return { response: { requestPasswordReset: true } }
+  },
+  changePassword: async (
+    userPayload: TokenPayload,
+    data: ChangePasswordDto
+  ) => {
+    const user = await authRepo.findUserWithCredentialsById(userPayload.id)
+
+    if (!user || user.deactivatedAt || !user.credentials) {
+      throw ApiError(404, 'NOT_FOUND', 'User not found')
+    }
+
+    const isCurrentPasswordCorrect = await bcrypt.compare(
+      data.currentPassword,
+      user.credentials.passwordHash
+    )
+
+    if (!isCurrentPasswordCorrect) {
+      throw ApiError(400, 'BAD_REQUEST', 'Current password is incorrect')
+    }
+
+    const newPasswordHash = await bcrypt.hash(data.newPassword, 10)
+
+    await authRepo.updatePassword(user.id, newPasswordHash)
+
+    return { response: { passwordChanged: true } }
   },
   resetPassword: async (data: ResetPasswordDto) => {
     return authService.requestPasswordReset(data)

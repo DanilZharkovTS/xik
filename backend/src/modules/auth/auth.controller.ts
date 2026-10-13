@@ -72,6 +72,17 @@ export const authController = {
       next(err)
     }
   },
+  changePassword: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await authService.changePassword(
+        req.user,
+        req.validData!.body
+      )
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
   resetPassword: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await authService.requestPasswordReset(req.validData!.body)
