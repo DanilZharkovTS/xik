@@ -153,10 +153,47 @@ export const authService = {
 
     return { response: { loggedOut: true } }
   },
+  sendPasswordResetEmail: async (
+    user: { email: string; locale: 'en' | 'es' | 'uk'; name?: string | null },
+    token: string
+  ) => {
+    const notificationsUrl =
+      process.env.NOTIFICATIONS_SERVICE_URL || 'http://localhost:3002'
+    const secret = process.env.NOTIFICATIONS_SERVICE_SECRET
+
+    const response = await fetch(
+      `${notificationsUrl.replace(/\/$/, '')}/api/email/password-reset`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(secret ? { service_token: secret } : {}),
+        },
+        body: JSON.stringify({
+          to: user.email,
+          token,
+          locale: user.locale,
+          userName: user.name ?? undefined,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(
+        `[Auth:PasswordReset] Failed to send email (${response.status}): ${errorText}`
+      )
+      throw ApiError(
+        502,
+        'NOTIFICATION_FAILED',
+        'Failed to send password reset email'
+      )
+    }
+  },
   requestPasswordReset: async (data: RequestPasswordResetDto) => {
     const user = await authRepo.findUserByEmail(data.email)
 
-    if (!user) {
+    if (!user || user.deactivatedAt) {
       throw ApiError(404, 'NOT_FOUND', 'User not found')
     }
 
@@ -170,20 +207,30 @@ export const authService = {
       expiresAt
     )
 
-    return { response: { requestPasswordReset: true } }
+    await authService.sendPasswordResetEmail(user, rawToken)
+
+    return { response: { passwordResetWasRequested: true } }
   },
   requestPasswordChange: async (user: TokenPayload) => {
+    const targetUser = await authRepo.findUserById(user.id)
+
+    if (!targetUser || targetUser.deactivatedAt) {
+      throw ApiError(404, 'NOT_FOUND', 'User not found')
+    }
+
     const { rawToken, tokenHash, expiresAt } =
       tokenService.generateResetPasswordToken()
 
     await tokenRepo.createActionToken(
-      user.id,
+      targetUser.id,
       'passwordReset',
       tokenHash,
       expiresAt
     )
 
-    return { response: { requestPasswordReset: true } }
+    await authService.sendPasswordResetEmail(targetUser, rawToken)
+
+    return { response: { passwordResetWasRequested: true } }
   },
   changePassword: async (
     userPayload: TokenPayload,

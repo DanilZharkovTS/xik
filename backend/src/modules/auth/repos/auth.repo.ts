@@ -26,6 +26,14 @@ export const authRepo = {
     })
     return user
   },
+  findUserById: async (id: string) => {
+    const user = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    })
+    return user
+  },
   findUserWithCredentialsByEmail: async (email: string) => {
     const user = await prisma.user.findUnique({
       where: {
