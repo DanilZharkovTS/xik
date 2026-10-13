@@ -1,9 +1,10 @@
 import resend from '../../providers/resend'
-import { renderEmail } from '../../templates/emails/render'
+import { renderEmail, renderPasswordResetEmail } from '../../templates/emails/render'
 import type { EmailKind } from '../../templates/emails/copy'
 import {
   CancelSubscriptionEmailDto,
   DeleteSubscriptionEmailDto,
+  PasswordResetEmailDto,
   PaymentAttemptFailedEmailDto,
   SendDeviceKeyEmailDto,
   SubscriptionStartedEmailDto,
@@ -45,4 +46,30 @@ export const emailService = {
   sendPaymentAttemptFailed: (data: PaymentAttemptFailedEmailDto, idempotencyKey?: string) => send('paymentFailed', data, idempotencyKey),
   sendSubscriptionStarted: (data: SubscriptionStartedEmailDto, idempotencyKey?: string) =>
     send('subscriptionStarted', { ...data, deviceKey: data.deviceKey ?? data.device_key }, idempotencyKey),
+  sendPasswordReset: async (data: PasswordResetEmailDto, idempotencyKey?: string) => {
+    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3001').replace(/\/$/, '')
+    const resetUrl = `${frontendUrl}/reset-password?token=${encodeURIComponent(data.token)}`
+
+    const rendered = renderPasswordResetEmail(data.locale, {
+      userName: data.userName,
+      resetUrl,
+    })
+
+    const email = await resend.emails.send(
+      {
+        from: process.env.EMAIL_FROM! || 'onboarding@resend.dev',
+        to: data.to,
+        subject: rendered.subject,
+        html: rendered.html,
+        text: rendered.text,
+      },
+      idempotencyKey ? { idempotencyKey } : undefined
+    )
+
+    if (email.error) {
+      throw ApiError(400, email.error.message, 'EMAIL_SEND_FAILED')
+    }
+
+    return { response: { email } }
+  },
 }

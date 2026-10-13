@@ -201,3 +201,51 @@ export const COPY: Record<EmailKind, Record<EmailLocale, Copy>> = {
     },
   },
 }
+
+export const PASSWORD_RESET_COPY = {
+  en: {
+    subject: 'XIK — Reset your password',
+    title: 'Reset your password',
+    heading: 'Reset your password',
+    intro:
+      'We received a request to reset your password. Click the button below to set a new password:',
+    buttonText: 'Reset Password',
+    alternateLinkText:
+      'If the button above does not work, copy and paste this link into your browser:',
+    warning:
+      'This link is valid for 24 hours. If you did not request a password reset, you can safely ignore this email.',
+    footerNote: 'If you did not request this email, no action is required.',
+    text: (name: string, url: string) =>
+      `Hi ${name},\n\nWe received a request to reset your password. You can reset your password using the following link:\n\n${url}\n\nThis link is valid for 24 hours. If you did not request this, you can safely ignore this email.`,
+  },
+  es: {
+    subject: 'XIK — Restablecer su contraseña',
+    title: 'Restablecer su contraseña',
+    heading: 'Restablecer su contraseña',
+    intro:
+      'Hemos recibido una solicitud para restablecer su contraseña. Haga clic en el botón a continuación para elegir una nueva contraseña:',
+    buttonText: 'Restablecer contraseña',
+    alternateLinkText:
+      'Si el botón no funciona, copie y pegue el siguiente enlace en su navegador:',
+    warning:
+      'Este enlace es válido durante 24 horas. Si no solicitó restablecer su contraseña, puede ignorar este correo de forma segura.',
+    footerNote: 'Si no solicitó este correo, no es necesario realizar ninguna acción.',
+    text: (name: string, url: string) =>
+      `Hola, ${name}:\n\nHemos recibido una solicitud para restablecer su contraseña. Puede restablecerla usando el siguiente enlace:\n\n${url}\n\nEste enlace es válido durante 24 horas. Si no lo solicitó, puede ignorar este correo con tranquilidad.`,
+  },
+  uk: {
+    subject: 'XIK — Скидання пароля',
+    title: 'Скидання пароля',
+    heading: 'Скидання пароля',
+    intro:
+      'Ми отримали запит на скидання вашого пароля. Натисніть кнопку нижче, щоб встановити новий пароль:',
+    buttonText: 'Скинути пароль',
+    alternateLinkText:
+      'Якщо кнопка не працює, скопіюйте та вставте це посилання у браузер:',
+    warning:
+      'Посилання дійсне протягом 24 годин. Якщо ви не надсилали цей запит, просто проігноруйте цей лист.',
+    footerNote: 'Якщо ви не надсилали цей запит, жодних дій виконувати не потрібно.',
+    text: (name: string, url: string) =>
+      `Вітаємо, ${name}!\n\nМи отримали запит на скидання вашого пароля. Ви можете встановити новий пароль за посиланням:\n\n${url}\n\nПосилання дійсне протягом 24 годин. Якщо ви не запитували зміну пароля, просто проігноруйте цей лист.`,
+  },
+} as const
