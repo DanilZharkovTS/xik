@@ -13,6 +13,7 @@ const LOCALIZED_ROOTS = [
   'dashboard',
   'account',
   'blog',
+  'request-password-reset',
 ]
 
 const nextConfig: NextConfig = {

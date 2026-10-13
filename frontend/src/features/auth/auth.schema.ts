@@ -28,8 +28,16 @@ export const loginSchema = z.object({
     .min(8, 'auth.err.passwordShort'),
 })
 
+export const requestPasswordResetSchema = z.object({
+  email: z.email('auth.err.email'),
+})
+
 // DTO
 
 export type RegisterDto = z.infer<typeof registerSchema>
 
 export type LoginDto = z.infer<typeof loginSchema>
+
+export type RequestPasswordResetDto = z.infer<
+  typeof requestPasswordResetSchema
+>

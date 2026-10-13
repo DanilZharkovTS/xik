@@ -3,7 +3,7 @@ import type { Locale } from './i18n-store'
 
 // Розділи, що не є публічним сайтом: мова там береться не з адреси, а з вибору користувача.
 const WORKSPACE_PREFIXES = ['/admin', '/outreach', '/dashboard'] as const
-const ACCOUNT_PREFIXES = ['/auth', '/account'] as const
+const ACCOUNT_PREFIXES = ['/auth', '/account', '/request-password-reset'] as const
 
 const startsWithSegment = (path: string, prefix: string): boolean =>
   path === prefix || path.startsWith(`${prefix}/`)

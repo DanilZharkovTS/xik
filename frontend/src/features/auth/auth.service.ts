@@ -1,4 +1,8 @@
-import { LoginDto, RegisterDto } from './auth.schema'
+import {
+  LoginDto,
+  RegisterDto,
+  RequestPasswordResetDto,
+} from './auth.schema'
 import { api, refreshSession } from '@/src/shared/api/axios'
 
 export const authService = {
@@ -8,6 +12,10 @@ export const authService = {
   },
   login: async (data: LoginDto) => {
     const res = await api.post('/auth/login', data)
+    return res.data
+  },
+  requestPasswordReset: async (data: RequestPasswordResetDto) => {
+    const res = await api.post('/auth/request-password-reset', data)
     return res.data
   },
   refresh: refreshSession,

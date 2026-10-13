@@ -185,6 +185,17 @@ export const AuthForm: React.FC = () => {
           />
         )}
 
+        {!isRegister && (
+          <div className="flex justify-end">
+            <Link
+              href={up('/request-password-reset')}
+              className="text-xs text-[var(--m)] hover:text-[var(--t)] transition-colors"
+            >
+              {t('auth.forgotPassword')}
+            </Link>
+          </div>
+        )}
+
         <Button type="submit" className="min-h-11 w-full" disabled={isLoading}>
           {isLoading ? t('auth.wait') : isRegister ? t('auth.createAccount') : t('auth.signIn')}
         </Button>
