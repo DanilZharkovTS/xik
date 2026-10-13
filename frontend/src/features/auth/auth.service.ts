@@ -2,6 +2,7 @@ import {
   LoginDto,
   RegisterDto,
   RequestPasswordResetDto,
+  ResetPasswordDto,
 } from './auth.schema'
 import { api, refreshSession } from '@/src/shared/api/axios'
 
@@ -16,6 +17,10 @@ export const authService = {
   },
   requestPasswordReset: async (data: RequestPasswordResetDto) => {
     const res = await api.post('/auth/request-password-reset', data)
+    return res.data
+  },
+  resetPassword: async (data: ResetPasswordDto) => {
+    const res = await api.post('/auth/reset-password', data)
     return res.data
   },
   refresh: refreshSession,
