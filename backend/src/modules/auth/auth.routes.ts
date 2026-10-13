@@ -3,6 +3,7 @@ import { authMiddleware } from './auth.middleware.js'
 import {
   loginSchema,
   registerSchema,
+  requestPasswordResetSchema,
   resetPasswordSchema,
 } from './auth.schema.js'
 import { authController } from './auth.controller.js'
@@ -21,9 +22,21 @@ router.post(
 )
 
 router.post(
+  '/request-password-reset',
+  validateBody(requestPasswordResetSchema),
+  authController.requestPasswordReset
+)
+
+router.post(
+  '/request-password-change',
+  authMiddleware.verifyAccess,
+  authController.requestPasswordChange
+)
+
+router.post(
   '/reset-password',
   validateBody(resetPasswordSchema),
-  authController.resetPassword
+  authController.requestPasswordReset
 )
 
 router.post(
