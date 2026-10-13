@@ -49,7 +49,7 @@ router.post(
 )
 
 router.post(
-  '/reset-password',
+  '/password-reset',
   validateBody(passwordResetEmailSchema),
   emailController.sendPasswordReset
 )
