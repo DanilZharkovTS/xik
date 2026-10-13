@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../support/test'
 
 import { THEME_STORAGE_KEY } from '../../src/features/theme/theme-config'
 
@@ -17,9 +17,9 @@ test.describe('manual monochrome theme', () => {
     await expect(toggle).toHaveAttribute('aria-pressed', 'false')
     await expect(page.locator('body')).toHaveCSS(
       'background-color',
-      'rgb(5, 5, 5)',
+      'rgb(0, 0, 0)',
     )
-    await expect(toggle).toHaveCSS('border-top-width', '4px')
+    await expect(toggle).toHaveCSS('border-top-width', '0px')
 
     await toggle.click()
 
@@ -31,11 +31,11 @@ test.describe('manual monochrome theme', () => {
     ).toHaveAttribute('aria-pressed', 'true')
     await expect(page.locator('body')).toHaveCSS(
       'background-color',
-      'rgb(250, 250, 250)',
+      'rgb(255, 255, 255)',
     )
     await expect(page.locator('body')).toHaveCSS(
       'color',
-      'rgb(5, 5, 5)',
+      'rgb(29, 29, 31)',
     )
     await expect
       .poll(() =>
@@ -98,11 +98,11 @@ test.describe('manual monochrome theme', () => {
     )
     await expect(page.locator('body')).toHaveCSS(
       'background-color',
-      'rgb(250, 250, 250)',
+      'rgb(255, 255, 255)',
     )
     await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
       'content',
-      '#fafafa',
+      '#ffffff',
     )
   })
 })

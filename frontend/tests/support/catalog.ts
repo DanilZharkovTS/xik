@@ -7,10 +7,7 @@ const products = catalog.filter((item) => item.kind === 'product')
 const agents = catalog.filter((item) => item.kind === 'agent')
 
 export const PRODUCTS = products.map((item) => ({
-  slug: item.slug,
-  name: item.name,
-  description: item.description,
-  features: item.features,
+  ...item,
 }))
 
 export const MODERN_PRODUCTS = products.map((item) => ({ slug: item.slug, title: item.name }))

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../support/test'
 
 import { collectRuntimeErrors } from '../support/runtime'
 
@@ -9,10 +9,7 @@ test.describe('homepage animation lifecycle', () => {
     const runtimeErrors = collectRuntimeErrors(page)
 
     await page.goto('/')
-    await expect(page.locator('[data-system-boot]')).toHaveAttribute(
-      'data-boot-state',
-      'ready',
-    )
+    await expect(page.locator('[data-theme-toggle]')).toBeVisible()
 
     await page.evaluate(() => {
       window.scrollTo({
@@ -20,10 +17,7 @@ test.describe('homepage animation lifecycle', () => {
         top: document.documentElement.scrollHeight,
       })
     })
-    await expect(page.locator('[data-scroll-chomper]')).toHaveAttribute(
-      'data-complete',
-      'true',
-    )
+    await expect(page.locator('#about')).toBeVisible()
     await page.waitForTimeout(3_200)
 
     const runningAnimations = await page.evaluate(() => {
@@ -33,7 +27,7 @@ test.describe('homepage animation lifecycle', () => {
           (animation) =>
             animation instanceof CSSAnimation &&
             animation.playState === 'running' &&
-            !animation.animationName.includes('xik-logo-cursor'),
+            animation.animationName !== 'logo-blink',
         )
         .map((animation) => (animation as CSSAnimation).animationName)
     })
@@ -46,10 +40,7 @@ test.describe('homepage animation lifecycle', () => {
     page,
   }) => {
     await page.goto('/')
-    await expect(page.locator('[data-system-boot]')).toHaveAttribute(
-      'data-boot-state',
-      'ready',
-    )
+    await expect(page.locator('[data-theme-toggle]')).toBeVisible()
 
     const supportsLongTasks = await page.evaluate(() => {
       const supported = PerformanceObserver.supportedEntryTypes.includes(

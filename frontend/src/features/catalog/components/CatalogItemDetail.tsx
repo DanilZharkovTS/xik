@@ -35,9 +35,10 @@ interface CatalogItemDetailProps {
   related?: RelatedItem[]
   // Є лише в продуктів, придатних до оплати.
   purchase?: PurchaseInfo
+  priceLabel?: string
 }
 
-export function CatalogItemDetail({ item, related = [], purchase }: CatalogItemDetailProps) {
+export function CatalogItemDetail({ item, related = [], purchase, priceLabel = '' }: CatalogItemDetailProps) {
   const { t } = useI18n()
   const href = useLocalePath()
   const { architecture } = item
@@ -298,6 +299,8 @@ export function CatalogItemDetail({ item, related = [], purchase }: CatalogItemD
                 <div className="text-2xl font-bold tracking-tight text-[var(--t)] sm:text-3xl">
                   {purchase
                     ? purchase.priceLabel || t('detail.subscription')
+                    : priceLabel
+                    ? priceLabel
                     : item.type === 'product'
                     ? t('detail.license')
                     : item.type === 'agent'
@@ -309,7 +312,7 @@ export function CatalogItemDetail({ item, related = [], purchase }: CatalogItemD
                     ? purchase.priceLabel
                       ? t('detail.billed')
                       : t('detail.priceAtCheckout')
-                    : t('detail.available')}
+                    : priceLabel ? t('detail.billed') : t('detail.available')}
                 </p>
               </div>
 
@@ -338,7 +341,7 @@ export function CatalogItemDetail({ item, related = [], purchase }: CatalogItemD
                   className={
                     purchase
                       ? 'inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-[var(--l)] bg-[var(--bg)] px-6 text-sm font-medium text-[var(--t)] transition-colors hover:bg-[var(--s)]'
-                      : 'inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--b)] px-6 text-sm font-medium text-white shadow-sm transition-all hover:brightness-105 active:scale-[0.99]'
+                      : 'inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--b)] px-6 text-sm font-medium text-[var(--bg)] shadow-sm transition-all hover:brightness-105 active:scale-[0.99]'
                   }
                 >
                   {purchase ? t('detail.ask') : t('detail.request')}

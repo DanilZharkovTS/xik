@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../support/test'
 
 import { PRODUCTS } from '../support/catalog'
 import { collectRuntimeErrors } from '../support/runtime'
@@ -6,18 +6,18 @@ import { collectRuntimeErrors } from '../support/runtime'
 const PUBLIC_PAGES = [
   {
     path: '/',
-    title: 'XIK — AI Tools With Pixel Soul',
-    heading: 'AI tools built by a dev. Powered by curiosity.',
+    title: 'XIK — AI Products, Agents & Engineering Services',
+    heading: 'Building things that should exist.',
   },
   {
     path: '/products',
-    title: 'AI Products | XIK',
-    heading: 'AI Products',
+    title: 'AI Software Products | XIK',
+    heading: 'AI Software Products',
   },
   {
     path: '/about',
-    title: 'About Us | XIK',
-    heading: 'About Us',
+    title: 'XIK — AI Products, Agents & Engineering Services',
+    heading: 'Building things that should exist.',
   },
 ] as const
 
@@ -60,9 +60,7 @@ test.describe('public routes and navigation', () => {
         }),
       ).toBeVisible()
       await expect(page.getByText(product.description)).toBeVisible()
-      await expect(page.getByRole('list').last()).toContainText(
-        product.features[0],
-      )
+      await expect(page.getByRole('heading', { name: product.features[0], exact: true })).toBeVisible()
       expect(runtimeErrors).toEqual([])
     })
   }
@@ -78,7 +76,7 @@ test.describe('public routes and navigation', () => {
     await expect(
       page.getByRole('heading', { level: 1, name: '404' }),
     ).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Go Home' })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: 'Go home' })).toHaveAttribute(
       'href',
       '/',
     )
@@ -103,10 +101,10 @@ test.describe('public routes and navigation', () => {
       name: 'Products',
     })
 
-    await expect(productsLink).not.toHaveAttribute('aria-current')
+    await expect(productsLink).toHaveAttribute('href', '#products')
     await productsLink.click()
-    await expect(page).toHaveURL('/products')
-    await expect(productsLink).toHaveAttribute('aria-current', 'page')
+    await expect(page).toHaveURL('/#products')
+    await expect(page.locator('#products')).toBeVisible()
   })
 
   test('skip link moves keyboard focus to main content', async ({
@@ -130,7 +128,7 @@ test.describe('public routes and navigation', () => {
   }) => {
     await page.goto('/products')
 
-    const cards = page.locator('main article')
+    const cards = page.locator('main li').filter({ has: page.getByRole('heading', { level: 2 }) })
 
     await expect(cards).toHaveCount(PRODUCTS.length)
 
@@ -143,7 +141,7 @@ test.describe('public routes and navigation', () => {
           name: product.name,
         }),
       ).toBeVisible()
-      await expect(card.getByRole('link', { name: 'View Product' })).toHaveAttribute(
+      await expect(card.getByRole('link')).toHaveAttribute(
         'href',
         `/products/${product.slug}`,
       )

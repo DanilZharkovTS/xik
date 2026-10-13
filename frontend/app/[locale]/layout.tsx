@@ -3,7 +3,7 @@ import '../globals.css'
 import { notFound } from 'next/navigation'
 import Script from 'next/script'
 import { siteConfig, siteText } from '@/src/config/site'
-import { DEFAULT_LOCALE, LOCALES, isLocale } from '@/src/shared/i18n/i18n-store'
+import { LOCALES, isLocale } from '@/src/shared/i18n/i18n-store'
 import type { Locale } from '@/src/shared/i18n/i18n-store'
 import { LocaleProvider } from '@/src/shared/i18n/locale-provider'
 import {
@@ -36,7 +36,8 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale: raw } = await params
-  const locale: Locale = isLocale(raw) ? raw : DEFAULT_LOCALE
+  if (!isLocale(raw)) notFound()
+  const locale: Locale = raw
   const text = siteText(locale)
 
   return {

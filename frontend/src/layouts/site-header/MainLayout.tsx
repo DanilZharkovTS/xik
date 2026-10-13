@@ -1,5 +1,6 @@
 'use client'
 
+import { PublicChatWidget } from '@/src/features/public-chat/components/public-chat-widget'
 import { AppProvider } from '@/src/providers/AppProvider'
 import { JsonLd } from '@/src/shared/seo/json-ld'
 import { SiteHeader } from './site-header'
@@ -114,6 +115,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
 
       {isWorkspace && <AdminTabBar />}
       {!isWorkspace && <ModernFooter />}
+      <PublicChatWidget />
       <Toaster richColors position="bottom-right" expand={false} />
     </>
   )

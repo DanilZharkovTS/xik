@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../support/test'
 
 const user = { id: 'buyer-test', email: 'buyer@example.test', name: 'Buyer', role: 'user', locale: 'en', sessionId: 'session-test' }
 

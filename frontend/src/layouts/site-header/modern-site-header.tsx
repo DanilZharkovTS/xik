@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import useAuthStore from '@/src/features/auth/store'
@@ -14,6 +14,27 @@ export function ModernSiteHeader() {
   const lp = useLocalePath()
   const up = useUrlLocalePath()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const mobileDialog = useRef<HTMLDialogElement>(null)
+  const menuTrigger = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    const dialog = mobileDialog.current
+    if (!dialog || !mobileOpen) return
+    const trigger = menuTrigger.current
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    dialog.showModal()
+    dialog.querySelector<HTMLButtonElement>('button')?.focus()
+    const media = window.matchMedia('(min-width: 768px)')
+    const closeOnDesktop = () => { if (media.matches) dialog.close() }
+    media.addEventListener('change', closeOnDesktop)
+    return () => {
+      media.removeEventListener('change', closeOnDesktop)
+      dialog.close()
+      document.body.style.overflow = overflow
+      trigger?.focus()
+    }
+  }, [mobileOpen])
   const pathname = usePathname()
   const isHome = splitLocale(pathname).path === '/'
 
@@ -35,8 +56,8 @@ export function ModernSiteHeader() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 h-[52px] border-b border-[var(--l)] bg-[var(--g)] backdrop-blur-xl transition-colors">
-        <div className="mx-auto flex h-full max-w-[1180px] items-center gap-5 px-6">
+      <header className="fixed inset-x-0 top-0 z-50 h-[52px] border-b border-[var(--l)] bg-[var(--bg)] transition-colors">
+        <div className="mx-auto flex h-full max-w-[1180px] items-center gap-3 px-4 sm:gap-5 sm:px-6">
           <Link
             href={lp('/')}
             className="mr-auto shrink-0 whitespace-nowrap text-[19px] font-[750] tracking-tight text-[var(--t)] transition-opacity hover:opacity-80"
@@ -85,7 +106,10 @@ export function ModernSiteHeader() {
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--l)] text-[var(--t)] md:hidden"
-              aria-label={t('site.menu')}
+              ref={menuTrigger}
+              aria-controls="mobile-navigation"
+              aria-expanded={mobileOpen}
+              aria-label={t('site.menu.open')}
             >
               {mobileOpen ? '✕' : '☰'}
             </button>
@@ -94,11 +118,27 @@ export function ModernSiteHeader() {
       </header>
 
       {/* Mobile Menu Drawer */}
-      <div
-        className={`fixed inset-x-0 top-[52px] z-40 border-b border-[var(--l)] bg-[var(--bg)] px-6 py-6 transition-all duration-300 md:hidden ${
-          mobileOpen ? 'block opacity-100' : 'hidden opacity-0'
-        }`}
+      <dialog
+        ref={mobileDialog}
+        id="mobile-navigation"
+        aria-label={t('site.nav.primary')}
+        onClose={() => setMobileOpen(false)}
+        onKeyDown={(event) => {
+          if (event.key !== 'Tab') return
+          const items = event.currentTarget.querySelectorAll<HTMLElement>('button, a[href]')
+          const first = items[0]
+          const last = items[items.length - 1]
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault()
+            last?.focus()
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault()
+            first?.focus()
+          }
+        }}
+        className="fixed inset-x-0 top-[52px] m-0 max-h-[calc(100dvh-52px)] max-w-none w-full overflow-auto border-b border-[var(--l)] bg-[var(--bg)] px-6 py-6 text-[var(--t)] backdrop:bg-black/40 md:hidden"
       >
+        <button type="button" onClick={closeMobile} aria-label={t('site.menu.close')} className="ml-auto block rounded-lg border border-[var(--l)] px-3 py-2">✕</button>
         <div className="flex flex-col text-sm font-medium text-[var(--t)]">
           {navLinks.map((link) => (
             <Link
@@ -129,7 +169,7 @@ export function ModernSiteHeader() {
             </Link>
           )}
         </div>
-      </div>
+      </dialog>
     </>
   )
 }
