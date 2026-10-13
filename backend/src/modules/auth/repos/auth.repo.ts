@@ -1,4 +1,4 @@
-import { prisma } from '../../../shared/database/prisma.js'
+import { prisma, type DbClient } from '../../../shared/database/prisma.js'
 import { RegisterDto } from '.././auth.schema.js'
 
 export const authRepo = {
@@ -56,8 +56,12 @@ export const authRepo = {
     })
     return user
   },
-  updatePassword: async (userId: string, passwordHash: string) => {
-    return prisma.userCredentials.update({
+  updatePassword: async (
+    userId: string,
+    passwordHash: string,
+    db: DbClient = prisma
+  ) => {
+    return db.userCredentials.update({
       where: { userId },
       data: {
         passwordHash,

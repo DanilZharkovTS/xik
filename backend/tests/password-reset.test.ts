@@ -98,4 +98,123 @@ describe('password reset & change notification flow', () => {
     expect(res.status).toBe(502)
     expect(res.body.code).toBe('NOTIFICATION_FAILED')
   })
+
+  it('reset-password validates matching newPassword and confirmNewPassword', async () => {
+    const res = await api()
+      .post('/api/auth/reset-password')
+      .send({
+        token: 'any-token',
+        newPassword: 'password-abc-1',
+        confirmNewPassword: 'password-abc-2',
+      })
+
+    expect(res.status).toBe(400)
+    expect(JSON.stringify(res.body)).toContain('Passwords do not match')
+  })
+
+  it('reset-password rejects invalid or missing token', async () => {
+    const res = await api()
+      .post('/api/auth/reset-password')
+      .send({
+        token: 'nonexistent-token',
+        newPassword: 'new-valid-pass-123',
+        confirmNewPassword: 'new-valid-pass-123',
+      })
+
+    expect(res.status).toBe(400)
+    expect(res.body.message).toContain('Token is invalid or expired')
+  })
+
+  it('reset-password successfully updates password, consumes token, and allows login with new password', async () => {
+    const user = await createUser('user', 'reset-success@example.com', 'old-password-123')
+
+    // Request reset to get raw token
+    let rawResetToken = ''
+    const fetchMock = vi.fn().mockImplementation((_url, options) => {
+      const parsed = JSON.parse(options.body as string)
+      rawResetToken = parsed.token
+      return Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }))
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await api()
+      .post('/api/auth/request-password-reset')
+      .send({ email: 'reset-success@example.com' })
+
+    expect(rawResetToken).toBeTruthy()
+
+    // Try same password as current -> should fail 400
+    const sameRes = await api()
+      .post('/api/auth/reset-password')
+      .send({
+        token: rawResetToken,
+        newPassword: 'old-password-123',
+        confirmNewPassword: 'old-password-123',
+      })
+    expect(sameRes.status).toBe(400)
+    expect(sameRes.body.message).toContain('New password must be different from current password')
+
+    // Reset with new password -> should succeed 200
+    const successRes = await api()
+      .post('/api/auth/reset-password')
+      .send({
+        token: rawResetToken,
+        newPassword: 'brand-new-password-456',
+        confirmNewPassword: 'brand-new-password-456',
+      })
+    expect(successRes.status).toBe(200)
+    expect(successRes.body).toEqual({ passwordChanged: true })
+
+    // Token must now be consumed
+    const consumedToken = await prisma.actionToken.findFirst({
+      where: { userId: user.id, type: 'passwordReset' },
+    })
+    expect(consumedToken?.usedAt).not.toBeNull()
+
+    // Using the same token again -> should fail 400
+    const reusedRes = await api()
+      .post('/api/auth/reset-password')
+      .send({
+        token: rawResetToken,
+        newPassword: 'another-new-password-789',
+        confirmNewPassword: 'another-new-password-789',
+      })
+    expect(reusedRes.status).toBe(400)
+    expect(reusedRes.body.message).toContain('Token is invalid or expired')
+
+    // Login with old password fails, new password succeeds
+    const oldLogin = await api().post('/api/auth/login').send({
+      email: 'reset-success@example.com',
+      password: 'old-password-123',
+    })
+    expect(oldLogin.status).toBe(401)
+
+    const newLogin = await api().post('/api/auth/login').send({
+      email: 'reset-success@example.com',
+      password: 'brand-new-password-456',
+    })
+    expect(newLogin.status).toBe(200)
+  })
+
+  it('reset-password rejects expired tokens', async () => {
+    const user = await createUser('user', 'expired-test@example.com', 'old-password-123')
+    const expiredToken = await prisma.actionToken.create({
+      data: {
+        userId: user.id,
+        type: 'passwordReset',
+        tokenHash: 'some-expired-hash',
+        expiresAt: new Date(Date.now() - 60_000), // expired 1 min ago
+      },
+    })
+
+    const res = await api()
+      .post('/api/auth/reset-password')
+      .send({
+        token: 'some-expired-raw-token',
+        newPassword: 'brand-new-password-456',
+        confirmNewPassword: 'brand-new-password-456',
+      })
+
+    expect(res.status).toBe(400)
+  })
 })

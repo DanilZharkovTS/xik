@@ -44,7 +44,8 @@ router.post(
 router.post(
   '/reset-password',
   validateBody(resetPasswordSchema),
-  authController.requestPasswordReset
+  authMiddleware.hashTokens('token'),
+  authController.resetPassword
 )
 
 router.post(

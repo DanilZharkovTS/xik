@@ -257,7 +257,48 @@ export const authService = {
 
     return { response: { passwordChanged: true } }
   },
-  resetPassword: async (data: ResetPasswordDto) => {
-    return authService.requestPasswordReset(data)
+  resetPassword: async (data: ResetPasswordDto, tokenHash: string) => {
+    const actionToken = await tokenRepo.findActionTokenByHash(
+      tokenHash,
+      'passwordReset'
+    )
+
+    if (
+      !actionToken ||
+      actionToken.type !== 'passwordReset' ||
+      actionToken.usedAt ||
+      actionToken.expiresAt < new Date()
+    ) {
+      throw ApiError(400, 'BAD_REQUEST', 'Token is invalid or expired')
+    }
+
+    const user = await authRepo.findUserWithCredentialsById(actionToken.userId)
+
+    if (!user || user.deactivatedAt || !user.credentials) {
+      throw ApiError(404, 'NOT_FOUND', 'User not found')
+    }
+
+    const isSameAsCurrent = await bcrypt.compare(
+      data.newPassword,
+      user.credentials.passwordHash
+    )
+
+    if (isSameAsCurrent) {
+      throw ApiError(
+        400,
+        'BAD_REQUEST',
+        'New password must be different from current password'
+      )
+    }
+
+    const newPasswordHash = await bcrypt.hash(data.newPassword, 10)
+
+    await prisma.$transaction(async (tx) => {
+      await authRepo.updatePassword(user.id, newPasswordHash, tx)
+      await tokenRepo.consumeActionToken(actionToken.id, tx)
+      await sessionRepo.revokeAllForUser(user.id, tx)
+    })
+
+    return { response: { passwordChanged: true } }
   },
 }
