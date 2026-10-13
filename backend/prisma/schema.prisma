@@ -209,7 +209,7 @@ model ActionToken {
 
   user User @relation(fields: [userId], references: [id])
 
-  @@unique([userId, type])
+  @@index([userId])
   @@index([expiresAt])
 }
 

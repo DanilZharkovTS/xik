@@ -48,4 +48,12 @@ export const authController = {
       next(err)
     }
   },
+  resetPassword: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await authService.resetPassword(req.validData!.body)
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
 }

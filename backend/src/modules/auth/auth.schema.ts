@@ -19,7 +19,12 @@ export const loginSchema = z.object({
   password: z.string().min(8),
 })
 
+export const resetPasswordSchema = z.object({
+  email: z.email(),
+})
+
 //dto
 
 export type RegisterDto = z.infer<typeof registerSchema>
 export type LoginDto = z.infer<typeof loginSchema>
+export type ResetPasswordDto = z.infer<typeof resetPasswordSchema>

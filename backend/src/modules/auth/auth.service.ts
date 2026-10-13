@@ -1,8 +1,9 @@
 import bcrypt from 'bcrypt'
 import { authRepo } from './repos/auth.repo.js'
-import { LoginDto, RegisterDto } from './auth.schema.js'
+import { LoginDto, RegisterDto, ResetPasswordDto } from './auth.schema.js'
 import { tokenService } from '../../shared/services/token.service.js'
 import { sessionRepo } from './repos/session.repo.js'
+import { tokenRepo } from './repos/token.repo.js'
 import { ApiError } from '../../shared/utils/ApiError.js'
 import { prisma } from '../../shared/database/prisma.js'
 
@@ -144,5 +145,24 @@ export const authService = {
     await sessionRepo.revokeSessionWithRefreshes(refresh.session.id)
 
     return { response: { loggedOut: true } }
+  },
+  resetPassword: async (data: ResetPasswordDto) => {
+    const user = await authRepo.findUserByEmail(data.email)
+
+    if (!user) {
+      throw ApiError(404, 'NOT_FOUND', 'User not found')
+    }
+
+    const { rawToken, tokenHash, expiresAt } =
+      tokenService.generateResetPasswordToken()
+
+    await tokenRepo.createActionToken(
+      user.id,
+      'passwordReset',
+      tokenHash,
+      expiresAt
+    )
+
+    return { response: { resetPassword: true } }
   },
 }
