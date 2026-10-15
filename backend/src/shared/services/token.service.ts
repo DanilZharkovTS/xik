@@ -33,6 +33,17 @@ export const tokenService = {
       expiresAt,
     }
   },
+  generateResetPasswordToken: (ttlSeconds = 60 * 60 * 24) => {
+    const rawToken = tokenService.generateRandom()
+    const tokenHash = tokenService.hash(rawToken)
+    const expiresAt = new Date(Date.now() + ttlSeconds * 1000)
+
+    return {
+      rawToken,
+      tokenHash,
+      expiresAt,
+    }
+  },
   generateRandom: () => {
     return randomBytes(32).toString('hex')
   },

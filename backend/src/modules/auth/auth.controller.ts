@@ -48,4 +48,50 @@ export const authController = {
       next(err)
     }
   },
+  requestPasswordReset: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const result = await authService.requestPasswordReset(req.validData!.body)
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
+  requestPasswordChange: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const result = await authService.requestPasswordChange(req.user)
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
+  changePassword: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await authService.changePassword(
+        req.user,
+        req.validData!.body
+      )
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
+  resetPassword: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await authService.resetPassword(
+        req.validData!.body,
+        req.tokens!.token
+      )
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
 }

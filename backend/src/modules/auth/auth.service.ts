@@ -1,10 +1,18 @@
 import bcrypt from 'bcrypt'
 import { authRepo } from './repos/auth.repo.js'
-import { LoginDto, RegisterDto } from './auth.schema.js'
+import {
+  ChangePasswordDto,
+  LoginDto,
+  RegisterDto,
+  RequestPasswordResetDto,
+  ResetPasswordDto,
+} from './auth.schema.js'
 import { tokenService } from '../../shared/services/token.service.js'
 import { sessionRepo } from './repos/session.repo.js'
+import { tokenRepo } from './repos/token.repo.js'
 import { ApiError } from '../../shared/utils/ApiError.js'
 import { prisma } from '../../shared/database/prisma.js'
+import type { TokenPayload } from './auth.types.js'
 
 export const authService = {
   register: async (data: RegisterDto) => {
@@ -144,5 +152,192 @@ export const authService = {
     await sessionRepo.revokeSessionWithRefreshes(refresh.session.id)
 
     return { response: { loggedOut: true } }
+  },
+  sendPasswordResetEmail: async (
+    user: { email: string; locale: 'en' | 'es' | 'uk'; name?: string | null },
+    token: string
+  ) => {
+    const notificationsUrl =
+      process.env.NOTIFICATIONS_SERVICE_URL || 'http://localhost:3002'
+    const secret = process.env.NOTIFICATIONS_SERVICE_SECRET
+
+    const response = await fetch(
+      `${notificationsUrl.replace(/\/$/, '')}/api/email/password-reset`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(secret ? { service_token: secret } : {}),
+        },
+        body: JSON.stringify({
+          to: user.email,
+          token,
+          locale: user.locale,
+          userName: user.name ?? undefined,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(
+        `[Auth:PasswordReset] Failed to send email (${response.status}): ${errorText}`
+      )
+      throw ApiError(
+        502,
+        'NOTIFICATION_FAILED',
+        'Failed to send password reset email'
+      )
+    }
+  },
+  sendPasswordChangedEmail: async (
+    user: { email: string; locale: 'en' | 'es' | 'uk'; name?: string | null }
+  ) => {
+    const notificationsUrl =
+      process.env.NOTIFICATIONS_SERVICE_URL || 'http://localhost:3002'
+    const secret = process.env.NOTIFICATIONS_SERVICE_SECRET
+
+    const response = await fetch(
+      `${notificationsUrl.replace(/\/$/, '')}/api/email/password-changed`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(secret ? { service_token: secret } : {}),
+        },
+        body: JSON.stringify({
+          to: user.email,
+          locale: user.locale,
+          userName: user.name ?? undefined,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(
+        `[Auth:PasswordChanged] Failed to send email (${response.status}): ${errorText}`
+      )
+      throw ApiError(
+        502,
+        'NOTIFICATION_FAILED',
+        'Failed to send password changed email'
+      )
+    }
+  },
+  requestPasswordReset: async (data: RequestPasswordResetDto) => {
+    const user = await authRepo.findUserByEmail(data.email)
+
+    if (!user || user.deactivatedAt) {
+      throw ApiError(404, 'NOT_FOUND', 'User not found')
+    }
+
+    const { rawToken, tokenHash, expiresAt } =
+      tokenService.generateResetPasswordToken()
+
+    await tokenRepo.createActionToken(
+      user.id,
+      'passwordReset',
+      tokenHash,
+      expiresAt
+    )
+
+    await authService.sendPasswordResetEmail(user, rawToken)
+
+    return { response: { passwordResetWasRequested: true } }
+  },
+  requestPasswordChange: async (user: TokenPayload) => {
+    const targetUser = await authRepo.findUserById(user.id)
+
+    if (!targetUser || targetUser.deactivatedAt) {
+      throw ApiError(404, 'NOT_FOUND', 'User not found')
+    }
+
+    const { rawToken, tokenHash, expiresAt } =
+      tokenService.generateResetPasswordToken()
+
+    await tokenRepo.createActionToken(
+      targetUser.id,
+      'passwordReset',
+      tokenHash,
+      expiresAt
+    )
+
+    await authService.sendPasswordResetEmail(targetUser, rawToken)
+
+    return { response: { passwordResetWasRequested: true } }
+  },
+  changePassword: async (
+    userPayload: TokenPayload,
+    data: ChangePasswordDto
+  ) => {
+    const user = await authRepo.findUserWithCredentialsById(userPayload.id)
+
+    if (!user || user.deactivatedAt || !user.credentials) {
+      throw ApiError(404, 'NOT_FOUND', 'User not found')
+    }
+
+    const isCurrentPasswordCorrect = await bcrypt.compare(
+      data.currentPassword,
+      user.credentials.passwordHash
+    )
+
+    if (!isCurrentPasswordCorrect) {
+      throw ApiError(400, 'BAD_REQUEST', 'Current password is incorrect')
+    }
+
+    const newPasswordHash = await bcrypt.hash(data.newPassword, 10)
+
+    await authRepo.updatePassword(user.id, newPasswordHash)
+
+    await authService.sendPasswordChangedEmail(user)
+
+    return { response: { passwordChanged: true } }
+  },
+  resetPassword: async (data: ResetPasswordDto, tokenHash: string) => {
+    const actionToken = await tokenRepo.findActionTokenByHash(
+      tokenHash,
+      'passwordReset'
+    )
+
+    if (
+      !actionToken ||
+      actionToken.type !== 'passwordReset' ||
+      actionToken.usedAt ||
+      actionToken.expiresAt < new Date()
+    ) {
+      throw ApiError(400, 'BAD_REQUEST', 'Token is invalid or expired')
+    }
+
+    const user = await authRepo.findUserWithCredentialsById(actionToken.userId)
+
+    if (!user || user.deactivatedAt || !user.credentials) {
+      throw ApiError(404, 'NOT_FOUND', 'User not found')
+    }
+
+    const isSameAsCurrent = await bcrypt.compare(
+      data.newPassword,
+      user.credentials.passwordHash
+    )
+
+    if (isSameAsCurrent) {
+      throw ApiError(
+        400,
+        'BAD_REQUEST',
+        'New password must be different from current password'
+      )
+    }
+
+    const newPasswordHash = await bcrypt.hash(data.newPassword, 10)
+
+    await prisma.$transaction(async (tx) => {
+      await authRepo.updatePassword(user.id, newPasswordHash, tx)
+      await tokenRepo.consumeActionToken(actionToken.id, tx)
+      await sessionRepo.revokeAllForUser(user.id, tx)
+    })
+
+    await authService.sendPasswordChangedEmail(user)
+
+    return { response: { passwordChanged: true } }
   },
 }

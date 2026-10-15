@@ -46,6 +46,19 @@ export const subscriptionStartedEmailSchema = z.object({
   locale,
 })
 
+export const passwordResetEmailSchema = z.object({
+  to: z.email(),
+  token: z.string().min(1, 'token is required'),
+  locale: z.enum(['en', 'es', 'uk']),
+  userName: z.string().optional(),
+})
+
+export const passwordChangedEmailSchema = z.object({
+  to: z.email(),
+  userName: z.string().optional(),
+  locale,
+})
+
 //dto
 
 export type SendDeviceKeyEmailDto = z.infer<typeof sendDeviceKeyEmailSchema>
@@ -57,3 +70,8 @@ export type DeleteSubscriptionEmailDto = z.infer<typeof deleteSubscriptionEmailS
 export type PaymentAttemptFailedEmailDto = z.infer<typeof paymentAttemptFailedEmailSchema>
 
 export type SubscriptionStartedEmailDto = z.infer<typeof subscriptionStartedEmailSchema>
+
+export type PasswordResetEmailDto = z.infer<typeof passwordResetEmailSchema>
+
+export type PasswordChangedEmailDto = z.infer<typeof passwordChangedEmailSchema>
+

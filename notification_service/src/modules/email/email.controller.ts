@@ -42,4 +42,21 @@ export const emailController = {
       next(err)
     }
   },
+  sendPasswordReset: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await emailService.sendPasswordReset(req.body, req.get('idempotency-key'))
+      res.status(200).json(result)
+    } catch (err) {
+      next(err)
+    }
+  },
+  sendPasswordChanged: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await emailService.sendPasswordChanged(req.body, req.get('idempotency-key'))
+      res.status(200).json(result)
+    } catch (err) {
+      next(err)
+    }
+  },
 }
+

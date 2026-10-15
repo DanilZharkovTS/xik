@@ -49,7 +49,10 @@ export const authMiddleware = {
       const tokens: Record<string, string> = {}
 
       for (const name of names) {
-        const token = req.cookies[name]
+        const token =
+          req.cookies?.[name] ??
+          req.validData?.body?.[name] ??
+          req.body?.[name]
 
         if (!token) {
           throw ApiError(401, 'UNAUTHORIZED', 'Missing token')
