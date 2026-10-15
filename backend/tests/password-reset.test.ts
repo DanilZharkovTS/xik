@@ -132,7 +132,9 @@ describe('password reset & change notification flow', () => {
     let rawResetToken = ''
     const fetchMock = vi.fn().mockImplementation((_url, options) => {
       const parsed = JSON.parse(options.body as string)
-      rawResetToken = parsed.token
+      if (parsed.token) {
+        rawResetToken = parsed.token
+      }
       return Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }))
     })
     vi.stubGlobal('fetch', fetchMock)
@@ -164,6 +166,16 @@ describe('password reset & change notification flow', () => {
       })
     expect(successRes.status).toBe(200)
     expect(successRes.body).toEqual({ passwordChanged: true })
+
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    const [changedUrl, changedOptions] = fetchMock.mock.calls[1]
+    expect(changedUrl).toContain('/api/email/password-changed')
+    expect(changedOptions.method).toBe('POST')
+    expect(JSON.parse(changedOptions.body as string)).toMatchObject({
+      to: 'reset-success@example.com',
+      locale: user.locale,
+      userName: user.name,
+    })
 
     // Token must now be consumed
     const consumedToken = await prisma.actionToken.findFirst({
@@ -216,5 +228,37 @@ describe('password reset & change notification flow', () => {
       })
 
     expect(res.status).toBe(400)
+  })
+
+  it('change-password updates password and calls notification service', async () => {
+    const user = await createUser('user', 'change-user@example.com', 'current-password-123')
+    const { accessToken } = await loginOk('change-user@example.com', 'current-password-123')
+
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await api()
+      .post('/api/auth/password-change')
+      .set(auth(accessToken))
+      .send({
+        currentPassword: 'current-password-123',
+        newPassword: 'new-secure-password-456',
+        confirmNewPassword: 'new-secure-password-456',
+      })
+
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual({ passwordChanged: true })
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, options] = fetchMock.mock.calls[0]
+    expect(url).toContain('/api/email/password-changed')
+    expect(options.method).toBe('POST')
+
+    const body = JSON.parse(options.body as string)
+    expect(body).toMatchObject({
+      to: 'change-user@example.com',
+      locale: user.locale,
+      userName: user.name,
+    })
   })
 })

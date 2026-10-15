@@ -190,6 +190,41 @@ export const authService = {
       )
     }
   },
+  sendPasswordChangedEmail: async (
+    user: { email: string; locale: 'en' | 'es' | 'uk'; name?: string | null }
+  ) => {
+    const notificationsUrl =
+      process.env.NOTIFICATIONS_SERVICE_URL || 'http://localhost:3002'
+    const secret = process.env.NOTIFICATIONS_SERVICE_SECRET
+
+    const response = await fetch(
+      `${notificationsUrl.replace(/\/$/, '')}/api/email/password-changed`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(secret ? { service_token: secret } : {}),
+        },
+        body: JSON.stringify({
+          to: user.email,
+          locale: user.locale,
+          userName: user.name ?? undefined,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(
+        `[Auth:PasswordChanged] Failed to send email (${response.status}): ${errorText}`
+      )
+      throw ApiError(
+        502,
+        'NOTIFICATION_FAILED',
+        'Failed to send password changed email'
+      )
+    }
+  },
   requestPasswordReset: async (data: RequestPasswordResetDto) => {
     const user = await authRepo.findUserByEmail(data.email)
 
@@ -255,6 +290,8 @@ export const authService = {
 
     await authRepo.updatePassword(user.id, newPasswordHash)
 
+    await authService.sendPasswordChangedEmail(user)
+
     return { response: { passwordChanged: true } }
   },
   resetPassword: async (data: ResetPasswordDto, tokenHash: string) => {
@@ -298,6 +335,8 @@ export const authService = {
       await tokenRepo.consumeActionToken(actionToken.id, tx)
       await sessionRepo.revokeAllForUser(user.id, tx)
     })
+
+    await authService.sendPasswordChangedEmail(user)
 
     return { response: { passwordChanged: true } }
   },
