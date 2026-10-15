@@ -53,6 +53,12 @@ export const passwordResetEmailSchema = z.object({
   userName: z.string().optional(),
 })
 
+export const passwordChangedEmailSchema = z.object({
+  to: z.email(),
+  userName: z.string().optional(),
+  locale,
+})
+
 //dto
 
 export type SendDeviceKeyEmailDto = z.infer<typeof sendDeviceKeyEmailSchema>
@@ -66,3 +72,6 @@ export type PaymentAttemptFailedEmailDto = z.infer<typeof paymentAttemptFailedEm
 export type SubscriptionStartedEmailDto = z.infer<typeof subscriptionStartedEmailSchema>
 
 export type PasswordResetEmailDto = z.infer<typeof passwordResetEmailSchema>
+
+export type PasswordChangedEmailDto = z.infer<typeof passwordChangedEmailSchema>
+

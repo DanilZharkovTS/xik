@@ -249,3 +249,49 @@ export const PASSWORD_RESET_COPY = {
       `Вітаємо, ${name}!\n\nМи отримали запит на скидання вашого пароля. Ви можете встановити новий пароль за посиланням:\n\n${url}\n\nПосилання дійсне протягом 24 годин. Якщо ви не запитували зміну пароля, просто проігноруйте цей лист.`,
   },
 } as const
+
+export const PASSWORD_CHANGED_COPY = {
+  en: {
+    subject: 'XIK — Password changed successfully',
+    title: 'Your XIK password has been changed',
+    heading: 'Password Changed Successfully',
+    intro: 'Your XIK account password has been successfully changed.',
+    confirmation: 'If you made this change, no further action is needed.',
+    warningTitle: "Didn't make this change?",
+    warning:
+      "If you didn't change your password, please contact our support team immediately to secure your account.",
+    footerNote: 'If you did not make this change, please contact support immediately.',
+    signoff: 'Best regards,\nThe XIK Team',
+    text: (name: string) =>
+      `Hi ${name},\n\nYour XIK account password has been successfully changed.\n\nIf you made this change, no further action is needed.\n\nIf you didn't change your password, please contact our support team immediately to secure your account.\n\nBest regards,\nThe XIK Team`,
+  },
+  es: {
+    subject: 'XIK — Contraseña modificada correctamente',
+    title: 'Su contraseña de XIK ha sido modificada',
+    heading: 'Contraseña cambiada correctamente',
+    intro: 'La contraseña de su cuenta de XIK se ha cambiado correctamente.',
+    confirmation: 'Si realizó este cambio, no es necesario que haga nada más.',
+    warningTitle: '¿No realizó este cambio?',
+    warning:
+      'Si no cambió su contraseña, comuníquese de inmediato con nuestro equipo de soporte para proteger su cuenta.',
+    footerNote: 'Si no realizó este cambio, póngase en contacto con soporte de inmediato.',
+    signoff: 'Saludos cordiales,\nEl equipo de XIK',
+    text: (name: string) =>
+      `Hola, ${name}:\n\nLa contraseña de su cuenta de XIK se ha cambiado correctamente.\n\nSi realizó este cambio, no es necesario que haga nada más.\n\nSi no cambió su contraseña, comuníquese de inmediato con nuestro equipo de soporte para proteger su cuenta.\n\nSaludos cordiales,\nEl equipo de XIK`,
+  },
+  uk: {
+    subject: 'XIK — Ваш пароль успішно змінено',
+    title: 'Ваш пароль XIK успішно змінено',
+    heading: 'Пароль успішно змінено',
+    intro: 'Пароль до вашого облікового запису XIK було успішно змінено.',
+    confirmation: 'Якщо ви самі змінили пароль, жодних додаткових дій виконувати не потрібно.',
+    warningTitle: 'Не ви змінювали пароль?',
+    warning:
+      'Якщо ви не змінювали пароль, негайно зверніться до нашої служби підтримки, щоб захистити свій обліковий запис.',
+    footerNote: 'Якщо ви не змінювали пароль, негайно зверніться до підтримки.',
+    signoff: 'З повагою,\nКоманда XIK',
+    text: (name: string) =>
+      `Вітаємо, ${name}!\n\nПароль до вашого облікового запису XIK було успішно змінено.\n\nЯкщо ви самі змінили пароль, жодних додаткових дій виконувати не потрібно.\n\nЯкщо ви не змінювали пароль, негайно зверніться до нашої служби підтримки, щоб захистити свій обліковий запис.\n\nЗ повагою,\nКоманда XIK`,
+  },
+} as const
+

@@ -1,5 +1,5 @@
 import { baseEmailLayout } from './layout'
-import { COMMON, COPY, EMAIL_LOCALES, PASSWORD_RESET_COPY } from './copy'
+import { COMMON, COPY, EMAIL_LOCALES, PASSWORD_RESET_COPY, PASSWORD_CHANGED_COPY } from './copy'
 import type { EmailData, EmailKind, EmailLocale } from './copy'
 
 const TONES = {
@@ -141,6 +141,48 @@ export function renderPasswordResetEmail(
     subject: copy.subject,
     html,
     text: `${copy.text(name, resetUrl)}\n\n${common.signature}`,
+  }
+}
+
+export function renderPasswordChangedEmail(
+  localeInput: unknown,
+  data: { userName?: string }
+): RenderedEmail {
+  const locale = resolveLocale(localeInput)
+  const copy = PASSWORD_CHANGED_COPY[locale]
+  const common = COMMON[locale]
+  const name = data.userName?.trim() || common.fallbackName
+
+  const paragraph = (html: string) =>
+    `<p style="margin: 0 0 20px; font-size: 15px; line-height: 1.6; color: #525252;">${html}</p>`
+
+  const callout = `
+    <div style="margin: 24px 0; padding: 16px; background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px;">
+      <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #92400e;">
+        <strong>${copy.warningTitle}</strong><br />${copy.warning}
+      </p>
+    </div>
+  `
+
+  const html = baseEmailLayout({
+    title: copy.title,
+    footerNote: copy.footerNote,
+    lang: locale,
+    sentBy: common.sentBy,
+    content: `
+      <h1 style="margin: 0 0 16px; font-size: 24px; line-height: 1.3; font-weight: 700; color: #171717;">${copy.heading}</h1>
+      ${paragraph(escapeHtml(common.hello(name)))}
+      ${paragraph(copy.intro)}
+      ${paragraph(copy.confirmation)}
+      ${callout}
+      ${paragraph(copy.signoff.replace(/\n/g, '<br />'))}
+    `,
+  })
+
+  return {
+    subject: copy.subject,
+    html,
+    text: copy.text(name),
   }
 }
 
