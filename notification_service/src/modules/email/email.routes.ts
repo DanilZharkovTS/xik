@@ -4,6 +4,8 @@ import { validateBody } from '../../shared/middlewares/helpers'
 import {
   cancelSubscriptionEmailSchema,
   deleteSubscriptionEmailSchema,
+  passwordChangedEmailSchema,
+  passwordResetEmailSchema,
   paymentAttemptFailedEmailSchema,
   sendDeviceKeyEmailSchema,
   subscriptionStartedEmailSchema,
@@ -45,6 +47,18 @@ router.post(
   '/subscription-started',
   validateBody(subscriptionStartedEmailSchema),
   emailController.sendSubscriptionStarted
+)
+
+router.post(
+  '/password-reset',
+  validateBody(passwordResetEmailSchema),
+  emailController.sendPasswordReset
+)
+
+router.post(
+  '/password-changed',
+  validateBody(passwordChangedEmailSchema),
+  emailController.sendPasswordChanged
 )
 
 export default router
