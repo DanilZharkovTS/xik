@@ -111,7 +111,7 @@ which block of the site shows it; services stay static in the frontend.
 - **One-to-one link.** Every product has one Stripe product (`stripeProductId`) and one current Stripe price
   (`stripePriceId`), both unique. Create is Stripe-first; if the database write then fails, the new Stripe objects are
   deactivated. Changing the price creates a new Stripe price and deactivates the old one (existing subscribers keep it).
-- **Price is always set.** `showPrice` only decides whether the product page shows it; otherwise the buyer sees it at checkout.
+- **Price is always set.** When `showPrice` is off, the public product page hides both the price and the subscription button.
   Public responses never contain Stripe ids, and hide the price when `showPrice` is off.
 - **Delete is archive.** `DELETE /products/:id` sets `archivedAt` and deactivates the Stripe product; `POST /products/:id/restore`
   brings it back. Archived products disappear from the site, checkout and the journal product list.

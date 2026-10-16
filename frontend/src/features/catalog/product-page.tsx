@@ -123,7 +123,7 @@ export async function ProductPage({
         related={related}
         priceLabel={visiblePrice}
         purchase={
-          product.isPurchasable
+          product.showPrice && product.isPurchasable
             ? { productId: product.id, priceLabel: visiblePrice }
             : undefined
         }

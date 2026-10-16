@@ -15,7 +15,7 @@ export interface ApiCatalogProduct {
   categories: string[]
   sortOrder: number
   showPrice: boolean
-  // Ціна приходить лише якщо showPrice: інакше користувач побачить її вже на оплаті у Stripe.
+  // Ціна приходить лише якщо showPrice; без неї публічна сторінка приховує й підписку.
   price: string | null
   currency: string | null
   billingPeriod: 'week' | 'month' | 'year' | null
