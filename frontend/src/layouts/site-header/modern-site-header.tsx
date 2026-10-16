@@ -56,7 +56,7 @@ export function ModernSiteHeader() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 h-[52px] border-b border-[var(--l)] bg-[var(--bg)] transition-colors">
+      <header className="fixed inset-x-0 top-0 z-50 h-[52px] border-b border-[var(--l)]/80 bg-[var(--bg)]/80 backdrop-blur-xl transition-colors">
         <div className="mx-auto flex h-full max-w-[1180px] items-center gap-3 px-4 sm:gap-5 sm:px-6">
           <Link
             href={lp('/')}

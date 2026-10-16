@@ -51,8 +51,13 @@ export function ModernProducts({ products }: ModernProductsProps) {
                   className="modern-product-card group relative flex min-h-[260px] cursor-pointer flex-col justify-between overflow-hidden rounded-[24px] border border-[var(--l)] bg-[var(--s)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--m)] hover:shadow-xl sm:min-h-[290px]"
                 >
                   <div className="relative z-10">
-                    <div className="line-clamp-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--m)]">
-                      {[product.categoryLabel ?? t('catalog.eyebrow.product'), statusLabel(product.status, locale)].join(' · ')}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="line-clamp-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--m)]">
+                        {product.categoryLabel ?? t('catalog.eyebrow.product')}
+                      </span>
+                      <span className="inline-flex shrink-0 items-center rounded-full border border-[var(--l)] bg-[var(--bg)]/90 px-2 py-0.5 text-[10px] font-semibold text-[var(--m)]">
+                        {statusLabel(product.status, locale)}
+                      </span>
                     </div>
 
                     <h3 className="my-2.5 text-2xl font-bold tracking-tight text-[var(--t)] transition-colors group-hover:text-[var(--b)]">
