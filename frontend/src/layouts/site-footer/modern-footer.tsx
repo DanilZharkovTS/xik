@@ -57,7 +57,7 @@ export function ModernFooter() {
                 {t('site.nav.blog')}
               </Link>
               <a
-                href="/blog/feed.xml"
+                href={lp('/blog/rss.xml')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="transition-colors hover:text-[var(--t)]"

@@ -40,6 +40,15 @@ export async function generateMetadata({
   const locale: Locale = raw
   const text = siteText(locale)
 
+  const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+  const yandexVerification = process.env.NEXT_PUBLIC_YANDEX_VERIFICATION
+  const bingVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+
+  const verification: NonNullable<Metadata['verification']> = {}
+  if (googleVerification) verification.google = googleVerification
+  if (yandexVerification) verification.yandex = yandexVerification
+  if (bingVerification) verification.other = { 'msvalidate.01': bingVerification }
+
   return {
     metadataBase: new URL(siteConfig.origin),
     title: {
@@ -51,6 +60,7 @@ export async function generateMetadata({
     authors: [{ name: siteConfig.name, url: siteConfig.origin }],
     creator: siteConfig.name,
     manifest: '/manifest.webmanifest',
+    ...(Object.keys(verification).length > 0 ? { verification } : {}),
   }
 }
 
