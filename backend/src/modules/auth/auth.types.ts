@@ -28,3 +28,5 @@ export interface TokenPayload {
   role: UserRole
   sessionId: string
 }
+
+export type ActionTokenType = 'passwordReset'
