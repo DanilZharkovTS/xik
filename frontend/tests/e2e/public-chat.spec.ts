@@ -31,7 +31,7 @@ for (const path of ['/', '/es', '/uk', '/services']) {
   })
 }
 
-for (const path of ['/auth/login', '/es/auth/login', '/account', '/dashboard']) {
+for (const path of ['/login', '/es/login', '/account', '/dashboard']) {
   test(`chat does not load on ${path}`, async ({ page }) => {
     let loads = 0
     await mockChat(page)
@@ -50,8 +50,8 @@ test('SPA navigation removes chat from account pages and remounts once on return
   await page.goto('/')
   const chat = page.locator('iframe[data-chat-site="xik-app"]')
   await expect(chat).toHaveCount(1)
-  await page.locator('a[href="/auth/login"]').first().click()
-  await expect(page).toHaveURL(/\/auth\/login$/)
+  await page.locator('a[href="/login"]').first().click()
+  await expect(page).toHaveURL(/\/login$/)
   await expect(chat).toHaveCount(0)
   await page.goBack()
   await expect(page).toHaveURL('/')
@@ -71,8 +71,8 @@ test('late script completion cannot mount chat after navigation to login', async
   })
   await page.goto('/')
   await started
-  await page.locator('a[href="/auth/login"]').first().click()
-  await expect(page).toHaveURL(/\/auth\/login$/)
+  await page.locator('a[href="/login"]').first().click()
+  await expect(page).toHaveURL(/\/login$/)
   release()
   await page.waitForFunction(() => Boolean(window.AgentPlatformWidget))
   await expect(page.locator('iframe[data-chat-site]')).toHaveCount(0)

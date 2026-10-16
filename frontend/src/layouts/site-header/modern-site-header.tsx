@@ -94,7 +94,7 @@ export function ModernSiteHeader() {
               </Link>
             ) : (
               <Link
-                href={up('/auth/login')}
+                href={up('/login')}
                 className="rounded-full border border-[var(--l)] px-3.5 py-1.5 text-xs font-medium text-[var(--t)] transition-colors hover:bg-[var(--s)]"
               >
                 {t('site.signIn')}
@@ -161,7 +161,7 @@ export function ModernSiteHeader() {
             </Link>
           ) : (
             <Link
-              href={up('/auth/login')}
+              href={up('/login')}
               onClick={closeMobile}
               className="py-3 transition-colors hover:text-[var(--b)]"
             >

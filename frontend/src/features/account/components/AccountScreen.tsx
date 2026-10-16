@@ -247,7 +247,7 @@ function ProfileTab(): ReactElement {
       setIsLoggingOut(true)
       await authService.logout()
       clearAuth()
-      router.push(up('/auth/login'))
+      router.push(up('/login'))
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {

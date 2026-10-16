@@ -28,6 +28,6 @@ test('parallel expired requests share one refresh and retry with the new token',
 test('a failed initial refresh leaves checking and permits signing in again', async ({ page }) => {
   await page.route('**/api/auth/refresh', (route) => route.abort('failed'))
   await page.goto('/account')
-  await expect(page).toHaveURL(/\/auth\/login$/)
+  await expect(page).toHaveURL(/\/login$/)
   await expect(page.getByRole('button', { name: /sign in/i })).toBeEnabled()
 })

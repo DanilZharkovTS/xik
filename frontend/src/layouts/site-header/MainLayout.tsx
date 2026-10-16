@@ -62,11 +62,11 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
       path.startsWith('/account')
 
     if (!user && isPrivatePath) {
-      router.replace(up('/auth/login'))
+      router.replace(up('/login'))
       return
     }
 
-    if (user && path.startsWith('/auth/')) {
+    if (user && (path === '/login' || path.startsWith('/auth/'))) {
       router.replace(up(isStaff ? '/dashboard' : '/account'))
       return
     }

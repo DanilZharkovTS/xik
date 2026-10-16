@@ -8,6 +8,7 @@ const LOCALIZED_ROOTS = [
   'agents',
   'success',
   'auth',
+  'login',
   'admin',
   'outreach',
   'dashboard',
@@ -40,6 +41,21 @@ const nextConfig: NextConfig = {
       // Англійська без префікса: /en/... веде на канонічну адресу.
       { source: '/en', destination: '/', permanent: true },
       { source: '/en/:path*', destination: '/:path*', permanent: true },
+      {
+        source: '/auth/login',
+        destination: '/login',
+        permanent: true,
+      },
+      {
+        source: '/es/auth/login',
+        destination: '/es/login',
+        permanent: true,
+      },
+      {
+        source: '/uk/auth/login',
+        destination: '/uk/login',
+        permanent: true,
+      },
       {
         source: '/about',
         destination: '/#about',

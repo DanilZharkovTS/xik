@@ -104,7 +104,7 @@ export const RequestPasswordResetForm: React.FC = () => {
             </Button>
 
             <Link
-              href={up('/auth/login')}
+              href={up('/login')}
               className="inline-flex min-h-11 items-center justify-center text-sm text-[var(--m)] hover:text-[var(--t)] transition-colors"
             >
               <ArrowLeft className="mr-1.5 h-4 w-4" />
@@ -141,7 +141,7 @@ export const RequestPasswordResetForm: React.FC = () => {
 
       {!isSuccess && (
         <Link
-          href={up('/auth/login')}
+          href={up('/login')}
           className="mt-4 inline-flex min-h-11 items-center justify-center text-[var(--m)] hover:text-[var(--t)] transition-colors"
         >
           <ArrowLeft className="mr-1.5 h-4 w-4" />

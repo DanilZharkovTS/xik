@@ -1,7 +1,10 @@
-import { Auth } from "@/src/features/auth/components/Auth"
+import { redirect } from 'next/navigation'
 
-const LoginPage = () => {
-  return <Auth />
+export default async function AuthLoginPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  redirect(locale === 'en' ? '/login' : `/${locale}/login`)
 }
-
-export default LoginPage
