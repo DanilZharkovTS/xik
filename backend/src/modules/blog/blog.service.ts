@@ -176,7 +176,7 @@ export const blogService = {
   listPublic: async (query: PublicListDto) => {
     const { items, total } = await blogRepo.listVisible(
       query.lang,
-      { tag: query.tag, category: query.category },
+      { tag: query.tag, category: query.category, q: query.q },
       query.page,
       query.limit,
       new Date()

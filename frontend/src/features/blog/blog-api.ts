@@ -18,12 +18,13 @@ const empty: ArticleList = { articles: [], total: 0, page: 1, pages: 1 }
 // Сторінки не повинні падати разом із бекендом: без даних блог просто порожній.
 export async function fetchArticles(
   locale: Locale,
-  options: { tag?: string; category?: string; page?: number; limit?: number } = {},
+  options: { tag?: string; category?: string; q?: string; page?: number; limit?: number } = {},
 ): Promise<ArticleList> {
   try {
     const query = new URLSearchParams({ lang: locale })
     if (options.tag) query.set('tag', options.tag)
     if (options.category) query.set('category', options.category)
+    if (options.q) query.set('q', options.q)
     if (options.page) query.set('page', String(options.page))
     if (options.limit) query.set('limit', String(options.limit))
 
