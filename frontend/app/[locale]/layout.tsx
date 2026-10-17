@@ -7,22 +7,41 @@ import { LOCALES, isLocale } from '@/src/shared/i18n/i18n-store'
 import type { Locale } from '@/src/shared/i18n/i18n-store'
 import { LocaleProvider } from '@/src/shared/i18n/locale-provider'
 import {
-  DEFAULT_THEME,
+  DEFAULT_THEME_PREFERENCE,
+  SYSTEM_DARK_QUERY,
   THEME_STORAGE_KEY,
 } from '@/src/features/theme/theme-config'
 import { MainLayout } from '@/src/layouts/site-header/MainLayout'
 
+// Виставляє тему до першого малювання і стежить за системною темою, коли обрано «Авто».
 const themeInitializationScript = `
   (() => {
-    const fallback = '${DEFAULT_THEME}';
-    let theme = fallback;
+    const root = document.documentElement;
+    const fallback = '${DEFAULT_THEME_PREFERENCE}';
+    let preference = fallback;
 
     try {
       const stored = window.localStorage.getItem('${THEME_STORAGE_KEY}');
-      theme = stored === 'light' || stored === 'dark' ? stored : fallback;
+      if (stored === 'light' || stored === 'dark' || stored === 'system') preference = stored;
     } catch {}
 
-    document.documentElement.dataset.theme = theme;
+    const media = window.matchMedia ? window.matchMedia('${SYSTEM_DARK_QUERY}') : null;
+    const resolve = (value) => value === 'system' ? (media && !media.matches ? 'light' : 'dark') : value;
+
+    root.dataset.themePreference = preference;
+    root.dataset.theme = resolve(preference);
+
+    if (media && media.addEventListener) {
+      media.addEventListener('change', () => {
+        if (root.dataset.themePreference !== 'system') return;
+        const theme = resolve('system');
+        root.dataset.theme = theme;
+        document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+          meta.setAttribute('content', theme === 'light' ? '#ffffff' : '#000000');
+        });
+        window.dispatchEvent(new Event('xik-theme-change'));
+      });
+    }
   })();
 `
 

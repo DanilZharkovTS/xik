@@ -2,25 +2,51 @@
 
 import { useEffect, useSyncExternalStore } from 'react'
 import type { ReactElement } from 'react'
+import { Monitor, Moon, Sun } from 'lucide-react'
 
 import {
   DEFAULT_THEME,
+  DEFAULT_THEME_PREFERENCE,
   isSiteTheme,
+  isThemePreference,
+  nextThemePreference,
+  SYSTEM_DARK_QUERY,
   THEME_STORAGE_KEY,
 } from '../theme-config'
-import type { SiteTheme } from '../theme-config'
+import type { SiteTheme, ThemePreference } from '../theme-config'
 import { useI18n } from '@/src/shared/i18n/use-i18n'
 
 const THEME_CHANGE_EVENT = 'xik-theme-change'
 
-function getDocumentTheme(): SiteTheme {
-  if (typeof document === 'undefined') return DEFAULT_THEME
+const PREFERENCE_LABEL_KEYS = {
+  dark: 'site.theme.dark',
+  light: 'site.theme.light',
+  system: 'site.theme.system',
+} as const satisfies Record<ThemePreference, string>
+
+const PREFERENCE_ICONS = {
+  dark: Moon,
+  light: Sun,
+  system: Monitor,
+} as const satisfies Record<ThemePreference, typeof Moon>
+
+function getDocumentPreference(): ThemePreference {
+  if (typeof document === 'undefined') return DEFAULT_THEME_PREFERENCE
+  const preference = document.documentElement.dataset.themePreference
+  if (isThemePreference(preference)) return preference
+  // Сторінка без атрибута вибору (старий скрипт): беремо застосовану тему.
   const theme = document.documentElement.dataset.theme
-  return isSiteTheme(theme) ? theme : DEFAULT_THEME
+  return isSiteTheme(theme) ? theme : DEFAULT_THEME_PREFERENCE
 }
 
-function getServerTheme(): SiteTheme {
-  return DEFAULT_THEME
+function getServerPreference(): ThemePreference {
+  return DEFAULT_THEME_PREFERENCE
+}
+
+function resolveTheme(preference: ThemePreference): SiteTheme {
+  if (preference !== 'system') return preference
+  if (typeof window === 'undefined' || !window.matchMedia) return DEFAULT_THEME
+  return window.matchMedia(SYSTEM_DARK_QUERY).matches ? 'dark' : 'light'
 }
 
 function updateThemeColor(theme: SiteTheme): void {
@@ -33,12 +59,19 @@ function updateThemeColor(theme: SiteTheme): void {
     })
 }
 
-function applyTheme(theme: SiteTheme): void {
-  document.documentElement.dataset.theme = theme
+function setDocumentPreference(preference: ThemePreference): void {
+  const root = document.documentElement
+  const theme = resolveTheme(preference)
+  root.dataset.themePreference = preference
+  root.dataset.theme = theme
   updateThemeColor(theme)
+}
+
+function applyPreference(preference: ThemePreference): void {
+  setDocumentPreference(preference)
 
   try {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme)
+    window.localStorage.setItem(THEME_STORAGE_KEY, preference)
   } catch {
     // storage fallback
   }
@@ -53,11 +86,13 @@ function subscribeToTheme(onStoreChange: () => void): () => void {
     onStoreChange()
   }
 
+  // Вибір в іншій вкладці.
   const handleStorage = (event: StorageEvent) => {
     if (event.key !== THEME_STORAGE_KEY) return
-    const theme = isSiteTheme(event.newValue) ? event.newValue : DEFAULT_THEME
-    document.documentElement.dataset.theme = theme
-    updateThemeColor(theme)
+    const preference = isThemePreference(event.newValue)
+      ? event.newValue
+      : DEFAULT_THEME_PREFERENCE
+    setDocumentPreference(preference)
     onStoreChange()
   }
 
@@ -70,37 +105,40 @@ function subscribeToTheme(onStoreChange: () => void): () => void {
   }
 }
 
+// Одна кнопка перемикає по колу: темна → світла → авто (як у системі).
+// Іконка показує поточний вибір, підказка — наступний.
 export function ThemeToggle(): ReactElement {
-  const theme = useSyncExternalStore(
+  const preference = useSyncExternalStore(
     subscribeToTheme,
-    getDocumentTheme,
-    getServerTheme,
+    getDocumentPreference,
+    getServerPreference,
   )
-  const isLightTheme = theme === 'light'
-  const nextTheme = isLightTheme ? 'dark' : 'light'
+  const nextPreference = nextThemePreference(preference)
   const { t } = useI18n()
-  const label = t('site.theme', { theme: t(nextTheme === 'dark' ? 'site.theme.dark' : 'site.theme.light') })
+  const label = t('site.theme', {
+    theme: t(PREFERENCE_LABEL_KEYS[nextPreference]),
+  })
+  const Icon = PREFERENCE_ICONS[preference]
 
   useEffect(() => {
-    updateThemeColor(theme)
-  }, [theme])
+    updateThemeColor(resolveTheme(preference))
+  }, [preference])
 
   const handleThemeChange = () => {
-    applyTheme(nextTheme)
+    applyPreference(nextPreference)
   }
 
   return (
     <button
       aria-label={label}
-      aria-pressed={isLightTheme}
-      className="flex size-8 items-center justify-center rounded-full bg-[var(--s)] text-sm text-[var(--t)] transition-all hover:scale-105 active:scale-95"
+      className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--s)] text-[var(--t)] transition-all hover:scale-105 active:scale-95"
+      data-theme-preference={preference}
       data-theme-toggle=""
       onClick={handleThemeChange}
       title={label}
       type="button"
     >
-      ◐
+      <Icon aria-hidden="true" className="size-4" strokeWidth={1.75} />
     </button>
   )
 }
-

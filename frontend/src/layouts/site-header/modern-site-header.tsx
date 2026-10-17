@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { UserRound } from 'lucide-react'
 import useAuthStore from '@/src/features/auth/store'
 import { ThemeToggle } from '@/src/features/theme/components/theme-toggle'
 import { LanguageSwitch } from '@/src/shared/i18n/language-switch'
@@ -79,8 +80,9 @@ export function ModernSiteHeader() {
 
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <LanguageSwitch />
+          {/* Усі елементи мають сталу ширину на мобільному, щоб шапка не стрибала при зміні мови. */}
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <LanguageSwitch className="shrink-0" />
             <ThemeToggle />
 
             {user ? (
@@ -88,16 +90,20 @@ export function ModernSiteHeader() {
                 href={up(accountHref)}
                 title={`${displayName} · ${user.email}`}
                 aria-label={`${t('site.account')}: ${displayName}`}
-                className="max-w-[9rem] truncate rounded-full bg-[var(--t)] px-3.5 py-1.5 text-xs font-medium text-[var(--bg)] transition-opacity hover:opacity-90"
+                className="max-w-[9rem] shrink-0 truncate rounded-full bg-[var(--t)] px-3.5 py-1.5 text-xs font-medium text-[var(--bg)] transition-opacity hover:opacity-90"
               >
                 {displayName}
               </Link>
             ) : (
               <Link
                 href={up('/login')}
-                className="rounded-full border border-[var(--l)] px-3.5 py-1.5 text-xs font-medium text-[var(--t)] transition-colors hover:bg-[var(--s)]"
+                aria-label={t('site.signIn')}
+                title={t('site.signIn')}
+                className="flex size-8 shrink-0 items-center justify-center rounded-full border border-[var(--l)] text-xs font-medium text-[var(--t)] transition-colors hover:bg-[var(--s)] sm:size-auto sm:px-3.5 sm:py-1.5"
               >
-                {t('site.signIn')}
+                {/* На мобільному іконка: довжина «Iniciar sesión» / «Sign In» / «Увійти» різна. */}
+                <UserRound aria-hidden="true" className="size-4 sm:hidden" strokeWidth={1.75} />
+                <span className="hidden sm:inline">{t('site.signIn')}</span>
               </Link>
             )}
 
@@ -105,7 +111,7 @@ export function ModernSiteHeader() {
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--l)] text-[var(--t)] md:hidden"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--l)] text-[var(--t)] md:hidden"
               ref={menuTrigger}
               aria-controls="mobile-navigation"
               aria-expanded={mobileOpen}

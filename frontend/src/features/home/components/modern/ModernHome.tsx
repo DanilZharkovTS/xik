@@ -10,6 +10,7 @@ import { ModernServices } from './ModernServices'
 import { ModernBlogSection } from './ModernBlogSection'
 import { ModernAbout } from './ModernAbout'
 import { ModernCta } from './ModernCta'
+import { MODERN_SERVICES } from '../../data/modern-home-data'
 
 type ModernHomeProps = {
   products: ApiCatalogProduct[]
@@ -20,7 +21,11 @@ type ModernHomeProps = {
 export function ModernHome({ products, agents, articles = [] }: ModernHomeProps) {
   return (
     <div className="relative w-full overflow-hidden">
-      <ModernHero />
+      <ModernHero
+        productCount={products.length}
+        agentCount={agents.length}
+        serviceCount={MODERN_SERVICES.length}
+      />
       <ModernProducts products={products} />
       <ModernAi agents={agents} />
       <ModernServices />
