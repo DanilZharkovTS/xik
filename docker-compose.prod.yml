@@ -36,6 +36,7 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY}
       EMAIL_FROM: ${EMAIL_FROM}
       SERVICE_TOKEN: ${NOTIFICATIONS_SERVICE_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL:-https://xik.app}
     networks:
       - app-network
 
