@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactElement } from 'react'
 import { toast } from 'sonner'
 
@@ -20,6 +20,11 @@ import { BreakdownList } from './BreakdownList'
 import { ALL_PRODUCTS, ReportFilters } from './ReportFilters'
 import { StatTiles } from './StatTiles'
 import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { Download } from 'lucide-react'
+import { Button } from '@/src/shared/ui/button'
+import type { TargetsSummary } from '@/src/features/outreach/outreach.types'
+import { downloadText, reportToCsv } from '../report-csv'
+import { ModeratorTable, TemplateTable } from './ModeratorTable'
 
 export function ReportsScreen(): ReactElement {
   const { t } = useI18n()
@@ -34,6 +39,9 @@ export function ReportsScreen(): ReactElement {
   const [customTo, setCustomTo] = useState('')
   const [types, setTypes] = useState<EventType[]>([...EVENT_TYPES])
   const [scope, setScope] = useState<string>(ALL_PRODUCTS)
+  // Поки адмін сам не вибрав обсяг звіту, він іде за продуктом у перемикачі вгорі.
+  const scopeTouched = useRef(false)
+  const [followUps, setFollowUps] = useState<TargetsSummary | null>(null)
   const [userId, setUserId] = useState('')
   const [moderators, setModerators] = useState<Moderator[]>([])
 
@@ -51,7 +59,14 @@ export function ReportsScreen(): ReactElement {
     const linkedUser = params.get('userId')
     if (linkedUser) setUserId(linkedUser)
     const linkedProduct = params.get('productId')
-    if (linkedProduct) setScope(linkedProduct)
+    if (linkedProduct) {
+      scopeTouched.current = true
+      setScope(linkedProduct)
+    }
+    if (params.get('scope') === 'all') {
+      scopeTouched.current = true
+      setScope(ALL_PRODUCTS)
+    }
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [])
 
@@ -121,6 +136,36 @@ export function ReportsScreen(): ReactElement {
     }
   }, [token, isAdmin])
 
+  useEffect(() => {
+    if (scopeTouched.current || !productId) return
+    setScope(productId)
+  }, [productId])
+
+  const chooseScope = (next: string) => {
+    scopeTouched.current = true
+    setScope(next)
+  }
+
+  // Що висить без руху, по модераторах того самого обсягу (лише адмін).
+  useEffect(() => {
+    if (!token || !isAdmin) return
+    let isCancelled = false
+    reportsService
+      .followUps(token, scope === ALL_PRODUCTS ? undefined : scope)
+      .then((loaded) => {
+        if (!isCancelled) setFollowUps(loaded)
+      })
+      .catch(() => undefined)
+    return () => {
+      isCancelled = true
+    }
+  }, [token, isAdmin, scope])
+
+  const exportCsv = () => {
+    if (!report) return
+    downloadText(reportToCsv(report, { unspecified: channelLabel('unspecified') }), `report-${report.range.from}-${report.range.to}.csv`)
+  }
+
   // Опорна дата не змінюється: з "цього тижня" на "місяць" потрапляємо в поточний місяць,
   // а не в той, де почався тиждень.
   const changePeriod = (next: Period) => setPeriod(next)
@@ -142,13 +187,19 @@ export function ReportsScreen(): ReactElement {
 
   return (
     <div className="space-y-3 md:space-y-5">
-      <div>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
         <h1 className="text-2xl font-medium md:text-4xl">{t('reports.title')}</h1>
         <p className="mt-0.5 text-sm text-[var(--m)] md:mt-1 md:text-base">
           {isAdmin
             ? t('reports.introAdmin')
             : t('reports.introMod')}
         </p>
+        </div>
+        <Button variant="secondary" disabled={!report} onClick={exportCsv}>
+          <Download aria-hidden="true" className="mr-2 h-4 w-4" />
+          {t('reports.export')}
+        </Button>
       </div>
 
       <ReportFilters
@@ -166,7 +217,7 @@ export function ReportsScreen(): ReactElement {
           isAdmin
             ? {
                 scope,
-                onScope: setScope,
+                onScope: chooseScope,
                 products,
                 userId,
                 onUser: setUserId,
@@ -201,11 +252,21 @@ export function ReportsScreen(): ReactElement {
           />
 
           {report.byModerator && (
-            <BreakdownList
-              title={t('reports.byModerator')}
-              rows={report.byModerator.map((row) => ({ key: row.id, label: row.name, value: row.total }))}
+            <ModeratorTable
+              rows={report.byModerator}
+              moderators={moderators.filter(
+                (moderator) =>
+                  (userId ? moderator.id === userId : moderator.deactivatedAt === null) &&
+                  (scope === ALL_PRODUCTS || moderator.products.some((product) => product.id === scope)),
+              )}
+              followUps={followUps?.byOwner ?? []}
+              followUpDays={followUps?.followUpDays ?? 3}
+              selectedId={userId}
+              onSelect={setUserId}
             />
           )}
+
+          {report.byTemplate && <TemplateTable rows={report.byTemplate} />}
 
           {report.byProduct && (
             <BreakdownList

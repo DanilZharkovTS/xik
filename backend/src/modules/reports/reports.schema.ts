@@ -41,6 +41,10 @@ export const reportQuerySchema = z.object({
   productId: z.string().min(1).optional(),
 })
 
+export const followUpsQuerySchema = z.object({
+  productId: z.string().min(1).optional(),
+})
+
 //dto
 
 export type ReportQueryDto = z.infer<typeof reportQuerySchema>

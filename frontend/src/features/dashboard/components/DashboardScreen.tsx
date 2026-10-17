@@ -18,7 +18,58 @@ import { cn } from '@/src/shared/lib/cn'
 import { Segmented } from '@/src/shared/ui/segmented'
 import { Skeleton } from '@/src/shared/ui/skeleton'
 import { dashboardService } from '../dashboard.service'
-import type { Attention, DashboardData, DashboardPeriod } from '../dashboard.service'
+import type { ActionItem, Attention, DashboardData, DashboardPeriod } from '../dashboard.service'
+import { replyRate } from '@/src/features/reports/reports.types'
+
+// Посилання на зріз контактів: продукт, власник і стан роботи.
+const targetsHref = (item: ActionItem, withOwner: boolean): string => {
+  const params = new URLSearchParams({ product: item.productId, state: item.followUp > 0 ? 'followUp' : 'needsAnswer' })
+  if (withOwner && item.userId) params.set('owner', item.userId)
+  return `/outreach/targets?${params.toString()}`
+}
+
+function ActionLine({ item, label, href }: { item: ActionItem; label: string; href: string }): ReactElement {
+  const { t } = useI18n()
+  return (
+    <li>
+      <Link href={href} className="flex min-h-11 items-center gap-3 rounded-xl px-1 py-1.5 text-sm transition-colors hover:bg-[var(--bg)]">
+        <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate">{label}</span>
+          <span className="block text-xs text-[var(--m)]">
+            {item.followUp > 0 && t('dash.action.followUp', { count: item.followUp })}
+            {item.followUp > 0 && item.needsAnswer > 0 && ' · '}
+            {item.needsAnswer > 0 && t('dash.action.needsAnswer', { count: item.needsAnswer })}
+          </span>
+        </span>
+        <ChevronRight aria-hidden="true" className="h-4 w-4 text-[var(--m)]" />
+      </Link>
+    </li>
+  )
+}
+
+// Менеджер: що зробити сьогодні по його продуктах.
+function MyActionsPanel({ actions }: { actions: { followUpDays: number; items: ActionItem[] } }): ReactElement {
+  const { t } = useI18n()
+  const up = useUrlLocalePath()
+
+  return (
+    <Panel title={t('dash.myActions.title')}>
+      {actions.items.length === 0 ? (
+        <p className="py-1 text-sm text-[var(--m)]">{t('dash.myActions.none')}</p>
+      ) : (
+        <>
+          <p className="mb-1 text-xs text-[var(--m)]">{t('dash.myActions.hint', { days: actions.followUpDays })}</p>
+          <ul className="-mx-1 divide-y divide-[var(--l)]">
+            {actions.items.map((item) => (
+              <ActionLine key={item.productId} item={item} label={item.productName} href={up(targetsHref(item, false))} />
+            ))}
+          </ul>
+        </>
+      )}
+    </Panel>
+  )
+}
 import { useI18n, useUrlLocalePath } from '@/src/shared/i18n/use-i18n'
 
 function Panel({
@@ -42,6 +93,8 @@ function Panel({
     </section>
   )
 }
+
+const formatPercent = (rate: number | null): string => (rate === null ? '—' : `${Math.round(rate * 100)}%`)
 
 const TILE_LINK =
   '-m-2 block rounded-xl p-2 transition-colors hover:bg-[var(--bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--t)]'
@@ -138,7 +191,22 @@ function AttentionPanel({ attention }: { attention: Attention }): ReactElement {
 
   return (
     <Panel title={t('dash.attention.title')}>
-      {items.length === 0 ? (
+      {attention.actionItems.length > 0 && (
+        <>
+          <p className="mb-1 text-xs text-[var(--m)]">{t('dash.myActions.hint', { days: attention.followUpDays })}</p>
+          <ul className="-mx-1 mb-1 divide-y divide-[var(--l)] border-b border-[var(--l)]">
+            {attention.actionItems.slice(0, 6).map((item) => (
+              <ActionLine
+                key={`${item.userId}-${item.productId}`}
+                item={item}
+                label={`${item.name} · ${item.productName}`}
+                href={up(targetsHref(item, true))}
+              />
+            ))}
+          </ul>
+        </>
+      )}
+      {items.length === 0 && attention.actionItems.length === 0 ? (
         <p className="py-1 text-sm text-[var(--m)]">{t('dash.attention.none')}</p>
       ) : (
         <ul className="-mx-1 divide-y divide-[var(--l)]">
@@ -282,9 +350,20 @@ export function DashboardScreen(): ReactElement {
                 </div>
               ))}
             </div>
+            <p className="mt-3 border-t border-[var(--l)] pt-3 text-sm text-[var(--m)]">
+              {t('dash.replyRate')}{' '}
+              <span className="font-medium text-[var(--t)]">{formatPercent(replyRate(data.current.reply, data.current.first))}</span>
+              <span className="text-xs">
+                {' · '}
+                {t(period === 'week' ? 'dash.previousWeek' : 'dash.previousMonth', {
+                  count: formatPercent(replyRate(data.previous.reply, data.previous.first)),
+                })}
+              </span>
+            </p>
           </Panel>
 
           <div className="grid gap-3 md:grid-cols-2 md:gap-6 xl:grid-cols-3">
+            {data.myActions && <MyActionsPanel actions={data.myActions} />}
             {data.attention && <AttentionPanel attention={data.attention} />}
 
             {data.byProduct.length > 0 && (

@@ -10,6 +10,7 @@ import { Button } from '@/src/shared/ui/button'
 import { TextareaField } from '@/src/shared/ui/textarea-field'
 import { TextField } from '@/src/shared/ui/text-field'
 import { OptionalDetails } from './OptionalDetails'
+import { WhenField, whenToIso } from './WhenField'
 import { formatDateTime, formatRelative } from '../format-date'
 import { outreachService } from '../outreach.service'
 import type {
@@ -169,6 +170,7 @@ function RegisterForm({
   const [templateId, setTemplateId] = useState('')
   const [url, setUrl] = useState('')
   const [comment, setComment] = useState('')
+  const [when, setWhen] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
   const submit = async (event: FormEvent) => {
@@ -183,6 +185,7 @@ function RegisterForm({
           displayName: displayName.trim() || undefined,
           url: url.trim() || undefined,
           comment: comment.trim() || undefined,
+          occurredAt: whenToIso(when),
         },
         token,
         productId,
@@ -213,7 +216,8 @@ function RegisterForm({
         value={templateId}
         onChange={setTemplateId}
       />
-      <OptionalDetails summary={t('result.nameAndProof')}>
+      <OptionalDetails summary={t('result.nameProofAndDate')}>
+        <WhenField value={when} onChange={setWhen} />
         <TextField
           label={t('result.name')}
           value={displayName}

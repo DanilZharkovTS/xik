@@ -51,6 +51,30 @@ export const targetsController = {
       next(err)
     }
   },
+  exportCsv: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await targetsService.exportCsv(
+        req.user,
+        req.product!.id,
+        req.validData!.query
+      )
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+      res.setHeader('Content-Disposition', 'attachment; filename="targets.csv"')
+      res.setHeader('Cache-Control', 'no-store')
+      res.setHeader('X-Export-Truncated', String(result.truncated))
+      res.status(200).send(result.csv)
+    } catch (err) {
+      next(err)
+    }
+  },
+  summary: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await targetsService.summary(req.user, req.product!.id)
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
   get: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await targetsService.get(

@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { authMiddleware } from '../auth/auth.middleware.js'
 import { validateQuery } from '../../shared/middlewares/helpers.js'
 import { reportsController } from './reports.controller.js'
-import { reportQuerySchema } from './reports.schema.js'
+import { followUpsQuerySchema, reportQuerySchema } from './reports.schema.js'
 
 const router = Router()
 
@@ -13,6 +13,15 @@ router.get(
   authMiddleware.requiresRole('admin'),
   validateQuery(reportQuerySchema),
   reportsController.forAdmin
+)
+
+// "Потребує дії" по модераторах: усі продукти або один (?productId=).
+router.get(
+  '/follow-ups',
+  authMiddleware.verifyAccess,
+  authMiddleware.requiresRole('admin'),
+  validateQuery(followUpsQuerySchema),
+  reportsController.followUps
 )
 
 export default router

@@ -10,9 +10,10 @@ import { account } from './account'
 import { blog } from './blog'
 import { blogAdmin } from './blog-admin'
 import { adminUx } from './admin-ux'
+import { journalAnalytics } from './journal-analytics'
 
-const en = { ...common.en, ...team.en, ...admin.en, ...outreach.en, ...reports.en, ...content.en, ...auth.en, ...publicSite.en, ...account.en, ...blog.en, ...blogAdmin.en, ...adminUx.en }
-const uk = { ...common.uk, ...team.uk, ...admin.uk, ...outreach.uk, ...reports.uk, ...content.uk, ...auth.uk, ...publicSite.uk, ...account.uk, ...blog.uk, ...blogAdmin.uk, ...adminUx.uk }
+const en = { ...common.en, ...team.en, ...admin.en, ...outreach.en, ...reports.en, ...content.en, ...auth.en, ...publicSite.en, ...account.en, ...blog.en, ...blogAdmin.en, ...adminUx.en, ...journalAnalytics.en }
+const uk = { ...common.uk, ...team.uk, ...admin.uk, ...outreach.uk, ...reports.uk, ...content.uk, ...auth.uk, ...publicSite.uk, ...account.uk, ...blog.uk, ...blogAdmin.uk, ...adminUx.uk, ...journalAnalytics.uk }
 
 export type MessageKey = keyof typeof en
 

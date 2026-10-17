@@ -200,6 +200,8 @@ export const teamService = {
     const rows = await targetsRepo.listTargets({
       productId: dto.productId,
       ownerUserId: dto.ownerId,
+      state: 'all',
+      followUpBefore: new Date(),
       lastId: dto.lastId,
       limit: dto.limit,
     })

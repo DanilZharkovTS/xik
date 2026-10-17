@@ -1,6 +1,7 @@
 import { api } from '@/src/shared/api/axios'
 import { EVENT_TYPES } from './reports.types'
 import type { Report, ReportQuery } from './reports.types'
+import type { TargetsSummary } from '@/src/features/outreach/outreach.types'
 
 const toParams = (query: ReportQuery) => ({
   period: query.period,
@@ -23,6 +24,14 @@ export const reportsService = {
     const res = await api.get('/outreach/reports', {
       params: toParams(query),
       headers: { Authorization: `Bearer ${token}`, 'X-Product-Id': productId },
+    })
+    return res.data
+  },
+  // "Потребує дії" по модераторах: усі продукти або один (лише адмін).
+  followUps: async (token: string, productId?: string): Promise<TargetsSummary> => {
+    const res = await api.get('/reports/follow-ups', {
+      params: { productId },
+      headers: { Authorization: `Bearer ${token}` },
     })
     return res.data
   },

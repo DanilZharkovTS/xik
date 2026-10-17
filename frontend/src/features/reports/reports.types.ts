@@ -67,7 +67,21 @@ export interface Report {
   byChannel: ChannelRow[]
   byModerator?: NamedRow[]
   byProduct?: NamedRow[]
+  byTemplate?: TemplateRow[]
 }
+
+// Шаблон у звіті: скільки разів ним писали, скільком людям і скільки з них відповіли.
+export interface TemplateRow {
+  id: string
+  title: string
+  uses: number
+  targets: number
+  replied: number
+}
+
+// Частка відповідей серед нових контактів періоду; без нових контактів її немає.
+export const replyRate = (replies: number, firstContacts: number): number | null =>
+  firstContacts > 0 ? replies / firstContacts : null
 
 export interface ReportQuery {
   period: Period
