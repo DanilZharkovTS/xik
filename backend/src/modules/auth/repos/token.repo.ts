@@ -33,8 +33,8 @@ export const tokenRepo = {
     })
   },
   consumeActionToken: async (id: string, db: DbClient = prisma) => {
-    return db.actionToken.update({
-      where: { id },
+    return db.actionToken.updateMany({
+      where: { id, usedAt: null, expiresAt: { gt: new Date() } },
       data: {
         usedAt: new Date(),
       },

@@ -331,8 +331,11 @@ export const authService = {
     const newPasswordHash = await bcrypt.hash(data.newPassword, 10)
 
     await prisma.$transaction(async (tx) => {
+      const consumed = await tokenRepo.consumeActionToken(actionToken.id, tx)
+      if (consumed.count !== 1) {
+        throw ApiError(400, 'BAD_REQUEST', 'Token is invalid or expired')
+      }
       await authRepo.updatePassword(user.id, newPasswordHash, tx)
-      await tokenRepo.consumeActionToken(actionToken.id, tx)
       await sessionRepo.revokeAllForUser(user.id, tx)
     })
 
