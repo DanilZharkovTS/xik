@@ -13,6 +13,7 @@ import type { TargetListItem } from '@/src/features/outreach/outreach.types'
 import { teamService } from '../team.service'
 import type { Moderator, TeamProduct } from '../team.types'
 import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { useConfirm } from '@/src/shared/ui/confirm'
 
 type TransferTargetsSheetProps = {
   source: Moderator | null
@@ -47,6 +48,7 @@ function TransferForm({
   onDone,
 }: Omit<TransferTargetsSheetProps, 'source'> & { source: Moderator }): ReactElement {
   const { t } = useI18n()
+  const confirm = useConfirm()
   const [productId, setProductId] = useState(products[0]?.id ?? '')
   const [toUserId, setToUserId] = useState('')
   const [mode, setMode] = useState<Mode>('all')
@@ -132,7 +134,7 @@ function TransferForm({
       mode === 'all'
         ? t('team.transfer.confirmAll', { from: source.name, to: recipient?.name ?? '' })
         : t('team.transfer.confirmSelected', { count: selected.size, from: source.name, to: recipient?.name ?? '' })
-    if (!window.confirm(confirmText)) return
+    if (!(await confirm({ title: t('team.transfer.title'), description: confirmText, confirmLabel: t('team.transfer.confirmOk') }))) return
 
     try {
       setIsSaving(true)

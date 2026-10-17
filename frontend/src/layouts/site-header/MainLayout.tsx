@@ -7,6 +7,7 @@ import { SiteHeader } from './site-header'
 import { AdminHeader, AdminTabBar } from './admin-header'
 import { ModernFooter } from '@/src/layouts/site-footer/modern-footer'
 import { Toaster } from 'sonner'
+import { ConfirmProvider } from '@/src/shared/ui/confirm'
 import { siteConfig, siteText } from '@/src/config/site'
 import useAuthStore from '@/src/features/auth/store'
 import { usePathname, useRouter } from 'next/navigation'
@@ -138,7 +139,9 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
         data={organizationStructuredData}
         id="organization-structured-data"
       />
-      <MainContent>{children}</MainContent>
+      <ConfirmProvider>
+        <MainContent>{children}</MainContent>
+      </ConfirmProvider>
     </AppProvider>
   )
 }

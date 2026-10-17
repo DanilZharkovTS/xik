@@ -22,6 +22,18 @@ const FOCUSABLE =
 // (шторка вибору поверх форми не закриває форму).
 const openSheets: symbol[] = []
 
+// Інші вікна (підтвердження) стають у той самий стек: поки вони зверху,
+// шторка під ними не реагує на Escape і не перехоплює Tab.
+export const pushOverlay = (key: symbol): (() => void) => {
+  openSheets.push(key)
+  return () => {
+    const index = openSheets.indexOf(key)
+    if (index !== -1) openSheets.splice(index, 1)
+  }
+}
+
+export const isTopOverlay = (key: symbol): boolean => openSheets[openSheets.length - 1] === key
+
 // На телефоні виїжджає знизу (дотягується великим пальцем), на десктопі стає модальним вікном.
 // Поки відкрите: фокус усередині й не виходить за межі, Escape закриває, фон не прокручується,
 // після закриття фокус повертається на елемент, що відкрив вікно.

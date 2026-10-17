@@ -1,6 +1,12 @@
 import { Prisma } from '../../generated/prisma/client.js'
 import { prisma, type DbClient } from '../../shared/database/prisma.js'
 
+export type ModeratorActivity = {
+  weekEvents: number
+  lastEventAt: Date | null
+  lastSignInAt: Date | null
+}
+
 export const teamRepo = {
   findModeratorById: async (userId: string, db: DbClient = prisma) => {
     const user = await db.user.findFirst({
@@ -38,6 +44,42 @@ export const teamRepo = {
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     })
     return moderators
+  },
+  // Активність для картки модератора: події журналу за 7 днів, остання подія й останній вхід.
+  activityFor: async (userIds: string[], since: Date) => {
+    if (userIds.length === 0) return new Map<string, ModeratorActivity>()
+
+    const [week, lastEvent, lastSignIn] = await Promise.all([
+      prisma.outreachEvent.groupBy({
+        by: ['userId'],
+        where: { userId: { in: userIds }, occurredAt: { gte: since } },
+        _count: { _all: true },
+      }),
+      prisma.outreachEvent.groupBy({
+        by: ['userId'],
+        where: { userId: { in: userIds } },
+        _max: { occurredAt: true },
+      }),
+      prisma.userSession.groupBy({
+        by: ['userId'],
+        where: { userId: { in: userIds } },
+        _max: { createdAt: true },
+      }),
+    ])
+
+    const result = new Map<string, ModeratorActivity>(
+      userIds.map((id) => [
+        id,
+        { weekEvents: 0, lastEventAt: null, lastSignInAt: null },
+      ])
+    )
+    for (const row of week) result.get(row.userId)!.weekEvents = row._count._all
+    for (const row of lastEvent)
+      result.get(row.userId)!.lastEventAt = row._max.occurredAt
+    for (const row of lastSignIn)
+      result.get(row.userId)!.lastSignInAt = row._max.createdAt
+
+    return result
   },
   createModerator: async (
     data: { email: string; name: string; passwordHash: string },

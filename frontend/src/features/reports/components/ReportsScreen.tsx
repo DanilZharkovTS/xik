@@ -40,6 +40,21 @@ export function ReportsScreen(): ReactElement {
   const [report, setReport] = useState<Report | null>(null)
   const [settledKey, setSettledKey] = useState('')
 
+  // Посилання з дашборду: ?period=month&userId=...&productId=... задають початкові фільтри.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const linkedPeriod = params.get('period')
+    /* eslint-disable react-hooks/set-state-in-effect -- фільтри з посилання застосовуються один раз */
+    if (linkedPeriod === 'day' || linkedPeriod === 'week' || linkedPeriod === 'month' || linkedPeriod === 'year') {
+      setPeriod(linkedPeriod)
+    }
+    const linkedUser = params.get('userId')
+    if (linkedUser) setUserId(linkedUser)
+    const linkedProduct = params.get('productId')
+    if (linkedProduct) setScope(linkedProduct)
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [])
+
   const isCustomReady = period !== 'custom' || (customFrom !== '' && customTo !== '')
 
   const query = useMemo<ReportQuery | null>(() => {

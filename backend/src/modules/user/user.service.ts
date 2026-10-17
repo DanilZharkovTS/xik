@@ -1,6 +1,6 @@
 import { ApiError } from '../../shared/utils/ApiError.js'
 import { TokenPayload } from '../auth/auth.types.js'
-import { userRepo } from './user.repo.js'
+import { USERS_PAGE_SIZE, userRepo } from './user.repo.js'
 import { FindUsersDto } from './user.schema.js'
 import { UserRole } from './user.types.js'
 import { prisma } from '../../shared/database/prisma.js'
@@ -8,12 +8,23 @@ import { auditRepo } from '../audit/audit.repo.js'
 
 export const userService = {
   findUsers: async (data: FindUsersDto) => {
-    const users = await userRepo.findUsersByName(data)
+    // Беремо на один запис більше: так відомо, чи є наступна сторінка.
+    const rows = await userRepo.findUsersByName(data, USERS_PAGE_SIZE + 1)
+    const hasMore = rows.length > USERS_PAGE_SIZE
+    const users = rows.slice(0, USERS_PAGE_SIZE)
 
     const lastId = users.at(-1)?.id
     const lastCreatedAt = users.at(-1)?.createdAt
 
-    return { response: { users, search: data.name, lastId, lastCreatedAt } }
+    return {
+      response: {
+        users,
+        search: data.q ?? data.name,
+        lastId,
+        lastCreatedAt,
+        hasMore,
+      },
+    }
   },
   //admin
   changeUserRole: async (

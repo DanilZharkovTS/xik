@@ -2,6 +2,8 @@ import { prisma } from '../../shared/database/prisma.js'
 import { FindUsersDto } from './user.schema.js'
 import { UserRole } from './user.types.js'
 
+export const USERS_PAGE_SIZE = 50
+
 export const userRepo = {
   findById: async (id: string) => {
     const user = await prisma.user.findUnique({
@@ -11,16 +13,21 @@ export const userRepo = {
     })
     return user
   },
-  findUsersByName: async (data: FindUsersDto) => {
+  findUsersByName: async (data: FindUsersDto, take = USERS_PAGE_SIZE) => {
+    const search = data.q || data.name
+
     const users = await prisma.user.findMany({
-      where: data.name
-        ? {
-            name: {
-              contains: data.name,
-              mode: 'insensitive',
-            },
-          }
-        : undefined,
+      where: {
+        ...(data.role ? { role: data.role } : {}),
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      },
 
       ...(data.lastId && data.lastCreatedAt
         ? {
@@ -32,7 +39,7 @@ export const userRepo = {
           }
         : {}),
 
-      take: 50,
+      take,
       select: {
         id: true,
         email: true,

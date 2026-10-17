@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import useAuthStore from '@/src/features/auth/store'
@@ -16,8 +16,20 @@ import { AdminProductCard } from './AdminProductCard'
 import { ProductFormSheet } from './ProductFormSheet'
 import type { MessageKey } from '@/src/shared/i18n/messages'
 import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { useConfirm } from '@/src/shared/ui/confirm'
+import { CardGridSkeleton } from '@/src/shared/ui/skeleton'
 
 type KindFilter = ProductKind | 'all'
+
+// Швидкі фільтри, на які веде дашборд (?issue=...): рахуються на клієнті з уже завантаженого списку.
+type Issue = 'notInStripe' | 'priceHidden'
+
+const ISSUES: Record<Issue, (product: AdminProduct) => boolean> = {
+  notInStripe: (product) => !product.isStripeLinked,
+  priceHidden: (product) => !product.showPrice,
+}
+
+const isIssue = (value: string | null): value is Issue => value === 'notInStripe' || value === 'priceHidden'
 
 const KIND_VALUES: { value: KindFilter; labelKey: MessageKey }[] = [
   { value: 'all', labelKey: 'products.all' },
@@ -66,6 +78,7 @@ function StateTabs({
 export function AdminProductsScreen(): ReactElement {
   const { t } = useI18n()
   const token = useAuthStore((state) => state.accessToken)
+  const confirm = useConfirm()
 
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -75,6 +88,21 @@ export function AdminProductsScreen(): ReactElement {
   const [state, setState] = useState<ListState>('active')
   const [search, setSearch] = useState('')
   const [query, setQuery] = useState('')
+
+  const [issue, setIssue] = useState<Issue | null>(null)
+
+  useEffect(() => {
+    const value = new URLSearchParams(window.location.search).get('issue')
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- фільтр із посилання застосовується один раз
+    if (isIssue(value)) setIssue(value)
+  }, [])
+
+  const clearIssue = () => {
+    setIssue(null)
+    window.history.replaceState(null, '', window.location.pathname)
+  }
+
+  const visible = issue ? products.filter(ISSUES[issue]) : products
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editing, setEditing] = useState<AdminProduct | null>(null)
@@ -130,8 +158,14 @@ export function AdminProductsScreen(): ReactElement {
     setIsFormOpen(true)
   }
 
-  const archive = (product: AdminProduct) => {
-    if (!window.confirm(t('products.confirmArchive', { name: product.name }))) return
+  const archive = async (product: AdminProduct) => {
+    const ok = await confirm({
+      title: t('products.confirmArchive.title', { name: product.name }),
+      description: t('products.confirmArchive', { name: product.name }),
+      confirmLabel: t('products.archive'),
+      tone: 'danger',
+    })
+    if (!ok) return
 
     void run(product, () => adminProductsService.archive(product.id, token!), t('products.archivedToast'))
   }
@@ -180,9 +214,24 @@ export function AdminProductsScreen(): ReactElement {
         />
       </div>
 
+      {issue && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-[var(--m)]">{t('products.issueFilter')}</span>
+          <button
+            type="button"
+            onClick={clearIssue}
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-[var(--t)] px-3 text-sm font-medium"
+          >
+            {t(`products.issue.${issue}`)}
+            <X aria-hidden="true" className="h-3.5 w-3.5" />
+            <span className="sr-only">{t('products.clearFilter')}</span>
+          </button>
+        </div>
+      )}
+
       {isLoading ? (
-        <p className="py-12 text-center text-[var(--m)]">{t('common.loading')}</p>
-      ) : products.length === 0 ? (
+        <CardGridSkeleton label={t('common.loading')} />
+      ) : visible.length === 0 ? (
         <div className="rounded-2xl border border-[var(--l)] px-4 py-12 text-center">
           <p className="font-medium">
             {state === 'archived' ? t('products.noArchived') : t('products.noneFound')}
@@ -195,7 +244,7 @@ export function AdminProductsScreen(): ReactElement {
         </div>
       ) : (
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {products.map((product) => (
+          {visible.map((product) => (
             <AdminProductCard
               key={product.id}
               product={product}
@@ -208,7 +257,7 @@ export function AdminProductsScreen(): ReactElement {
                   t('products.syncedToast'),
                 )
               }
-              onArchive={() => archive(product)}
+              onArchive={() => void archive(product)}
               onRestore={() =>
                 void run(
                   product,
