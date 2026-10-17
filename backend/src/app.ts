@@ -12,6 +12,10 @@ dotenv.config()
 
 export const app = express()
 
+// API стоїть за одним зворотним проксі (Caddy): req.ip береться з X-Forwarded-For,
+// інакше всі клієнти мають одну адресу і ліміти за IP не працюють.
+app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS ?? 1))
+
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3001',

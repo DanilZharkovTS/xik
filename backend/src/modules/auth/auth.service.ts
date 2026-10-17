@@ -190,9 +190,11 @@ export const authService = {
       )
     }
   },
-  sendPasswordChangedEmail: async (
-    user: { email: string; locale: 'en' | 'es' | 'uk'; name?: string | null }
-  ) => {
+  sendPasswordChangedEmail: async (user: {
+    email: string
+    locale: 'en' | 'es' | 'uk'
+    name?: string | null
+  }) => {
     const notificationsUrl =
       process.env.NOTIFICATIONS_SERVICE_URL || 'http://localhost:3002'
     const secret = process.env.NOTIFICATIONS_SERVICE_SECRET
@@ -225,6 +227,24 @@ export const authService = {
       )
     }
   },
+  // Новий токен скидання пароля гасить усі попередні: дійсне лише останнє посилання.
+  issuePasswordResetToken: async (userId: string) => {
+    const { rawToken, tokenHash, expiresAt } =
+      tokenService.generateResetPasswordToken()
+
+    await prisma.$transaction(async (tx) => {
+      await tokenRepo.invalidateActive(userId, 'passwordReset', tx)
+      await tokenRepo.createActionToken(
+        userId,
+        'passwordReset',
+        tokenHash,
+        expiresAt,
+        tx
+      )
+    })
+
+    return rawToken
+  },
   requestPasswordReset: async (data: RequestPasswordResetDto) => {
     const user = await authRepo.findUserByEmail(data.email)
 
@@ -232,15 +252,7 @@ export const authService = {
       throw ApiError(404, 'NOT_FOUND', 'User not found')
     }
 
-    const { rawToken, tokenHash, expiresAt } =
-      tokenService.generateResetPasswordToken()
-
-    await tokenRepo.createActionToken(
-      user.id,
-      'passwordReset',
-      tokenHash,
-      expiresAt
-    )
+    const rawToken = await authService.issuePasswordResetToken(user.id)
 
     await authService.sendPasswordResetEmail(user, rawToken)
 
@@ -253,15 +265,7 @@ export const authService = {
       throw ApiError(404, 'NOT_FOUND', 'User not found')
     }
 
-    const { rawToken, tokenHash, expiresAt } =
-      tokenService.generateResetPasswordToken()
-
-    await tokenRepo.createActionToken(
-      targetUser.id,
-      'passwordReset',
-      tokenHash,
-      expiresAt
-    )
+    const rawToken = await authService.issuePasswordResetToken(targetUser.id)
 
     await authService.sendPasswordResetEmail(targetUser, rawToken)
 
@@ -288,7 +292,13 @@ export const authService = {
 
     const newPasswordHash = await bcrypt.hash(data.newPassword, 10)
 
-    await authRepo.updatePassword(user.id, newPasswordHash)
+    // Після зміни пароля всі інші сесії (можливо, чужі) закриваються, а старі
+    // посилання на скидання пароля більше не діють. Поточна сесія лишається.
+    await prisma.$transaction(async (tx) => {
+      await authRepo.updatePassword(user.id, newPasswordHash, tx)
+      await sessionRepo.revokeAllForUser(user.id, tx, userPayload.sessionId)
+      await tokenRepo.invalidateActive(user.id, 'passwordReset', tx)
+    })
 
     await authService.sendPasswordChangedEmail(user)
 
@@ -337,6 +347,7 @@ export const authService = {
       }
       await authRepo.updatePassword(user.id, newPasswordHash, tx)
       await sessionRepo.revokeAllForUser(user.id, tx)
+      await tokenRepo.invalidateActive(user.id, 'passwordReset', tx)
     })
 
     await authService.sendPasswordChangedEmail(user)

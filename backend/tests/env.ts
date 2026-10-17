@@ -6,3 +6,7 @@ process.env.DATABASE_URL =
 process.env.JWT_SECRET = 'test-jwt-secret'
 process.env.STRIPE_SECRET = process.env.STRIPE_SECRET ?? 'sk_test_dummy'
 process.env.REPORT_TIMEZONE = 'Europe/Kyiv'
+// Усі тести йдуть з однієї адреси: ліміти за IP піднято, щоб вони не заважали.
+// Ліміти за e-mail і користувачем лишаються робочими й перевіряються окремо.
+process.env.PASSWORD_RESET_IP_RATE_LIMIT = '10000'
+process.env.REGISTER_RATE_LIMIT = '10000'
