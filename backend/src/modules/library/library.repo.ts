@@ -18,9 +18,13 @@ export const libraryRepo = {
     return libraryItem
   },
   findById: async (id: string) => {
-    return prisma.userLibrary.findUnique({
+    return prisma.userLibrary.findFirst({
       where: {
-        id,
+        OR: [
+          { id },
+          { subscriptionId: id },
+          { stripeSubscriptionId: id },
+        ],
       },
     })
   },

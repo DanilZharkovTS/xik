@@ -599,15 +599,14 @@ export const billingService = {
         stripeSubscriptionId: subscriptionId,
         subscriptionId,
         licenseId: license.id,
-        licenseKey: license.key,
         accessExpiresAt,
         canceledAt,
       },
       update: {
         accessExpiresAt,
         canceledAt,
+        subscriptionId,
         licenseId: license.id,
-        licenseKey: license.key,
       },
     })
 

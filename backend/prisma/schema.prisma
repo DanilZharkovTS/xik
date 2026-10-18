@@ -289,8 +289,7 @@ model UserLibrary {
   subscriptionId String?
   stripeSubscriptionId String?
   licenseId Int?
-  licenseKey String?
-
+  
   accessExpiresAt DateTime?
   canceledAt DateTime?
   createdAt DateTime @default(now())
@@ -300,7 +299,6 @@ model UserLibrary {
 
   @@unique([stripeSubscriptionId])
   @@unique([subscriptionId])
-  @@unique([licenseKey])
 }
 
 // Робочий доступ модератора до продукту (журнал звернень).

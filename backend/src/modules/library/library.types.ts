@@ -3,10 +3,13 @@ export interface UserLibrary {
 
   userId: string
   productId: string
-  subscriptionId: string
-  stripeSubscriptionId: string
+  subscriptionId: string | null
+  stripeSubscriptionId: string | null
+  licenseId: number | null
+  licenseKey: string | null
 
-  accessExpiresAt: Date
+  accessExpiresAt: Date | null
   canceledAt: Date | null
   createdAt: Date
 }
+
