@@ -24,9 +24,8 @@ export const libraryService = {
       throw ApiError(404, 'Product not found', 'PRODUCT_NOT_FOUND')
     }
 
-    const libraryItem = await libraryRepo.addLibraryItem(data)
 
-    return { response: { libraryItem } }
+    return { response: {} }
   },
   renewLibraryAccess: async (data: RenewLibraryAccessDto) => {
     const libraryItem = await libraryRepo.updateLibraryItemExpiresAt(data)

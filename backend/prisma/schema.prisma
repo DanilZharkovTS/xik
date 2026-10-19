@@ -286,10 +286,9 @@ model UserLibrary {
 
   userId String 
   productId String
-  subscriptionId String?
   stripeSubscriptionId String?
   licenseId Int?
-  
+
   accessExpiresAt DateTime?
   canceledAt DateTime?
   createdAt DateTime @default(now())
@@ -298,7 +297,6 @@ model UserLibrary {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([stripeSubscriptionId])
-  @@unique([subscriptionId])
 }
 
 // Робочий доступ модератора до продукту (журнал звернень).

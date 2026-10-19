@@ -597,7 +597,6 @@ export const billingService = {
         userId,
         productId,
         stripeSubscriptionId: subscriptionId,
-        subscriptionId,
         licenseId: license.id,
         accessExpiresAt,
         canceledAt,
@@ -605,7 +604,6 @@ export const billingService = {
       update: {
         accessExpiresAt,
         canceledAt,
-        subscriptionId,
         licenseId: license.id,
       },
     })

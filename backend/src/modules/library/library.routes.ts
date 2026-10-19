@@ -36,21 +36,6 @@ router.get(
   libraryController.getLicenseKey
 )
 
-router.get(
-  '/license-key/:subscriptionId',
-  authMiddleware.verifyAccess,
-  validateParams('subscriptionId'),
-  libraryController.getLicenseKey
-)
-
-router.post(
-  '/license-key',
-  authMiddleware.verifyAccess,
-  validateBody(getLicenseKeySchema),
-  libraryController.getLicenseKey
-)
-
-
 
 router.delete(
   '/:subscriptionId',
