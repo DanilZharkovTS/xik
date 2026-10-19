@@ -61,9 +61,9 @@ test('profile subscription card displays Get license key button and opens masked
     })
   })
 
-  let licenseKeyRequested = false
+  let requestCount = 0
   await page.route('**/api/library/lib-item-123/license-key', async (route) => {
-    licenseKeyRequested = true
+    requestCount++
     // Simulate slight delay so loading state can be observed if needed
     await new Promise((resolve) => setTimeout(resolve, 100))
     await route.fulfill({
@@ -119,23 +119,15 @@ test('profile subscription card displays Get license key button and opens masked
 
   // Modal should be closed
   await expect(modal).toBeHidden()
-  expect(licenseKeyRequested).toBe(true)
+  expect(requestCount).toBe(1)
 
-  // Verify that clicking "Get license key" again triggers a new request and opens modal with new key
-  await page.route('**/api/library/lib-item-123/license-key', async (route) => {
-    await route.fulfill({
-      json: {
-        libraryItem: {
-          ...testLibraryItem,
-          licenseKey: 'XIK-REOPENED-KEY-7777',
-        },
-      },
-    })
-  })
-
+  // Verify that clicking "Get license key" again reuses the key from state and DOES NOT send a new network request
   await getKeyBtn.click()
   await expect(modal).toBeVisible()
-  await expect(modal.locator('input[type="password"]')).toHaveValue('XIK-REOPENED-KEY-7777')
+  await expect(modal.locator('input[type="password"]')).toHaveValue('XIK-SECRET-KEY-9999')
+  // Still 1 request (no additional network call made)
+  expect(requestCount).toBe(1)
+
   await modal.getByRole('button', { name: /close/i }).last().click()
   await expect(modal).toBeHidden()
 })

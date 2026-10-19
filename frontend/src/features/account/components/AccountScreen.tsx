@@ -155,18 +155,6 @@ export function AccountScreen(): ReactElement {
                           ) ?? null,
                         )
                       }}
-                      onModalClose={() => {
-                        setLibrary((current) =>
-                          current?.map((entry) => {
-                            if (entry.id === item.id) {
-                              const updated = { ...entry }
-                              delete updated.licenseKey
-                              return updated
-                            }
-                            return entry
-                          }) ?? null,
-                        )
-                      }}
                     />
 
                     {item.status === 'active' && (item.subscriptionId || item.id) && (

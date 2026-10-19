@@ -69,6 +69,14 @@ export function GetLicenseKey({
   const targetId = subscriptionId || item?.id
 
   const handleGetKey = async () => {
+    // If the license key is already present in state, use it directly without making a network request
+    const existingKey = item?.licenseKey || licenseKey
+    if (existingKey) {
+      setLicenseKey(existingKey)
+      setIsModalOpen(true)
+      return
+    }
+
     if (!targetId || !token || isLoading) return
 
     try {
@@ -108,7 +116,6 @@ export function GetLicenseKey({
 
   const handleClose = () => {
     setIsModalOpen(false)
-    setLicenseKey(null)
     setIsCopied(false)
     onModalClose?.()
   }
