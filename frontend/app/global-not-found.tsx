@@ -11,7 +11,9 @@ export const metadata: Metadata = {
 export default function GlobalNotFound() {
   return (
     <html lang="en">
-      <body className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center">
+      <head><title>Page Not Found | XIK</title></head>
+      <body>
+        <main className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center">
         <h1 className="text-5xl font-bold text-[var(--t)]">404</h1>
         <p className="text-[var(--m)]">Page not found</p>
         {/* Тут немає роутера (власний <html>), тож звичайне посилання. */}
@@ -22,6 +24,7 @@ export default function GlobalNotFound() {
         >
           Go home
         </a>
+        </main>
       </body>
     </html>
   )

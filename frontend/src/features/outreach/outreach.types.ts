@@ -107,6 +107,7 @@ export interface ActivityInput {
   channel?: Channel
   url?: string
   comment?: string
+  occurredAt?: string
 }
 
 export type TemplateChannel = Channel | 'any'
@@ -165,9 +166,10 @@ export interface TargetListItem {
   id: string
   displayName: string
   status: TargetStatus
-  owner: { name: string }
+  owner: { id?: string; name: string }
   firstContactedAt: string | null
   lastContactedAt: string | null
+  lastReplyAt?: string | null
   identifiers: TargetIdentifier[]
 }
 
@@ -196,6 +198,7 @@ export interface RegisterInput extends CheckInput {
   displayName?: string
   url?: string
   comment?: string
+  occurredAt?: string
 }
 
 export type RegisterOutcome =
@@ -205,4 +208,44 @@ export type RegisterOutcome =
 export interface TargetsPage {
   targets: TargetListItem[]
   nextCursor: string | null
+}
+
+// Стан роботи з ціллю (фільтр списку). Узгоджено з бекендом (targets.schema.ts).
+export const TARGET_STATES = ['all', 'followUp', 'needsAnswer', 'awaiting', 'replied', 'doNotContact'] as const
+export type TargetState = (typeof TARGET_STATES)[number]
+
+export interface TargetFilters {
+  state: TargetState
+  ownerUserId?: string
+  channel?: Channel
+  q?: string
+}
+
+export interface SummaryCounts {
+  total: number
+  awaiting: number
+  followUp: number
+  needsAnswer: number
+  replied: number
+  doNotContact: number
+}
+
+export interface OwnerSummary extends SummaryCounts {
+  userId: string
+  name: string
+}
+
+export interface TargetsSummary {
+  followUpDays: number
+  totals: SummaryCounts
+  byOwner: OwnerSummary[]
+  // Лише у зведенні для адміна: модератор × продукт, де щось висить.
+  actionItems?: {
+    userId: string
+    name: string
+    productId: string
+    productName: string
+    followUp: number
+    needsAnswer: number
+  }[]
 }

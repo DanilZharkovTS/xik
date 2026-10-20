@@ -44,4 +44,25 @@ export const libraryController = {
       next(err)
     }
   },
+  getLicenseKey: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const subscriptionId =
+        req.validData?.body?.subscriptionId ||
+        req.validData?.query?.subscriptionId ||
+        req.validData?.params?.subscriptionId ||
+        req.params.subscriptionId ||
+        req.body?.subscriptionId ||
+        req.query?.subscriptionId
+
+      const result = await libraryService.getLicenseKey(req.user, subscriptionId)
+      res.status(200).json(result.response)
+    } catch (err) {
+      next(err)
+    }
+  },
 }
+

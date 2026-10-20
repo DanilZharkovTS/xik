@@ -2,7 +2,10 @@ import z from 'zod'
 
 export const findUsersSchema = z
   .object({
-    name: z.string().optional(),
+    // q шукає за імʼям або e-mail; name лишився для старих клієнтів.
+    q: z.string().trim().max(200).optional(),
+    name: z.string().trim().max(200).optional(),
+    role: z.enum(['admin', 'moderator', 'user']).optional(),
     lastId: z.string().optional(),
     lastCreatedAt: z.coerce.date().optional(),
   })

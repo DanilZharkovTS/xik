@@ -59,6 +59,7 @@ interface TargetBase {
   statusReason: string | null
   firstContactedAt: Date | null
   lastContactedAt: Date | null
+  lastReplyAt: Date | null
   owner: { id: string; name: string }
   identifiers: IdentifierRow[]
 }
@@ -67,9 +68,10 @@ export const toListItemDto = (row: TargetBase) => ({
   id: row.id,
   displayName: row.displayName,
   status: row.status,
-  owner: { name: row.owner.name },
+  owner: { id: row.owner.id, name: row.owner.name },
   firstContactedAt: row.firstContactedAt,
   lastContactedAt: row.lastContactedAt,
+  lastReplyAt: row.lastReplyAt,
   identifiers: row.identifiers.map(toIdentifierDto),
 })
 

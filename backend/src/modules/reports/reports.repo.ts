@@ -63,6 +63,34 @@ export const reportsRepo = {
       WHERE ${where(filter)}
       GROUP BY 1, 2, 3
     `,
+  // Шаблони: скільки разів ними писали (перший і повторний контакт), скільком людям
+  // і скільки з них потім відповіли (відповідь будь-коли після цього звернення).
+  templateStats: (filter: ReportFilter) =>
+    prisma.$queryRaw<
+      {
+        templateId: string
+        title: string
+        uses: number
+        targets: number
+        replied: number
+      }[]
+    >`
+      SELECT e."templateId" AS "templateId",
+             t."title" AS "title",
+             COUNT(*)::int AS "uses",
+             COUNT(DISTINCT e."targetId")::int AS "targets",
+             COUNT(DISTINCT e."targetId") FILTER (WHERE EXISTS (
+               SELECT 1 FROM "OutreachEvent" r
+               WHERE r."targetId" = e."targetId" AND r."type" = 'reply' AND r."occurredAt" >= e."occurredAt"
+             ))::int AS "replied"
+      FROM (
+        SELECT * FROM "OutreachEvent"
+        WHERE ${where({ ...filter, types: ['first', 'repeat'] })} AND "templateId" IS NOT NULL
+      ) e
+      JOIN "OutreachTemplate" t ON t."id" = e."templateId"
+      GROUP BY 1, 2
+      ORDER BY "uses" DESC
+    `,
   countsByProductAndType: (filter: ReportFilter) =>
     prisma.$queryRaw<
       (CountRow & { productId: string; name: string; type: ReportEventType })[]

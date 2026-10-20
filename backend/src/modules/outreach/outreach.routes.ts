@@ -27,6 +27,7 @@ import {
 import {
   addIdentifierSchema,
   checkSchema,
+  exportTargetsSchema,
   listTargetsSchema,
   registerTargetSchema,
 } from './targets.schema.js'
@@ -64,6 +65,15 @@ router.post(
 )
 
 router.get('/targets', validateQuery(listTargetsSchema), targetsController.list)
+
+// Статичні шляхи раніше за /targets/:targetId.
+router.get(
+  '/targets/export',
+  validateQuery(exportTargetsSchema),
+  targetsController.exportCsv
+)
+
+router.get('/targets/summary', targetsController.summary)
 
 router.get(
   '/targets/:targetId',

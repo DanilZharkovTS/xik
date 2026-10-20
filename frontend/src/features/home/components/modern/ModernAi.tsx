@@ -57,19 +57,23 @@ export function ModernAi({ agents }: ModernAiProps) {
                   href={href(productHref(agent))}
                   className="group relative flex min-h-[260px] cursor-pointer flex-col justify-between rounded-[24px] border border-[var(--l)] bg-[var(--bg)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--m)] hover:shadow-xl sm:min-h-[290px]"
                 >
-                  {/* Status Indicator */}
-                  <span
-                    className={`absolute right-5 top-5 size-2 rounded-full ${
-                      isBuilding ? 'bg-[#ff9f0a]' : 'bg-[#30d158]'
-                    }`}
-                    title={isBuilding ? t('home.ai.building') : t('home.ai.active')}
-                    role="img"
-                    aria-label={isBuilding ? t('home.ai.building') : t('home.ai.active')}
-                  />
-
-                  <div>
-                    <div className="line-clamp-1 pr-5 text-[11px] font-semibold uppercase tracking-wider text-[var(--m)]">
-                      {String(index + 1).padStart(2, '0')} · {agent.categoryLabel ?? t('catalog.eyebrow.agent')}
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="line-clamp-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--m)]">
+                        {String(index + 1).padStart(2, '0')} · {agent.categoryLabel ?? t('catalog.eyebrow.agent')}
+                      </span>
+                      <span
+                        className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          isBuilding
+                            ? 'border border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                            : 'border border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        }`}
+                      >
+                        <span
+                          className={`size-1.5 rounded-full ${isBuilding ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                        />
+                        {isBuilding ? t('home.ai.building') : t('home.ai.active')}
+                      </span>
                     </div>
 
                     <h3 className="my-2.5 text-xl font-bold tracking-tight text-[var(--t)] transition-colors group-hover:text-[var(--b)] sm:text-[22px]">

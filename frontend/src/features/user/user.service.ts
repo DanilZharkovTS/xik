@@ -1,10 +1,15 @@
 import { api } from '@/src/shared/api/axios'
-import { UserRole } from './user.types'
+import type { UserRole, UsersPage, UsersQuery } from './user.types'
 
 export const userService = {
-  findUsers: async (search: string | null, token: string) => {
+  findUsers: async (query: UsersQuery, token: string): Promise<UsersPage> => {
     const res = await api.get('/users', {
-      params: { name: search ? search : null },
+      params: {
+        q: query.q || undefined,
+        role: query.role,
+        lastId: query.cursor?.lastId,
+        lastCreatedAt: query.cursor?.lastCreatedAt,
+      },
       headers: { Authorization: `Bearer ${token}` },
     })
     return res.data

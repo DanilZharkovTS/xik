@@ -47,7 +47,7 @@ export const blogRepo = {
 
   listVisible: async (
     lang: ContentLocale,
-    filter: { tag?: string; category?: string },
+    filter: { tag?: string; category?: string; q?: string },
     page: number,
     limit: number,
     now: Date
@@ -56,6 +56,20 @@ export const blogRepo = {
       ...visibleWhere(lang, now),
       ...(filter.tag ? { tags: { some: { slug: filter.tag } } } : {}),
       ...(filter.category ? { category: { slug: filter.category } } : {}),
+      ...(filter.q
+        ? {
+            translations: {
+              some: {
+                locale: lang,
+                isReady: true,
+                OR: [
+                  { title: { contains: filter.q, mode: 'insensitive' as const } },
+                  { excerpt: { contains: filter.q, mode: 'insensitive' as const } },
+                ],
+              },
+            },
+          }
+        : {}),
     }
 
     const [items, total] = await Promise.all([

@@ -27,12 +27,17 @@ const requireModerator = async (userId: string) => {
 export const teamService = {
   listModerators: async () => {
     const moderators = await teamRepo.listModerators()
+    const activity = await teamRepo.activityFor(
+      moderators.map((moderator) => moderator.id),
+      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    )
 
     return {
       response: {
         moderators: moderators.map(({ memberships, ...moderator }) => ({
           ...moderator,
           products: memberships.map((m) => m.product),
+          activity: activity.get(moderator.id),
         })),
       },
     }
@@ -195,6 +200,8 @@ export const teamService = {
     const rows = await targetsRepo.listTargets({
       productId: dto.productId,
       ownerUserId: dto.ownerId,
+      state: 'all',
+      followUpBefore: new Date(),
       lastId: dto.lastId,
       limit: dto.limit,
     })

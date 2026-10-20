@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../support/test'
 
 const user = { id: 'buyer-test', email: 'buyer@example.test', name: 'Buyer', role: 'user', locale: 'en', sessionId: 'session-test' }
 
@@ -28,6 +28,14 @@ test('parallel expired requests share one refresh and retry with the new token',
 test('a failed initial refresh leaves checking and permits signing in again', async ({ page }) => {
   await page.route('**/api/auth/refresh', (route) => route.abort('failed'))
   await page.goto('/account')
-  await expect(page).toHaveURL(/\/auth\/login$/)
+  await expect(page).toHaveURL(/\/login$/)
   await expect(page.getByRole('button', { name: /sign in/i })).toBeEnabled()
+  await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
+})
+
+test('an unavailable API on start shows the site as a guest without an error toast', async ({ page }) => {
+  await page.route('**/api/auth/refresh', (route) => route.fulfill({ status: 503, body: 'Service Unavailable' }))
+  await page.goto('/')
+  await expect(page.getByRole('link', { name: /sign in/i }).first()).toBeVisible()
+  await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
 })

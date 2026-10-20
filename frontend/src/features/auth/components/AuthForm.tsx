@@ -82,7 +82,7 @@ export const AuthForm: React.FC = () => {
 
       await authService.register({ ...form, locale })
 
-      router.push(up('/auth/login'))
+      router.push(up('/login'))
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {
@@ -202,7 +202,7 @@ export const AuthForm: React.FC = () => {
       </form>
 
       <Link
-        href={up(isRegister ? '/auth/login' : '/auth/register')}
+        href={up(isRegister ? '/login' : '/auth/register')}
         className="mt-4 inline-flex min-h-11 items-center justify-center text-[var(--m)] hover:text-[var(--t)]"
       >
         {isRegister ? t('auth.haveAccount') : t('auth.noAccount')}

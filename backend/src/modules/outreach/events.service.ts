@@ -66,6 +66,9 @@ export const eventsService = {
       }
 
       const occurredAt = dto.occurredAt ?? new Date()
+      // Канал не вибрали: беремо канал основного ідентифікатора, щоб у звітах не було "не вказано".
+      const channel =
+        dto.channel ?? (await targetsRepo.primaryChannel(targetId, tx))
 
       await targetsRepo.createEvent(
         {
@@ -73,7 +76,7 @@ export const eventsService = {
           targetId,
           userId: actor.id,
           type: dto.type,
-          channel: dto.channel,
+          channel,
           url: dto.url,
           comment: dto.comment,
           ...template,
@@ -84,6 +87,8 @@ export const eventsService = {
 
       if (dto.type === 'repeat') {
         await targetsRepo.touchLastContacted(targetId, occurredAt, tx)
+      } else {
+        await targetsRepo.touchLastReply(targetId, occurredAt, tx)
       }
     })
 

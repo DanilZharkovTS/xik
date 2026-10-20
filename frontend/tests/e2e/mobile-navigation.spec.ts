@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../support/test'
 
 test.use({
   hasTouch: true,
@@ -41,7 +41,7 @@ test.describe('mobile navigation', () => {
 
     await page.keyboard.press('Shift+Tab')
     await expect(
-      dialog.getByRole('link', { name: 'Get Started' }),
+      dialog.getByRole('link', { name: 'Sign In' }),
     ).toBeFocused()
     await page.keyboard.press('Tab')
     await expect(closeButton).toBeFocused()
@@ -76,9 +76,9 @@ test.describe('mobile navigation', () => {
     const dialog = page.locator('dialog#mobile-navigation')
 
     await trigger.click()
-    await dialog.getByRole('link', { name: 'About Us' }).click()
+    await dialog.getByRole('link', { name: 'Blog' }).click()
 
-    await expect(page).toHaveURL('/about')
+    await expect(page).toHaveURL('/blog')
     await expect(dialog).toBeHidden()
     await expect(trigger).toHaveAttribute('aria-expanded', 'false')
     await expect

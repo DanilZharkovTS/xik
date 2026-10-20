@@ -33,11 +33,22 @@ work can be counted per day, week, month and year. It replaces an external noteb
   everyone. The reason is visible to the owner and admins only.
 - **Publications**: posts, ads, articles, links in an offer (Facebook, Instagram, Threads, TikTok, X, YouTube...)
   with a proof link, deduplicated by normalized URL, counted separately from personal contacts.
+- **Contact states**: every target is *waiting for reply*, *no reply N+ days* (follow-up due, `FOLLOW_UP_DAYS`),
+  *replied, your turn* (the last reply is newer than our last contact), *replied* or *do not contact*. The list
+  filters by state, channel, search (name or identifier) and, for admins, moderator, and exports to CSV (max 5000 rows,
+  formula-safe). `lastReplyAt` on the target keeps these filters cheap.
+- **Dates**: a first contact, a repeat and a reply can be logged with an earlier date (never a future one). A repeat or
+  reply without a channel gets the channel of the target's first identifier.
 - **Templates**: per-product texts for copying (channel or universal), variables `{{name}}`,
   `{{product_name}}`, `{{product_link}}`, `{{manager_name}}`. Owner or admin edits; others duplicate. Every
   content change bumps a version; events remember the version used.
 - **Reports**: day/week/month/year/custom (max 366 days), by channel, moderator and product, event-type
-  filter, a dashboard with a chart and a table view. Admins also get an "All products" scope.
+  filter, a dashboard with a chart and a table view. Admins also get an "All products" scope (by default the report
+  follows the product chosen at the top). The moderator table shows new, repeat, replies, reply rate
+  (replies / new contacts), posts, follow-ups due and last activity; templates show uses, people and how many replied
+  afterwards. Reports export to CSV.
+- **Needs action**: the dashboard lists, per moderator and product, contacts with no reply for `FOLLOW_UP_DAYS`+ days
+  and people who replied and wait for an answer (`GET /api/outreach/targets/summary`, admin `GET /api/reports/follow-ups`).
 - **Team** (admin): create moderators, reset passwords, give and take products one by one, deactivate and
   reactivate, transfer targets (all or chosen) between moderators.
 - **Audit**: access changes, password resets, do-not-contact changes, template deletions and target transfers
@@ -54,6 +65,7 @@ Facebook drop tracking parameters, `www` and trailing slash; websites match by r
 | Variable | Default | Purpose |
 |---|---|---|
 | `REPORT_TIMEZONE` | `Europe/Kyiv` | IANA time zone for report day boundaries (`AT TIME ZONE`). An invalid name fails loudly. |
+| `FOLLOW_UP_DAYS` | `3` | Days without a reply after which a contact counts as follow-up due. |
 | `OUTREACH_RATE_LIMIT` | `30` | Requests per minute per user for check, register and add-identifier. |
 | `LOGIN_RATE_LIMIT` | `10` | Failed sign-ins per e-mail per 5 minutes (successful ones do not count). |
 | `TEST_DATABASE_URL` | `postgresql://postgres:1234@localhost:5432/xik_test` | Empty Postgres database used by `npm test`. |
@@ -111,7 +123,7 @@ which block of the site shows it; services stay static in the frontend.
 - **One-to-one link.** Every product has one Stripe product (`stripeProductId`) and one current Stripe price
   (`stripePriceId`), both unique. Create is Stripe-first; if the database write then fails, the new Stripe objects are
   deactivated. Changing the price creates a new Stripe price and deactivates the old one (existing subscribers keep it).
-- **Price is always set.** `showPrice` only decides whether the product page shows it; otherwise the buyer sees it at checkout.
+- **Price is always set.** When `showPrice` is off, the public product page hides both the price and the subscription button.
   Public responses never contain Stripe ids, and hide the price when `showPrice` is off.
 - **Delete is archive.** `DELETE /products/:id` sets `archivedAt` and deactivates the Stripe product; `POST /products/:id/restore`
   brings it back. Archived products disappear from the site, checkout and the journal product list.

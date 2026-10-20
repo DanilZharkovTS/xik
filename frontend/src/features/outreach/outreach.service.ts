@@ -16,8 +16,17 @@ import type {
   TemplateStatus,
   TemplateUpdateOutcome,
   TargetDetail,
+  TargetFilters,
   TargetsPage,
+  TargetsSummary,
 } from './outreach.types'
+
+const filterParams = (filters: TargetFilters) => ({
+  state: filters.state === 'all' ? undefined : filters.state,
+  ownerUserId: filters.ownerUserId || undefined,
+  channel: filters.channel || undefined,
+  q: filters.q?.trim() || undefined,
+})
 
 // Продукт передається заголовком, але остаточне рішення про доступ ухвалює сервер.
 const scoped = (token: string, productId: string) => ({
@@ -81,13 +90,35 @@ export const outreachService = {
   listTargets: async (
     token: string,
     productId: string,
+    filters: TargetFilters = { state: 'all' },
     lastId?: string,
   ): Promise<TargetsPage> => {
     const res = await api.get('/outreach/targets', {
       ...scoped(token, productId),
-      params: lastId ? { lastId } : undefined,
+      params: { ...filterParams(filters), lastId },
     })
     return res.data
+  },
+  summary: async (token: string, productId: string): Promise<TargetsSummary> => {
+    const res = await api.get('/outreach/targets/summary', scoped(token, productId))
+    return res.data
+  },
+  // CSV з тими самими фільтрами: файл зберігається через тимчасове посилання.
+  exportTargets: async (token: string, productId: string, filters: TargetFilters): Promise<{ truncated: boolean }> => {
+    const res = await api.get('/outreach/targets/export', {
+      ...scoped(token, productId),
+      params: filterParams(filters),
+      responseType: 'blob',
+    })
+    const url = URL.createObjectURL(res.data as Blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `targets-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+    return { truncated: res.headers['x-export-truncated'] === 'true' }
   },
   getTarget: async (
     targetId: string,

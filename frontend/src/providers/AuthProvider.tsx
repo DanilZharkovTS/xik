@@ -30,6 +30,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           return
         }
 
+        // Бекенд недоступний (немає відповіді) або тимчасово лежить (5xx):
+        // сайт працює як для гостя, без тосту й червоного оверлею в dev.
+        if (isAxiosError(err) && (!err.response || err.response.status >= 500)) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.warn('[auth] Session refresh skipped: API is unavailable.', err.message)
+          }
+          setAuthStatus('unauthenticated')
+          return
+        }
+
         if (err instanceof Error) {
           toast.error(err.message)
         }

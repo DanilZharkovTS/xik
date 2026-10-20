@@ -11,6 +11,14 @@ export interface Moderator {
   createdAt: string
   deactivatedAt: string | null
   products: TeamProduct[]
+  activity?: ModeratorActivity
+}
+
+export interface ModeratorActivity {
+  // Події журналу за останні 7 днів.
+  weekEvents: number
+  lastEventAt: string | null
+  lastSignInAt: string | null
 }
 
 export interface CreateModeratorInput {

@@ -597,9 +597,7 @@ export const billingService = {
         userId,
         productId,
         stripeSubscriptionId: subscriptionId,
-        subscriptionId,
         licenseId: license.id,
-        licenseKey: license.key,
         accessExpiresAt,
         canceledAt,
       },
@@ -607,7 +605,6 @@ export const billingService = {
         accessExpiresAt,
         canceledAt,
         licenseId: license.id,
-        licenseKey: license.key,
       },
     })
 

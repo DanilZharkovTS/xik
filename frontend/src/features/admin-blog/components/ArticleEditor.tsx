@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -10,7 +10,8 @@ import useAuthStore from '@/src/features/auth/store'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
 import type { Locale } from '@/src/shared/i18n/i18n-store'
 import { withLocale } from '@/src/shared/i18n/paths'
-import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { useI18n, useUrlLocalePath } from '@/src/shared/i18n/use-i18n'
+import { useUnsavedChanges } from '@/src/shared/lib/use-unsaved-changes'
 import { Button } from '@/src/shared/ui/button'
 import { Segmented } from '@/src/shared/ui/segmented'
 import { SelectField } from '@/src/shared/ui/select-field'
@@ -45,8 +46,35 @@ function Group({ title, children }: { title: string; children: ReactNode }): Rea
 
 const counter = (value: string, max: number): string => `${value.length} / ${max}`
 
+// Локальна чернетка в браузері: переживає закриття вкладки, кнопку "назад" і збій мережі.
+type LocalDraft = { form: ArticleForm; savedAt: string }
+
+const draftKey = (articleId: string | null) => `xik.blog-draft:${articleId ?? 'new'}`
+
+const readDraft = (articleId: string | null): LocalDraft | null => {
+  try {
+    const raw = window.localStorage.getItem(draftKey(articleId))
+    return raw ? (JSON.parse(raw) as LocalDraft) : null
+  } catch {
+    return null
+  }
+}
+
+const writeDraft = (articleId: string | null, form: ArticleForm) => {
+  try {
+    window.localStorage.setItem(draftKey(articleId), JSON.stringify({ form, savedAt: new Date().toISOString() }))
+  } catch {}
+}
+
+const dropDraft = (articleId: string | null) => {
+  try {
+    window.localStorage.removeItem(draftKey(articleId))
+  } catch {}
+}
+
 export function ArticleEditor({ articleId }: { articleId: string | null }): ReactElement {
   const { t, locale: uiLocale } = useI18n()
+  const up = useUrlLocalePath()
   const router = useRouter()
   const token = useAuthStore((state) => state.accessToken)
 
@@ -57,11 +85,56 @@ export function ArticleEditor({ articleId }: { articleId: string | null }): Reac
   const [lang, setLang] = useState<Locale>('en')
   const [isLoading, setIsLoading] = useState(articleId !== null)
   const [isSaving, setIsSaving] = useState(false)
+  // Що лежить на сервері: з ним порівнюється форма, щоб знати про незбережені зміни.
+  const [savedJson, setSavedJson] = useState(() => JSON.stringify(newForm()))
+  const [pendingDraft, setPendingDraft] = useState<LocalDraft | null>(null)
+
+  const formJson = useMemo(() => JSON.stringify(form), [form])
+  const isDirty = !isLoading && formJson !== savedJson
 
   const apply = (loaded: AdminArticle) => {
+    const loadedForm = toForm(loaded)
     setArticle(loaded)
-    setForm(toForm(loaded))
+    setForm(loadedForm)
+    setSavedJson(JSON.stringify(loadedForm))
     setAssets((current) => ({ ...current, ...loaded.assets }))
+  }
+
+  useUnsavedChanges(isDirty, {
+    title: t('blogAdmin.unsaved.title'),
+    description: t('blogAdmin.unsaved.text'),
+    confirmLabel: t('blogAdmin.unsaved.leave'),
+    tone: 'danger',
+  })
+
+  // Після завантаження: якщо в браузері лишилася чернетка, що відрізняється від збереженого, пропонуємо її.
+  useEffect(() => {
+    if (isLoading) return
+    const draft = readDraft(articleId)
+    if (draft && JSON.stringify(draft.form) !== savedJson) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- перевірка один раз після завантаження
+      setPendingDraft(draft)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, articleId])
+
+  // Поки є незбережені зміни, чернетка оновлюється з невеликою паузою.
+  useEffect(() => {
+    if (!isDirty || pendingDraft) return
+    const timer = setTimeout(() => writeDraft(articleId, form), 800)
+    return () => clearTimeout(timer)
+  }, [isDirty, pendingDraft, articleId, form])
+
+  const restoreDraft = () => {
+    if (!pendingDraft) return
+    setForm(pendingDraft.form)
+    setPendingDraft(null)
+    toast.success(t('blogAdmin.draft.restored'))
+  }
+
+  const discardDraft = () => {
+    dropDraft(articleId)
+    setPendingDraft(null)
   }
 
   useEffect(() => {
@@ -122,14 +195,17 @@ export function ArticleEditor({ articleId }: { articleId: string | null }): Reac
 
       if (article) {
         apply(await adminBlogService.update(article.id, payload, token))
+        dropDraft(article.id)
         toast.success(t('blogAdmin.editor.saved'))
       } else {
         const created = await adminBlogService.create(
           { ...payload, status: payload.status === 'archived' ? 'draft' : payload.status },
           token,
         )
+        setSavedJson(formJson)
+        dropDraft(null)
         toast.success(t('blogAdmin.editor.created'))
-        router.replace(`/admin/blog/${created.id}`)
+        router.replace(up(`/admin/blog/${created.id}`))
       }
     } catch (err) {
       toast.error(getErrorMessage(err))
@@ -153,13 +229,34 @@ export function ArticleEditor({ articleId }: { articleId: string | null }): Reac
   return (
     <div className="mx-auto w-full max-w-3xl space-y-4 px-4 py-4 md:py-6">
       <div className="flex items-center justify-between gap-3">
-        <Link href="/admin/blog" className="text-sm text-[var(--m)] hover:text-[var(--t)]">
+        <Link href={up('/admin/blog')} className="text-sm text-[var(--m)] hover:text-[var(--t)]">
           ← {t('blogAdmin.editor.back')}
         </Link>
         <h1 className="text-lg font-medium md:text-2xl">
           {article ? t('blogAdmin.editor.edit') : t('blogAdmin.editor.new')}
         </h1>
       </div>
+
+      {pendingDraft && (
+        <div
+          role="status"
+          className="flex flex-col gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm md:flex-row md:items-center md:justify-between md:p-4"
+        >
+          <p>
+            {t('blogAdmin.draft.found', {
+              time: new Intl.DateTimeFormat(uiLocale, { dateStyle: 'medium', timeStyle: 'short' }).format(
+                new Date(pendingDraft.savedAt),
+              ),
+            })}
+          </p>
+          <div className="flex shrink-0 gap-2">
+            <Button variant="secondary" onClick={discardDraft}>
+              {t('blogAdmin.draft.discard')}
+            </Button>
+            <Button onClick={restoreDraft}>{t('blogAdmin.draft.restore')}</Button>
+          </div>
+        </div>
+      )}
 
       <Group title={t('blogAdmin.pub.title')}>
         <SelectField
@@ -323,6 +420,9 @@ export function ArticleEditor({ articleId }: { articleId: string | null }): Reac
       />
 
       <div className="sticky bottom-0 -mx-4 flex gap-2 border-t border-[var(--l)] bg-[var(--bg)] px-4 pb-1 pt-3 max-md:bottom-[calc(3.5rem+env(safe-area-inset-bottom))]">
+        <p aria-live="polite" className="flex items-center text-sm text-[var(--m)]">
+          {isDirty ? t('blogAdmin.unsaved.badge') : t('blogAdmin.unsaved.allSaved')}
+        </p>
         <Button className="flex-1" onClick={save} disabled={isSaving}>
           {isSaving ? t('blogAdmin.editor.saving') : t('blogAdmin.editor.save')}
         </Button>

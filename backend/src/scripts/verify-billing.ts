@@ -139,7 +139,6 @@ async function main() {
       res1.status === 200 &&
       lib1 !== null &&
       lib1.licenseId !== null &&
-      lib1.licenseKey !== null &&
       lib1.accessExpiresAt !== null &&
       lib1.canceledAt === null &&
       (evt1?.notification as any)?.endpoint === 'subscription-started' &&
@@ -152,7 +151,6 @@ async function main() {
         webhookStatus: res1.status,
         userLibraryFound: !!lib1,
         licenseId: lib1?.licenseId,
-        licenseKey: lib1?.licenseKey,
         accessExpiresAt: lib1?.accessExpiresAt?.toISOString(),
         canceledAt: lib1?.canceledAt,
         noticeEndpoint: (evt1?.notification as any)?.endpoint,

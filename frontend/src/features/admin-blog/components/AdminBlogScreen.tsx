@@ -8,7 +8,8 @@ import { toast } from 'sonner'
 import useAuthStore from '@/src/features/auth/store'
 import { getErrorMessage } from '@/src/shared/api/get-error-message'
 import { cn } from '@/src/shared/lib/cn'
-import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { useI18n, useUrlLocalePath } from '@/src/shared/i18n/use-i18n'
+import { RowsSkeleton } from '@/src/shared/ui/skeleton'
 import { SelectField } from '@/src/shared/ui/select-field'
 import { TextField } from '@/src/shared/ui/text-field'
 import { adminBlogService } from '../admin-blog.service'
@@ -25,6 +26,7 @@ const BADGE: Record<ArticleState, string> = {
 
 export function AdminBlogScreen(): ReactElement {
   const { t, locale } = useI18n()
+  const up = useUrlLocalePath()
   const token = useAuthStore((state) => state.accessToken)
   const [state, setState] = useState<(typeof STATES)[number]>('all')
   const [query, setQuery] = useState('')
@@ -59,7 +61,7 @@ export function AdminBlogScreen(): ReactElement {
           <p className="text-sm text-[var(--m)]">{t('blogAdmin.subtitle')}</p>
         </div>
         <Link
-          href="/admin/blog/new"
+          href={up('/admin/blog/new')}
           className="inline-flex min-h-11 items-center rounded-full border border-[var(--t)] bg-[var(--t)] px-5 text-sm font-semibold text-[var(--bg)]"
         >
           {t('blogAdmin.new')}
@@ -78,7 +80,7 @@ export function AdminBlogScreen(): ReactElement {
       </div>
 
       {rows === null ? (
-        <p className="text-sm text-[var(--m)]">{t('common.loading')}</p>
+        <RowsSkeleton rows={4} label={t('common.loading')} />
       ) : rows.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-[var(--l)] p-6 text-center text-sm text-[var(--m)]">{t('blogAdmin.empty')}</p>
       ) : (
@@ -86,7 +88,7 @@ export function AdminBlogScreen(): ReactElement {
           {rows.map((row) => (
             <li key={row.id}>
               <Link
-                href={`/admin/blog/${row.id}`}
+                href={up(`/admin/blog/${row.id}`)}
                 className="flex items-center gap-3 rounded-2xl border border-[var(--l)] bg-[var(--s)] p-3 transition-colors hover:border-[var(--m)] md:p-4"
               >
                 {row.cover ? (

@@ -22,16 +22,7 @@ export async function productPageMetadata(
 ): Promise<Metadata> {
   const product = await fetchProduct(slug, locale)
 
-  if (!product) {
-    const key = kind === 'agent' ? 'Agent' : 'Product'
-
-    return createPageMetadata({
-      title: translate(locale, `detail.notFound${key}`),
-      description: translate(locale, `detail.notFound${key}Desc`),
-      pathname: `${kind === 'agent' ? '/ai' : '/products'}/${slug}`,
-      locale,
-    })
-  }
+  if (!product) notFound()
 
   const pathname = productHref(product)
 
@@ -79,7 +70,8 @@ export async function ProductPage({
     }))
 
   const url = getAbsoluteUrl(localizedPath(productHref(product), locale))
-  const hasPrice = product.showPrice && product.price !== null && product.currency !== null
+  const visiblePrice = product.showPrice ? formatPrice(product, locale) : ''
+  const hasPrice = visiblePrice !== ''
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -129,9 +121,10 @@ export async function ProductPage({
       <CatalogItemDetail
         item={toCatalogItem(product, locale)}
         related={related}
+        priceLabel={visiblePrice}
         purchase={
-          product.isPurchasable
-            ? { productId: product.id, priceLabel: formatPrice(product, locale) }
+          product.showPrice && product.isPurchasable
+            ? { productId: product.id, priceLabel: visiblePrice }
             : undefined
         }
       />

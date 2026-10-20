@@ -208,6 +208,20 @@ describe('password reset & change notification flow', () => {
     expect(newLogin.status).toBe(200)
   })
 
+  it('consumes a reset token only once under concurrent requests', async () => {
+    await createUser('user', 'concurrent-reset@example.com', 'old-password-123')
+    let token = ''
+    vi.stubGlobal('fetch', vi.fn().mockImplementation((_url, options) => {
+      token = JSON.parse(options.body).token ?? token
+      return Promise.resolve(new Response('{}', { status: 200 }))
+    }))
+    await api().post('/api/auth/request-password-reset').send({ email: 'concurrent-reset@example.com' })
+    const results = await Promise.all(['new-password-456', 'new-password-789'].map(password =>
+      api().post('/api/auth/reset-password').send({ token, newPassword: password, confirmNewPassword: password })
+    ))
+    expect(results.map(result => result.status).sort()).toEqual([200, 400])
+  })
+
   it('reset-password rejects expired tokens', async () => {
     const user = await createUser('user', 'expired-test@example.com', 'old-password-123')
     const expiredToken = await prisma.actionToken.create({

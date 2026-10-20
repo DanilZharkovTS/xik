@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../support/test'
 
 import { PRODUCTS } from '../support/catalog'
 import { getHorizontalOverflow } from '../support/runtime'
@@ -62,7 +62,7 @@ test.describe('responsive content and layout', () => {
       const image = document.querySelector('main img')
 
       if (!image) {
-        return true
+        return false
       }
 
       const imageBox = image.getBoundingClientRect()
@@ -89,7 +89,7 @@ test.describe('responsive content and layout', () => {
     expect(overlapsText).toBe(false)
     await expect(
       page.getByText(
-        'We build AI-powered tools that solve real problems and make complex work easier.',
+        'XIK is an independent product and AI engineering lab building operational software, autonomous systems and reusable infrastructure. From property operations and observability to AI security, agent runtimes and real-time assistants, every system is built around a concrete job.',
       ),
     ).toBeVisible()
   })
@@ -126,7 +126,7 @@ test.describe('responsive content and layout', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   })
 
-  test('ScrollChomper stays outside critical content gutters', async ({
+  test('public content gutters remain clear at every breakpoint', async ({
     page,
   }) => {
     for (const width of [375, 390, 768, 1440]) {
@@ -136,59 +136,10 @@ test.describe('responsive content and layout', () => {
       })
       await page.goto(`/products/${PRODUCTS[0].slug}`)
 
-      const result = await page.evaluate(() => {
-        const track = document.querySelector<HTMLElement>(
-          '[data-scroll-chomper]',
-        )
-        const main = document.querySelector('main')
-
-        if (!track || !main) {
-          return {
-            exists: false,
-            pointerEvents: '',
-            overlapsCriticalContent: true,
-          }
-        }
-
-        const chomper = track.querySelector<HTMLElement>('div')
-        const chomperBox = chomper?.getBoundingClientRect()
-        const criticalElements = Array.from(
-          main.querySelectorAll<HTMLElement>('h1, h2, p, a, button'),
-        ).filter((element) => {
-          const style = getComputedStyle(element)
-          const box = element.getBoundingClientRect()
-
-          return (
-            style.visibility !== 'hidden' &&
-            style.display !== 'none' &&
-            box.width > 0 &&
-            box.height > 0
-          )
-        })
-
-        const overlapsCriticalContent =
-          chomperBox !== undefined &&
-          criticalElements.some((element) => {
-            const box = element.getBoundingClientRect()
-
-            return !(
-              chomperBox.right <= box.left ||
-              chomperBox.left >= box.right ||
-              chomperBox.bottom <= box.top ||
-              chomperBox.top >= box.bottom
-            )
-          })
-
-        return {
-          exists: true,
-          pointerEvents: getComputedStyle(track).pointerEvents,
-          overlapsCriticalContent,
-        }
-      })
-
-      expect(result.exists).toBe(true)
-      expect(result.pointerEvents).toBe('none')
-      expect(result.overlapsCriticalContent).toBe(false)
+      // The current public design has no decorative gutter overlay.
+      await expect(page.locator('[data-scroll-chomper]')).toHaveCount(0)
+      expect(await getHorizontalOverflow(page)).toBeLessThanOrEqual(0)
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     }
   })
 })

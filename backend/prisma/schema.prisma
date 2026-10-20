@@ -286,10 +286,8 @@ model UserLibrary {
 
   userId String 
   productId String
-  subscriptionId String?
   stripeSubscriptionId String?
   licenseId Int?
-  licenseKey String?
 
   accessExpiresAt DateTime?
   canceledAt DateTime?
@@ -299,8 +297,6 @@ model UserLibrary {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([stripeSubscriptionId])
-  @@unique([subscriptionId])
-  @@unique([licenseKey])
 }
 
 // Робочий доступ модератора до продукту (журнал звернень).
@@ -360,6 +356,8 @@ model OutreachTarget {
 
   firstContactedAt DateTime?
   lastContactedAt DateTime?
+  // Остання відповідь людини: для фільтрів "відповів", "чекає відповіді" й "без руху".
+  lastReplyAt DateTime?
   createdAt DateTime @default(now())
 
   product Product @relation(fields: [productId], references: [id])
@@ -369,6 +367,7 @@ model OutreachTarget {
 
   @@index([ownerUserId, lastContactedAt])
   @@index([productId, lastContactedAt])
+  @@index([productId, ownerUserId, status])
 }
 
 // Одна ціль може мати кілька ідентифікаторів (Telegram, e-mail, сайт). Унікальність у межах

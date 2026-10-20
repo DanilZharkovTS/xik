@@ -1,11 +1,13 @@
 'use client'
 
+import { PublicChatWidget } from '@/src/features/public-chat/components/public-chat-widget'
 import { AppProvider } from '@/src/providers/AppProvider'
 import { JsonLd } from '@/src/shared/seo/json-ld'
 import { SiteHeader } from './site-header'
 import { AdminHeader, AdminTabBar } from './admin-header'
 import { ModernFooter } from '@/src/layouts/site-footer/modern-footer'
 import { Toaster } from 'sonner'
+import { ConfirmProvider } from '@/src/shared/ui/confirm'
 import { siteConfig, siteText } from '@/src/config/site'
 import useAuthStore from '@/src/features/auth/store'
 import { usePathname, useRouter } from 'next/navigation'
@@ -61,11 +63,11 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
       path.startsWith('/account')
 
     if (!user && isPrivatePath) {
-      router.replace(up('/auth/login'))
+      router.replace(up('/login'))
       return
     }
 
-    if (user && path.startsWith('/auth/')) {
+    if (user && (path === '/login' || path.startsWith('/auth/'))) {
       router.replace(up(isStaff ? '/dashboard' : '/account'))
       return
     }
@@ -114,6 +116,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
 
       {isWorkspace && <AdminTabBar />}
       {!isWorkspace && <ModernFooter />}
+      <PublicChatWidget />
       <Toaster richColors position="bottom-right" expand={false} />
     </>
   )
@@ -136,7 +139,9 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
         data={organizationStructuredData}
         id="organization-structured-data"
       />
-      <MainContent>{children}</MainContent>
+      <ConfirmProvider>
+        <MainContent>{children}</MainContent>
+      </ConfirmProvider>
     </AppProvider>
   )
 }

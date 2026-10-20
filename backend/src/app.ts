@@ -1,5 +1,4 @@
 import express from 'express'
-import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import appRoutes from './app.routes.js'
@@ -7,15 +6,21 @@ import { errorHandler } from './shared/middlewares/errorHandler.js'
 import { billingMiddlewares } from './modules/billing/billing.middlewares.js'
 import { mediaDir } from './modules/media/storage.js'
 import { billingController } from './modules/billing/billing.controller.js'
+import dotenv from 'dotenv'
 
 dotenv.config()
 
 export const app = express()
 
+// API стоїть за одним зворотним проксі (Caddy): req.ip береться з X-Forwarded-For,
+// інакше всі клієнти мають одну адресу і ліміти за IP не працюють.
+app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS ?? 1))
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
+    exposedHeaders: ['X-Export-Truncated'],
   })
 )
 

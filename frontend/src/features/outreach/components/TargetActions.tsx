@@ -10,6 +10,7 @@ import { Sheet } from '@/src/shared/ui/sheet'
 import { TextareaField } from '@/src/shared/ui/textarea-field'
 import { TextField } from '@/src/shared/ui/text-field'
 import { OptionalDetails } from './OptionalDetails'
+import { WhenField, whenToIso } from './WhenField'
 import { outreachService } from '../outreach.service'
 import { CHANNELS, channelLabel } from '../outreach.types'
 import type { Channel, TargetDetail } from '../outreach.types'
@@ -144,7 +145,10 @@ function ActivitySheet({
   const [templateId, setTemplateId] = useState('')
   const [url, setUrl] = useState('')
   const [comment, setComment] = useState('')
+  const [when, setWhen] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  // Без вибору сервер позначить подію каналом основного ідентифікатора.
+  const autoChannel = target.identifiers[0]?.channel
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
@@ -160,6 +164,7 @@ function ActivitySheet({
           templateId: templateId || undefined,
           url: url.trim() || undefined,
           comment: comment.trim() || undefined,
+          occurredAt: whenToIso(when),
         },
         token,
         productId,
@@ -170,6 +175,7 @@ function ActivitySheet({
       setTemplateId('')
       setUrl('')
       setComment('')
+      setWhen('')
       onClose()
     } catch (err) {
       await onError(err)
@@ -188,11 +194,13 @@ function ActivitySheet({
         <p className="break-words text-sm text-[var(--m)]">{target.displayName}</p>
 
         <SelectField
-          label={t('actions.channelOptional')}
+          label={t('actions.channel')}
           value={channel}
           onChange={(event) => setChannel(event.target.value as Channel | '')}
         >
-          <option value="">{t('actions.notSpecified')}</option>
+          <option value="">
+            {autoChannel ? t('actions.channelAuto', { channel: channelLabel(autoChannel) }) : t('actions.notSpecified')}
+          </option>
           {CHANNELS.map((item) => (
             <option key={item} value={item}>
               {channelLabel(item)}
@@ -219,7 +227,8 @@ function ActivitySheet({
           />
         )}
 
-        <OptionalDetails summary={t('result.proofSummary')}>
+        <OptionalDetails summary={t('result.proofAndDate')}>
+          <WhenField value={when} onChange={setWhen} />
           <TextField
             label={t('result.proof')}
             type="url"

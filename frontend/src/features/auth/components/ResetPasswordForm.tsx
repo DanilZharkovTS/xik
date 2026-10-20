@@ -12,7 +12,6 @@ import useAuthStore from "../store";
 import { getErrorMessage } from "@/src/shared/api/get-error-message";
 import { translateNow } from "@/src/shared/i18n/translate";
 import type { MessageKey } from "@/src/shared/i18n/messages";
-import { LanguageSwitch } from "@/src/shared/i18n/language-switch";
 import { Button } from "@/src/shared/ui/button";
 import { AuthInput } from "./AuthInput";
 import { useI18n, useUrlLocalePath } from "@/src/shared/i18n/use-i18n";
@@ -143,7 +142,7 @@ export const ResetPasswordForm: React.FC = () => {
 
           <div className="pt-2 flex flex-col gap-2">
             <Link
-              href={up("/auth/login")}
+              href={up("/login")}
               className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--t)] bg-[var(--t)] px-5 py-2 font-medium text-[var(--bg)] hover:opacity-90 transition-opacity"
             >
               {t("auth.signIn")}
@@ -197,7 +196,7 @@ export const ResetPasswordForm: React.FC = () => {
         </Link>
       ) : (
         <Link
-          href={up("/auth/login")}
+          href={up("/login")}
           className="mt-4 inline-flex min-h-11 items-center justify-center text-[var(--m)] hover:text-[var(--t)] transition-colors"
         >
           <ArrowLeft className="mr-1.5 h-4 w-4" />

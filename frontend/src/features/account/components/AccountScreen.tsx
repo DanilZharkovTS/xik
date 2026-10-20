@@ -20,6 +20,7 @@ import { accountService } from '../account.service'
 import type { LibraryItem, SavedProduct } from '../account.service'
 import { CancelSubscriptionButton } from './CancelSubscriptionButton'
 import { RestoreSubscriptionButton } from './RestoreSubscriptionButton'
+import { GetLicenseKey } from './GetLicenseKey'
 import { ChangePasswordModal } from './ChangePasswordModal'
 
 type Tab = 'subs' | 'saved' | 'profile'
@@ -142,8 +143,21 @@ export function AccountScreen(): ReactElement {
                       .filter(Boolean)
                       .join(' · ')}
                   </p>
-                  {item.status === 'active' && (item.subscriptionId || item.id) && (
-                    <div className="mt-3 flex justify-end">
+                  <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
+                    <GetLicenseKey
+                      item={item}
+                      onLicenseKeyReceived={(updatedItem) => {
+                        setLibrary((current) =>
+                          current?.map((entry) =>
+                            entry.id === updatedItem.id
+                              ? { ...entry, licenseKey: updatedItem.licenseKey }
+                              : entry,
+                          ) ?? null,
+                        )
+                      }}
+                    />
+
+                    {item.status === 'active' && (item.subscriptionId || item.id) && (
                       <CancelSubscriptionButton
                         subscriptionId={item.subscriptionId ?? item.id}
                         onCanceled={() => {
@@ -156,10 +170,8 @@ export function AccountScreen(): ReactElement {
                           )
                         }}
                       />
-                    </div>
-                  )}
-                  {item.status === 'canceled' && (item.subscriptionId || item.id) && (
-                    <div className="mt-3 flex justify-end">
+                    )}
+                    {item.status === 'canceled' && (item.subscriptionId || item.id) && (
                       <RestoreSubscriptionButton
                         subscriptionId={item.subscriptionId ?? item.id}
                         onRestored={() => {
@@ -172,8 +184,8 @@ export function AccountScreen(): ReactElement {
                           )
                         }}
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -247,7 +259,7 @@ function ProfileTab(): ReactElement {
       setIsLoggingOut(true)
       await authService.logout()
       clearAuth()
-      router.push(up('/auth/login'))
+      router.push(up('/login'))
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {

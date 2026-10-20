@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import type { ReactElement, ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/src/shared/ui/button'
+import { isTopOverlay, pushOverlay } from '@/src/shared/ui/sheet'
 
 export type ModalAlertProps = {
   isOpen: boolean
@@ -38,6 +39,7 @@ export function ModalAlert({
   const descId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   const onCloseRef = useRef(onClose)
+  const overlayKey = useRef(Symbol('modal-alert'))
 
   useEffect(() => {
     onCloseRef.current = onClose
@@ -46,12 +48,16 @@ export function ModalAlert({
   useEffect(() => {
     if (!isOpen) return
 
+    const key = overlayKey.current
+    const releaseOverlay = pushOverlay(key)
     const previouslyFocused = document.activeElement as HTMLElement | null
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     panelRef.current?.focus()
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (!isTopOverlay(key)) return
+
       if (event.key === 'Escape' && !isLoading) {
         onCloseRef.current()
         return
@@ -84,6 +90,7 @@ export function ModalAlert({
 
     return () => {
       document.removeEventListener('keydown', onKeyDown)
+      releaseOverlay()
       document.body.style.overflow = previousOverflow
       previouslyFocused?.focus()
     }

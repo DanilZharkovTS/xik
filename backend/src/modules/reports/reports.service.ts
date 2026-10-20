@@ -77,7 +77,7 @@ export const reportsService = {
       userId: scope.userId,
     }
 
-    const [bucketRows, channelRows, moderatorRows, productRows] =
+    const [bucketRows, channelRows, moderatorRows, productRows, templateRows] =
       await Promise.all([
         reportsRepo.countsByBucketAndType(filter, range.granularity),
         reportsRepo.countsByChannelAndType(filter),
@@ -85,6 +85,7 @@ export const reportsService = {
           ? reportsRepo.countsByModeratorAndType(filter)
           : [],
         scope.includeProducts ? reportsRepo.countsByProductAndType(filter) : [],
+        reportsRepo.templateStats(filter),
       ])
 
     const totals = emptyCounts()
@@ -158,6 +159,13 @@ export const reportsService = {
               (row) => row.name
             )
           : undefined,
+        byTemplate: templateRows.map((row) => ({
+          id: row.templateId,
+          title: row.title,
+          uses: row.uses,
+          targets: row.targets,
+          replied: row.replied,
+        })),
         byProduct: scope.includeProducts
           ? byTotalDesc(
               group(productRows.map((row) => ({ ...row, id: row.productId }))),

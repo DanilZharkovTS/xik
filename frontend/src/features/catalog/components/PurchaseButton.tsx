@@ -27,7 +27,7 @@ export function PurchaseButton({ productId, label }: PurchaseButtonProps): React
 
   const purchase = async () => {
     if (!token) {
-      router.push(href('/auth/login'))
+      router.push(href('/login'))
       return
     }
 

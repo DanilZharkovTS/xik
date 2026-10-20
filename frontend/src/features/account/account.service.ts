@@ -16,6 +16,7 @@ export interface AccountProfile {
 export interface LibraryItem {
   id: string
   subscriptionId?: string | null
+  licenseKey?: string
   status: LibraryStatus
   accessExpiresAt: string | null
   canceledAt: string | null
@@ -54,4 +55,14 @@ export const accountService = {
 
   restoreSubscription: async (subscriptionId: string, token: string): Promise<{ success: boolean }> =>
     (await api.post(`/billing/subscriptions/${subscriptionId}/restore-canceled`, {}, withToken(token))).data,
+
+  getLicenseKey: async (
+    subscriptionId: string,
+    token: string,
+  ): Promise<{ libraryItem: LibraryItem }> =>
+    (await api.get(`/library/${subscriptionId}/license-key`, withToken(token))).data,
+}
+
+export const libraryService = {
+  getLicenseKey: accountService.getLicenseKey,
 }

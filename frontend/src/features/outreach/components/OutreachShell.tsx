@@ -34,6 +34,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
   const products = useOutreachStore((state) => state.products)
   const setProducts = useOutreachStore((state) => state.setProducts)
   const setError = useOutreachStore((state) => state.setError)
+  const selectProduct = useOutreachStore((state) => state.selectProduct)
 
   useEffect(() => {
     if (!token) return
@@ -43,7 +44,11 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
     outreachService
       .listProducts(token)
       .then((loaded) => {
-        if (!isCancelled) setProducts(loaded)
+        if (isCancelled) return
+        setProducts(loaded)
+        // Посилання з дашборду (?product=<id>) відкриває журнал одразу в потрібному продукті.
+        const linked = new URLSearchParams(window.location.search).get('product')
+        if (linked && loaded.some((product) => product.id === linked)) selectProduct(linked)
       })
       .catch((err: unknown) => {
         if (isCancelled) return
@@ -54,7 +59,10 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
     return () => {
       isCancelled = true
     }
-  }, [token, setProducts, setError])
+  }, [token, setProducts, setError, selectProduct])
+
+  // Адмін бачить контакти всіх модераторів, тож "Мої цілі" для нього вводить в оману.
+  const labelOf = (key: MessageKey): MessageKey => (isAdmin && key === 'journal.targets' ? 'journal.targetsAdmin' : key)
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-4 pt-2 md:pb-10 md:pt-8">
@@ -75,7 +83,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
                   : 'text-[var(--m)] hover:text-[var(--t)]',
               )}
             >
-              {t(labelKey)}
+              {t(labelOf(labelKey))}
             </Link>
           ))}
         </nav>
@@ -84,7 +92,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
       {products.length > 0 && (
         <nav
           aria-label={t('journal.section')}
-          className="-mx-4 mb-3 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] md:hidden"
+          className="mb-3 flex flex-wrap gap-1.5 md:hidden"
         >
           {NAV_ITEMS.map(({ href, labelKey }) => (
             <Link
@@ -98,7 +106,7 @@ export function OutreachShell({ children }: { children: ReactNode }): ReactEleme
                   : 'border-[var(--l)] text-[var(--m)]',
               )}
             >
-              {t(labelKey)}
+              {t(labelOf(labelKey))}
             </Link>
           ))}
         </nav>

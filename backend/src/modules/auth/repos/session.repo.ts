@@ -40,15 +40,23 @@ export const sessionRepo = {
     })
     return session
   },
-  revokeAllForUser: async (userId: string, db: DbClient = prisma) => {
+  // exceptSessionId: сесія, яку треба залишити (наприклад, поточна при зміні пароля).
+  revokeAllForUser: async (
+    userId: string,
+    db: DbClient = prisma,
+    exceptSessionId?: string
+  ) => {
     const now = new Date()
+    const sessionFilter = exceptSessionId
+      ? { userId, id: { not: exceptSessionId } }
+      : { userId }
 
     await db.userSession.updateMany({
-      where: { userId, revokedAt: null },
+      where: { ...sessionFilter, revokedAt: null },
       data: { revokedAt: now },
     })
     await db.refreshToken.updateMany({
-      where: { session: { userId }, revokedAt: null },
+      where: { session: sessionFilter, revokedAt: null },
       data: { revokedAt: now },
     })
   },

@@ -31,6 +31,11 @@ export const siteConfig = {
   origin: (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://xik.app').replace(/\/$/, ''),
   openGraphImage: '/opengraph-image',
   openGraphImageAlt: SITE_TEXT.en.imageAlt,
+  logo: '/icon.svg',
+  links: {
+    github: 'https://github.com/DanilZharkovTS/xik',
+    twitter: 'https://x.com/xik_app',
+  },
 } as const
 
 export const siteText = (locale: Locale) => SITE_TEXT[locale]

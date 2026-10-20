@@ -4,13 +4,17 @@ import type { TokenPayload } from '../auth/auth.types.js'
 import { parseIdentifier, type NormalizedIdentifier } from './normalizers.js'
 import { canModify, canViewDetails, isOwner } from './targets.policy.js'
 import { toDetailDto, toForeignDto, toListItemDto } from './targets.mapper.js'
+import { followUpCutoff, followUpDays } from './follow-up.js'
+import type { OwnerSummaryRow, TargetFilter } from './targets.repo.js'
 import { targetsRepo } from './targets.repo.js'
 import { templatesService } from './templates.service.js'
 import type {
   AddIdentifierDto,
   CheckDto,
+  ExportTargetsDto,
   ListTargetsDto,
   RegisterTargetDto,
+  TargetFilterDto,
 } from './targets.schema.js'
 
 // Кидається всередині транзакції, щоб відкотити щойно створену ціль, коли ідентифікатор зайнято.
@@ -66,6 +70,76 @@ const lookup = async (
   return { ...base, target: detail ? toDetailDto(detail, actor) : undefined }
 }
 
+// Модератор бачить лише свої цілі, адмін усі або вибраного модератора.
+const filterFor = (
+  actor: TokenPayload,
+  productId: string,
+  dto: TargetFilterDto
+): TargetFilter => ({
+  productId,
+  ownerUserId: actor.role === 'admin' ? dto.ownerUserId : actor.id,
+  state: dto.state,
+  channel: dto.channel,
+  q: dto.q || undefined,
+  followUpBefore: followUpCutoff(),
+})
+
+export const EXPORT_LIMIT = 5000
+
+// Значення для CSV: лапки подвоюються, а формули Excel (=, +, -, @) нейтралізуються.
+const csvCell = (value: unknown): string => {
+  let text =
+    value === null || value === undefined
+      ? ''
+      : value instanceof Date
+        ? value.toISOString()
+        : String(value)
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`
+  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
+}
+
+const stateOf = (row: {
+  status: string
+  lastReplyAt: Date | null
+  lastContactedAt: Date | null
+}): string => {
+  if (row.status === 'do_not_contact') return 'do_not_contact'
+  if (
+    row.lastReplyAt &&
+    (!row.lastContactedAt || row.lastReplyAt >= row.lastContactedAt)
+  )
+    return 'needs_answer'
+  if (row.lastReplyAt) return 'replied'
+  return 'awaiting'
+}
+
+const summaryResponse = (rows: OwnerSummaryRow[]) => {
+  const totals = {
+    total: 0,
+    awaiting: 0,
+    followUp: 0,
+    needsAnswer: 0,
+    replied: 0,
+    doNotContact: 0,
+  }
+  for (const row of rows) {
+    totals.total += row.total
+    totals.awaiting += row.awaiting
+    totals.followUp += row.followUp
+    totals.needsAnswer += row.needsAnswer
+    totals.replied += row.replied
+    totals.doNotContact += row.doNotContact
+  }
+  return {
+    followUpDays: followUpDays(),
+    totals,
+    byOwner: rows.map(({ ownerUserId, ...rest }) => ({
+      userId: ownerUserId,
+      ...rest,
+    })),
+  }
+}
+
 export const targetsService = {
   check: async (actor: TokenPayload, productId: string, dto: CheckDto) => {
     const result = await lookup(actor, productId, parseOrThrow(dto))
@@ -81,7 +155,8 @@ export const targetsService = {
       productId,
       dto.templateId
     )
-    const now = new Date()
+    // Перший контакт можна внести заднім числом, як і інші події.
+    const now = dto.occurredAt ?? new Date()
 
     try {
       const targetId = await prisma.$transaction(async (tx) => {
@@ -206,9 +281,7 @@ export const targetsService = {
   },
   list: async (actor: TokenPayload, productId: string, dto: ListTargetsDto) => {
     const rows = await targetsRepo.listTargets({
-      productId,
-      // Модератор бачить лише свої цілі, адмін усі.
-      ownerUserId: actor.role === 'admin' ? undefined : actor.id,
+      ...filterFor(actor, productId, dto),
       lastId: dto.lastId,
       limit: dto.limit,
     })
@@ -222,6 +295,69 @@ export const targetsService = {
         nextCursor: hasMore ? page.at(-1)!.id : null,
       },
     }
+  },
+  exportCsv: async (
+    actor: TokenPayload,
+    productId: string,
+    dto: ExportTargetsDto
+  ) => {
+    const rows = await targetsRepo.exportTargets(
+      filterFor(actor, productId, dto),
+      EXPORT_LIMIT
+    )
+    const header = [
+      'name',
+      'owner',
+      'state',
+      'identifiers',
+      'first_contact',
+      'last_contact',
+      'last_reply',
+      'replies',
+      'do_not_contact_reason',
+    ]
+    const lines = rows.map((row) =>
+      [
+        row.displayName,
+        row.owner.name,
+        stateOf(row),
+        row.identifiers
+          .map(
+            (identifier) =>
+              `${identifier.channel}:${identifier.valueNormalized}`
+          )
+          .join(' '),
+        row.firstContactedAt,
+        row.lastContactedAt,
+        row.lastReplyAt,
+        row._count.events,
+        row.statusReason,
+      ]
+        .map(csvCell)
+        .join(',')
+    )
+    // BOM: Excel відкриває UTF-8 з кирилицею правильно.
+    return {
+      csv: '\uFEFF' + [header.join(','), ...lines].join('\r\n') + '\r\n',
+      truncated: rows.length >= EXPORT_LIMIT,
+    }
+  },
+  summary: async (actor: TokenPayload, productId: string) => {
+    const rows = await targetsRepo.summaryByOwner({
+      productId,
+      ownerUserId: actor.role === 'admin' ? undefined : actor.id,
+      followUpBefore: followUpCutoff(),
+    })
+    return { response: summaryResponse(rows) }
+  },
+  // Адмін поза продуктом: усі продукти або один.
+  summaryForAdmin: async (productId?: string) => {
+    const followUpBefore = followUpCutoff()
+    const [rows, items] = await Promise.all([
+      targetsRepo.summaryByOwner({ productId, followUpBefore }),
+      targetsRepo.actionItems({ productId, followUpBefore }),
+    ])
+    return { response: { ...summaryResponse(rows), actionItems: items } }
   },
   get: async (actor: TokenPayload, productId: string, targetId: string) => {
     const target = await targetsRepo.findDetailById(productId, targetId)

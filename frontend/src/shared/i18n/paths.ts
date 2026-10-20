@@ -4,6 +4,7 @@ import type { Locale } from './i18n-store'
 // Розділи, що не є публічним сайтом: мова там береться не з адреси, а з вибору користувача.
 const WORKSPACE_PREFIXES = ['/admin', '/outreach', '/dashboard'] as const
 const ACCOUNT_PREFIXES = [
+  '/login',
   '/auth',
   '/account',
   '/request-password-reset',
@@ -14,8 +15,8 @@ const startsWithSegment = (path: string, prefix: string): boolean =>
   path === prefix || path.startsWith(`${prefix}/`)
 
 // "/es/products/x" -> { locale: 'es', path: '/products/x' }; без префікса locale англійська.
-// Префікс /en теж знімається: сервер бачить внутрішню адресу після rewrite (/en/auth/login),
-// а браузер публічну (/auth/login), і розділ сайту має визначатися однаково.
+// Префікс /en теж знімається: сервер бачить внутрішню адресу після rewrite (/en/login),
+// а браузер публічну (/login), і розділ сайту має визначатися однаково.
 export function splitLocale(pathname: string): { locale: Locale; path: string } {
   const [, first, ...rest] = pathname.split('/')
 

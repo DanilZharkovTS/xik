@@ -33,11 +33,22 @@ export const tokenRepo = {
     })
   },
   consumeActionToken: async (id: string, db: DbClient = prisma) => {
-    return db.actionToken.update({
-      where: { id },
+    return db.actionToken.updateMany({
+      where: { id, usedAt: null, expiresAt: { gt: new Date() } },
       data: {
         usedAt: new Date(),
       },
+    })
+  },
+  // Гасить усі ще не використані токени цього типу: дійсним лишається щонайбільше один.
+  invalidateActive: async (
+    userId: string,
+    type: ActionTokenType,
+    db: DbClient = prisma
+  ) => {
+    return db.actionToken.updateMany({
+      where: { userId, type, usedAt: null },
+      data: { usedAt: new Date() },
     })
   },
   deleteActionToken: async (

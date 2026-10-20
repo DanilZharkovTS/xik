@@ -1,5 +1,6 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../support/test'
 
+import { truncate } from '../../src/shared/seo/truncate'
 import { siteConfig } from '../../src/config/site'
 import { PRODUCTS } from '../support/catalog'
 
@@ -12,17 +13,10 @@ const STATIC_METADATA = [
   },
   {
     path: '/products',
-    title: 'AI Products | XIK',
+    title: 'AI Software Products | XIK',
     description:
-      'Explore independent AI tools built by XIK to make development and creative work faster and more focused.',
+      'Independent software products by XIK: observability, licensing, security testing and lead monitoring, built around real operational workflows.',
     canonical: 'https://xik.app/products',
-  },
-  {
-    path: '/about',
-    title: 'About Us | XIK',
-    description:
-      'Meet the two-person team building XIK and its focused AI tools for developers and technical workflows.',
-    canonical: 'https://xik.app/about',
   },
 ] as const
 
@@ -35,6 +29,12 @@ async function readJsonLd(page: import('@playwright/test').Page) {
 }
 
 test.describe('metadata and indexing endpoints', () => {
+  test('legacy About redirects to the canonical home section', async ({ page }) => {
+    await page.goto('/about')
+    await expect(page).toHaveURL('/#about')
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', siteConfig.origin)
+    await expect(page.locator('#about h2')).toBeVisible()
+  })
   for (const metadata of STATIC_METADATA) {
     test(`${metadata.path} exposes complete unique metadata`, async ({
       page,
@@ -97,11 +97,11 @@ test.describe('metadata and indexing endpoints', () => {
       await page.goto(`/products/${product.slug}`)
 
       await expect(page).toHaveTitle(
-        `${product.name} — AI Tool | XIK`,
+        `${truncate(`${product.name} — ${product.categoryLabel}`, 52)} | XIK`,
       )
       await expect(page.locator('meta[name="description"]')).toHaveAttribute(
         'content',
-        product.description,
+        truncate([product.shortDescription, product.tagline].filter(Boolean).join(' '), 158),
       )
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
         'href',
@@ -115,7 +115,7 @@ test.describe('metadata and indexing endpoints', () => {
         page.locator('meta[name="twitter:title"]'),
       ).toHaveAttribute(
         'content',
-        `${product.name} — AI Tool | XIK`,
+        `${truncate(`${product.name} — ${product.categoryLabel}`, 52)} | XIK`,
       )
 
       const jsonLd = await readJsonLd(page)
@@ -130,10 +130,12 @@ test.describe('metadata and indexing endpoints', () => {
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
         name: product.name,
-        description: product.description,
+        description: truncate(product.description, 300),
         url: productUrl,
       })
-      expect(application).not.toHaveProperty('offers')
+      const offer = application?.offers as { price: number } | undefined
+      if (offer) await expect(page.locator('main')).toContainText(`$${Number(offer.price)}`)
+      else expect(await page.locator('main').innerText()).not.toMatch(/\$\d/)
       expect(application).not.toHaveProperty('aggregateRating')
       expect(application).not.toHaveProperty('review')
       expect(breadcrumbs).toMatchObject({
@@ -148,7 +150,7 @@ test.describe('metadata and indexing endpoints', () => {
         ).map((item) => item.item),
       ).toEqual([
         `${siteConfig.origin}/`,
-        `${siteConfig.origin}/products`,
+        `${siteConfig.origin}/#products`,
         productUrl,
       ])
     })
@@ -170,7 +172,7 @@ test.describe('metadata and indexing endpoints', () => {
     const expectedUrls = [
       `${siteConfig.origin}/`,
       `${siteConfig.origin}/products`,
-      `${siteConfig.origin}/about`,
+      `${siteConfig.origin}/services`,
       ...PRODUCTS.map(
         (product) => `${siteConfig.origin}/products/${product.slug}`,
       ),
@@ -191,8 +193,8 @@ test.describe('metadata and indexing endpoints', () => {
       short_name: 'XIK',
       start_url: '/',
       display: 'standalone',
-      background_color: '#050505',
-      theme_color: '#050505',
+      background_color: '#050507',
+      theme_color: '#050507',
       lang: 'en',
     })
 

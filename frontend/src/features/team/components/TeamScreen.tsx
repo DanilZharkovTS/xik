@@ -15,6 +15,8 @@ import { ProductsSheet } from './ProductsSheet'
 import { ResetPasswordSheet } from './ResetPasswordSheet'
 import { TransferTargetsSheet } from './TransferTargetsSheet'
 import { useI18n } from '@/src/shared/i18n/use-i18n'
+import { useConfirm } from '@/src/shared/ui/confirm'
+import { CardGridSkeleton } from '@/src/shared/ui/skeleton'
 
 interface TeamData {
   moderators: Moderator[]
@@ -33,6 +35,7 @@ const fetchTeam = async (token: string): Promise<TeamData> => {
 export function TeamScreen(): ReactElement {
   const { t } = useI18n()
   const token = useAuthStore((state) => state.accessToken)
+  const confirm = useConfirm()
 
   const [moderators, setModerators] = useState<Moderator[]>([])
   const [products, setProducts] = useState<TeamProduct[]>([])
@@ -88,7 +91,12 @@ export function TeamScreen(): ReactElement {
 
     if (
       isActive &&
-      !window.confirm(t('team.confirmDeactivate', { name: moderator.name }))
+      !(await confirm({
+        title: t('team.confirmDeactivate.title', { name: moderator.name }),
+        description: t('team.confirmDeactivate', { name: moderator.name }),
+        confirmLabel: t('team.deactivate'),
+        tone: 'danger',
+      }))
     ) {
       return
     }
@@ -102,6 +110,7 @@ export function TeamScreen(): ReactElement {
         await teamService.activate(moderator.id, token)
       }
 
+      toast.success(isActive ? t('team.deactivatedToast', { name: moderator.name }) : t('team.activatedToast', { name: moderator.name }))
       await reload()
     } catch (err) {
       toast.error(getErrorMessage(err))
@@ -109,6 +118,17 @@ export function TeamScreen(): ReactElement {
       setBusyId(null)
     }
   }
+
+  // Перехід зі сторінки користувачів (?assign=<id>): одразу відкриваємо вибір продуктів.
+  useEffect(() => {
+    if (isLoading) return
+    const assign = new URLSearchParams(window.location.search).get('assign')
+    if (!assign || !moderators.some((moderator) => moderator.id === assign)) return
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- одноразове відкриття з адреси
+    setProductsFor(assign)
+    window.history.replaceState(null, '', window.location.pathname)
+  }, [isLoading, moderators])
 
   const findModerator = (id: string | null): Moderator | null =>
     moderators.find((moderator) => moderator.id === id) ?? null
@@ -135,7 +155,7 @@ export function TeamScreen(): ReactElement {
       </div>
 
       {isLoading ? (
-        <p className="py-12 text-center text-[var(--m)]">{t('common.loading')}</p>
+        <CardGridSkeleton count={3} label={t('common.loading')} />
       ) : moderators.length === 0 ? (
         <div className="rounded-2xl border border-[var(--l)] px-4 py-12 text-center">
           <p className="font-medium">{t('team.emptyTitle')}</p>
