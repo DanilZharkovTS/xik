@@ -5,18 +5,6 @@ import {
 } from './library.schema.js'
 
 export const libraryRepo = {
-  addLibraryItem: async (data: GrantLibraryAccessDto) => {
-    const libraryItem = await prisma.userLibrary.create({
-      data: {
-        userId: data.userId,
-        productId: data.productId,
-        subscriptionId: data.subscriptionId,
-        stripeSubscriptionId: data.stripeSubscriptionId,
-        accessExpiresAt: data.accessExpiresAt,
-      },
-    })
-    return libraryItem
-  },
   findById: async (id: string) => {
     return prisma.userLibrary.findUnique({
       where: {
@@ -27,7 +15,7 @@ export const libraryRepo = {
   updateLibraryItemExpiresAt: async (data: RenewLibraryAccessDto) => {
     const libraryItem = await prisma.userLibrary.update({
       where: {
-        subscriptionId: data.subscriptionId,
+        stripeSubscriptionId: data.subscriptionId,
       },
       data: {
         accessExpiresAt: data.accessExpiresAt,
@@ -60,7 +48,7 @@ export const libraryRepo = {
   cancelBySubscription: async (subscriptionId: string) => {
     const libraryItem = await prisma.userLibrary.update({
       where: {
-        subscriptionId,
+        stripeSubscriptionId: subscriptionId,
         canceledAt: null,
       },
       data: {
